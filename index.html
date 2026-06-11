@@ -320,7 +320,11 @@
     <h1>Mis prioridades</h1>
     <div class="meta" id="task-summary">cargando...</div>
   </div>
-  <button class="theme-btn" id="theme-toggle" title="Cambiar tema">🌙</button>
+  <div style="display:flex;gap:6px;align-items:center;">
+    <button class="theme-btn" id="btn-export" title="Exportar tareas">↓</button>
+    <label class="theme-btn" id="btn-import-label" title="Importar tareas" style="cursor:pointer;">↑<input type="file" id="btn-import" accept=".json" style="display:none;"></label>
+    <button class="theme-btn" id="theme-toggle" title="Cambiar tema">🌙</button>
+  </div>
 </header>
 
 <div class="board">
@@ -584,6 +588,32 @@ document.addEventListener('keydown', e => {
       addTask(col);
     }
   });
+});
+
+document.getElementById('btn-export').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(tasks, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tasks.json';
+  a.click();
+});
+
+document.getElementById('btn-import').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (Array.isArray(imported)) {
+        tasks = imported;
+        save();
+        render();
+      }
+    } catch { alert('Archivo inválido'); }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
 });
 
 const themeBtn = document.getElementById('theme-toggle');
