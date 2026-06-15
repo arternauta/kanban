@@ -207,6 +207,22 @@
   .card-date { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 3px; }
   .card-date.overdue { color: var(--danger); }
 
+  .wait-status {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 500; padding: 3px 7px;
+    border-radius: 999px; cursor: pointer; border: none;
+    letter-spacing: 0.02em; transition: opacity 0.15s; white-space: nowrap;
+    user-select: none;
+  }
+  .wait-status.pending {
+    background: var(--col-waiting-bg); color: var(--col-waiting-text);
+    border: 0.5px dashed var(--col-waiting-accent);
+  }
+  .wait-status.sent {
+    background: var(--col-done-bg); color: var(--col-done-text);
+  }
+  .wait-status:hover { opacity: 0.75; }
+
   .edit-form { display: flex; flex-direction: column; gap: 5px; }
   .edit-form textarea {
     width: 100%; border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
@@ -512,8 +528,15 @@ function render() {
                ${formatDate(task.date)}${isOverdue(task.date) ? ' · vencida' : ''}
              </span>` : '';
 
-        const meta = (brandBadge || priBadge || dateSpan)
-          ? `<div class="card-meta">${brandBadge}${priBadge}${dateSpan}</div>` : '';
+        const waitBadge = task.col === 'waiting'
+          ? (() => {
+              const sent = task.waitStatus === 'sent';
+              return `<button class="wait-status ${sent ? 'sent' : 'pending'}" data-toggle-wait="${esc(task.id)}">${sent ? '✓ Enviada' : '· Por enviar'}</button>`;
+            })()
+          : '';
+
+        const meta = (brandBadge || priBadge || dateSpan || waitBadge)
+          ? `<div class="card-meta">${waitBadge}${brandBadge}${priBadge}${dateSpan}</div>` : '';
 
         card.innerHTML = `
           <div class="card-top">
@@ -653,6 +676,7 @@ document.addEventListener('click', e => {
   if (t.closest('[data-save]')) { saveEdit(t.closest('[data-save]').dataset.save); return; }
   if (t.closest('[data-delete]')) { tasks = tasks.filter(tk => tk.id !== t.closest('[data-delete]').dataset.delete); save(); render(); return; }
   if (t.closest('[data-archive]')) { const tk = tasks.find(tk => tk.id === t.closest('[data-archive]').dataset.archive); if (tk) { tk.archived = !tk.archived; save(); render(); } return; }
+  if (t.closest('[data-toggle-wait]')) { const tk = tasks.find(tk => tk.id === t.closest('[data-toggle-wait]').dataset.toggleWait); if (tk) { tk.waitStatus = tk.waitStatus === 'sent' ? 'pending' : 'sent'; save(); render(); } return; }
   if (t.closest('[data-archive-col]')) { tasks.filter(tk => tk.col === t.closest('[data-archive-col]').dataset.archiveCol && !tk.archived).forEach(tk => tk.archived = true); save(); render(); return; }
 });
 
