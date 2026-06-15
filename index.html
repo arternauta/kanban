@@ -551,8 +551,9 @@ function matches(task) {
 function render() {
   COLS.forEach(col => {
     const container = document.getElementById('cards-' + col);
+    const PRIO = { alta: 0, media: 1, baja: 2, '': 3 };
     const colTasks = tasks.filter(t => t.col === col);
-    const visible = colTasks.filter(matches);
+    const visible = colTasks.filter(matches).sort((a, b) => (PRIO[a.priority||''] ?? 3) - (PRIO[b.priority||''] ?? 3));
 
     container.innerHTML = '';
 
