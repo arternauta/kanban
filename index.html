@@ -16,148 +16,139 @@
     --text: #1a1a18;
     --text2: #5f5e5a;
     --text3: #888780;
-    --todo-accent: #185FA5;
-    --todo-bg: #E6F1FB;
-    --todo-text: #0C447C;
-    --prog-accent: #BA7517;
-    --prog-bg: #FAEEDA;
-    --prog-text: #633806;
-    --done-accent: #3B6D11;
-    --done-bg: #EAF3DE;
-    --done-text: #27500A;
-    --danger: #E24B4A;
     --radius: 10px;
     --radius-sm: 6px;
+    --danger: #E24B4A;
+
+    --col-todo-accent: #185FA5;
+    --col-todo-bg: #E6F1FB;
+    --col-todo-text: #0C447C;
+    --col-progress-accent: #BA7517;
+    --col-progress-bg: #FAEEDA;
+    --col-progress-text: #633806;
+    --col-done-accent: #3B6D11;
+    --col-done-bg: #EAF3DE;
+    --col-done-text: #27500A;
+    --col-waiting-accent: #534AB7;
+    --col-waiting-bg: #EEEDFE;
+    --col-waiting-text: #3C3489;
+
     --p-alta-bg: #FCEBEB; --p-alta-text: #791F1F;
     --p-media-bg: #FAEEDA; --p-media-text: #633806;
     --p-baja-bg: #EAF3DE; --p-baja-text: #27500A;
+
+    --b-byd-bg: #E1F5EE; --b-byd-text: #085041;
+    --b-bmw-bg: #E6F1FB; --b-bmw-text: #0C447C;
+    --b-mini-bg: #FAEEDA; --b-mini-text: #633806;
+    --b-motorrad-bg: #FAECE7; --b-motorrad-text: #712B13;
+    --b-personal-bg: #F1EFE8; --b-personal-text: #444441;
   }
 
   [data-theme="dark"] {
-    --bg: #1a1a18;
-    --surface: #242422;
-    --surface2: #2c2c2a;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.15);
-    --text: #f0ede8;
-    --text2: #b4b2a9;
-    --text3: #888780;
-    --todo-accent: #378ADD;
-    --todo-bg: #042C53;
-    --todo-text: #B5D4F4;
-    --prog-accent: #EF9F27;
-    --prog-bg: #412402;
-    --prog-text: #FAC775;
-    --done-accent: #639922;
-    --done-bg: #173404;
-    --done-text: #C0DD97;
+    --bg: #1a1a18; --surface: #242422; --surface2: #2c2c2a;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+    --text: #f0ede8; --text2: #b4b2a9; --text3: #888780;
+
+    --col-todo-accent: #378ADD; --col-todo-bg: #042C53; --col-todo-text: #B5D4F4;
+    --col-progress-accent: #EF9F27; --col-progress-bg: #412402; --col-progress-text: #FAC775;
+    --col-done-accent: #639922; --col-done-bg: #173404; --col-done-text: #C0DD97;
+    --col-waiting-accent: #7F77DD; --col-waiting-bg: #26215C; --col-waiting-text: #CECBF6;
+
     --p-alta-bg: #501313; --p-alta-text: #F7C1C1;
     --p-media-bg: #412402; --p-media-text: #FAC775;
     --p-baja-bg: #173404; --p-baja-text: #C0DD97;
+
+    --b-byd-bg: #04342C; --b-byd-text: #9FE1CB;
+    --b-bmw-bg: #042C53; --b-bmw-text: #B5D4F4;
+    --b-mini-bg: #412402; --b-mini-text: #FAC775;
+    --b-motorrad-bg: #4A1B0C; --b-motorrad-text: #F5C4B3;
+    --b-personal-bg: #2C2C2A; --b-personal-text: #D3D1C7;
   }
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    transition: background 0.2s, color 0.2s;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; transition: background 0.2s, color 0.2s;
   }
 
   header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    border-bottom: 0.5px solid var(--border);
-    background: var(--surface);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding: 1rem 1.5rem;
+    border-bottom: 0.5px solid var(--border); background: var(--surface);
+    flex-wrap: wrap;
   }
 
   header h1 { font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
   header .meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
 
-  .search-wrap {
-    flex: 1;
-    max-width: 260px;
-    position: relative;
+  .header-center {
+    display: flex; gap: 8px; align-items: center;
+    flex: 1; min-width: 0; flex-wrap: wrap;
   }
+
+  .search-wrap { position: relative; flex: 1; min-width: 160px; max-width: 240px; }
   .search-wrap svg {
-    position: absolute;
-    left: 9px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text3);
-    pointer-events: none;
+    position: absolute; left: 9px; top: 50%;
+    transform: translateY(-50%); color: var(--text3); pointer-events: none;
   }
   .search-wrap input {
-    width: 100%;
-    padding: 6px 10px 6px 30px;
-    border: 0.5px solid var(--border2);
-    border-radius: var(--radius-sm);
-    background: var(--surface2);
-    color: var(--text);
-    font-size: 13px;
-    font-family: inherit;
-    outline: none;
+    width: 100%; padding: 6px 10px 6px 30px;
+    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
+    background: var(--surface2); color: var(--text);
+    font-size: 13px; font-family: inherit; outline: none;
   }
   .search-wrap input:focus { border-color: var(--text3); }
   .search-wrap input::placeholder { color: var(--text3); }
 
+  .brand-filter {
+    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
+    padding: 5px 8px; font-size: 13px; font-family: inherit;
+    background: var(--surface2); color: var(--text);
+    outline: none; cursor: pointer;
+  }
+
   .header-actions { display: flex; gap: 6px; align-items: center; }
 
   .icon-btn {
-    background: var(--surface2);
-    border: 0.5px solid var(--border2);
-    border-radius: var(--radius-sm);
-    padding: 6px 10px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--text2);
-    transition: background 0.15s;
-    line-height: 1;
-    white-space: nowrap;
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); padding: 6px 10px;
+    cursor: pointer; font-size: 13px; color: var(--text2);
+    transition: background 0.15s; line-height: 1; white-space: nowrap;
   }
   .icon-btn:hover { background: var(--border); }
-  .icon-btn.active { background: var(--todo-bg); color: var(--todo-text); border-color: var(--todo-accent); }
+  .icon-btn.active { background: var(--col-todo-bg); color: var(--col-todo-text); border-color: var(--col-todo-accent); }
 
   .board {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    padding: 1.25rem 1.5rem;
-    align-items: start;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.875rem; padding: 1.25rem 1.5rem; align-items: start;
   }
 
   .column {
-    background: var(--surface);
-    border-radius: var(--radius);
-    border: 0.5px solid var(--border);
-    overflow: hidden;
+    background: var(--surface); border-radius: var(--radius);
+    border: 0.5px solid var(--border); overflow: hidden;
   }
   .column.drag-over { border-color: var(--border2); background: var(--surface2); }
 
   .col-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.875rem 1rem;
-    border-bottom: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 0.875rem; border-bottom: 0.5px solid var(--border);
   }
 
-  .col-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
-  .col-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .col-title { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
+  .col-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .count-badge { font-size: 11px; font-weight: 500; padding: 2px 6px; border-radius: 999px; margin-left: 2px; }
 
-  .count-badge { font-size: 12px; font-weight: 500; padding: 2px 7px; border-radius: 999px; margin-left: 4px; }
+  [data-col="todo"] .col-dot { background: var(--col-todo-accent); }
+  [data-col="todo"] .count-badge { background: var(--col-todo-bg); color: var(--col-todo-text); }
+  [data-col="progress"] .col-dot { background: var(--col-progress-accent); }
+  [data-col="progress"] .count-badge { background: var(--col-progress-bg); color: var(--col-progress-text); }
+  [data-col="done"] .col-dot { background: var(--col-done-accent); }
+  [data-col="done"] .count-badge { background: var(--col-done-bg); color: var(--col-done-text); }
+  [data-col="waiting"] .col-dot { background: var(--col-waiting-accent); }
+  [data-col="waiting"] .count-badge { background: var(--col-waiting-bg); color: var(--col-waiting-text); }
 
-  [data-col="todo"] .col-dot { background: var(--todo-accent); }
-  [data-col="todo"] .count-badge { background: var(--todo-bg); color: var(--todo-text); }
-  [data-col="progress"] .col-dot { background: var(--prog-accent); }
-  [data-col="progress"] .count-badge { background: var(--prog-bg); color: var(--prog-text); }
-  [data-col="done"] .col-dot { background: var(--done-accent); }
-  [data-col="done"] .count-badge { background: var(--done-bg); color: var(--done-text); }
-
-  .col-actions { display: flex; gap: 6px; align-items: center; }
+  .col-actions { display: flex; gap: 4px; align-items: center; }
 
   .add-btn {
     background: none; border: none; cursor: pointer;
@@ -168,152 +159,90 @@
 
   .archive-btn {
     background: none; border: none; cursor: pointer;
-    color: var(--text3); font-size: 11px; line-height: 1;
-    padding: 2px 4px; transition: color 0.15s;
-    border-radius: 4px;
+    color: var(--text3); font-size: 11px; padding: 2px 5px;
+    border-radius: 4px; transition: color 0.15s, background 0.15s; line-height: 1;
   }
-  .archive-btn:hover { color: var(--done-text); background: var(--done-bg); }
+  .archive-btn:hover { color: var(--col-done-text); background: var(--col-done-bg); }
 
-  .cards {
-    padding: 0.625rem;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-height: 48px;
-  }
+  .cards { padding: 0.5rem; display: flex; flex-direction: column; gap: 5px; min-height: 48px; }
 
   .card {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.625rem 0.75rem;
-    cursor: grab;
-    transition: border-color 0.15s, opacity 0.15s;
-    user-select: none;
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 0.5rem 0.625rem;
+    cursor: grab; transition: border-color 0.15s, opacity 0.15s; user-select: none;
   }
   .card:hover { border-color: var(--border2); }
   .card.dragging { opacity: 0.4; cursor: grabbing; }
   .card.archived { opacity: 0.5; }
-  .card.hidden { display: none; }
 
-  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+  .card-text { font-size: 13px; line-height: 1.45; word-break: break-word; flex: 1; cursor: text; }
 
-  .card-text { font-size: 14px; line-height: 1.45; word-break: break-word; flex: 1; cursor: text; }
-
-  .card-btns { display: flex; gap: 4px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
+  .card-btns { display: flex; gap: 3px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
   .card:hover .card-btns { opacity: 1; }
 
   .card-btn {
     background: none; border: none; cursor: pointer;
-    color: var(--text3); font-size: 13px; padding: 0;
-    line-height: 1; transition: color 0.15s;
+    color: var(--text3); font-size: 12px; padding: 0; line-height: 1; transition: color 0.15s;
   }
   .card-btn:hover { color: var(--text); }
   .card-btn.del:hover { color: var(--danger); }
 
-  .card-meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .card-meta { display: flex; align-items: center; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
 
-  .priority-badge {
+  .badge {
     font-size: 10px; font-weight: 500;
-    padding: 2px 6px; border-radius: 999px;
-    text-transform: uppercase; letter-spacing: 0.03em;
+    padding: 2px 5px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap;
   }
-  .priority-badge.alta { background: var(--p-alta-bg); color: var(--p-alta-text); }
-  .priority-badge.media { background: var(--p-media-bg); color: var(--p-media-text); }
-  .priority-badge.baja { background: var(--p-baja-bg); color: var(--p-baja-text); }
+  .badge.alta { background: var(--p-alta-bg); color: var(--p-alta-text); }
+  .badge.media { background: var(--p-media-bg); color: var(--p-media-text); }
+  .badge.baja { background: var(--p-baja-bg); color: var(--p-baja-text); }
+  .badge.BYD { background: var(--b-byd-bg); color: var(--b-byd-text); }
+  .badge.BMW { background: var(--b-bmw-bg); color: var(--b-bmw-text); }
+  .badge.MINI { background: var(--b-mini-bg); color: var(--b-mini-text); }
+  .badge.MOTORRAD { background: var(--b-motorrad-bg); color: var(--b-motorrad-text); }
+  .badge.PERSONAL { background: var(--b-personal-bg); color: var(--b-personal-text); }
 
-  .card-date {
-    font-size: 11px; color: var(--text3);
-    display: flex; align-items: center; gap: 3px;
-  }
+  .card-date { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 3px; }
   .card-date.overdue { color: var(--danger); }
 
-  .edit-form {
-    display: flex; flex-direction: column; gap: 6px;
-    padding-top: 2px;
-  }
-
+  .edit-form { display: flex; flex-direction: column; gap: 5px; }
   .edit-form textarea {
-    width: 100%;
-    border: 0.5px solid var(--border2);
-    border-radius: var(--radius-sm);
-    padding: 6px 8px;
-    font-size: 13px;
-    font-family: inherit;
-    resize: none;
-    background: var(--surface2);
-    color: var(--text);
-    outline: none;
+    width: 100%; border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
+    padding: 6px 8px; font-size: 13px; font-family: inherit;
+    resize: none; background: var(--surface2); color: var(--text); outline: none;
   }
   .edit-form textarea:focus { border-color: var(--text3); }
 
-  .edit-row { display: flex; gap: 6px; align-items: center; }
-
-  .priority-select {
-    border: 0.5px solid var(--border2);
-    border-radius: var(--radius-sm);
-    padding: 5px 6px;
-    font-size: 12px;
-    font-family: inherit;
-    background: var(--surface2);
-    color: var(--text);
-    outline: none;
-    cursor: pointer;
-    flex: 1;
+  .edit-row { display: flex; gap: 5px; }
+  .form-select, .form-date {
+    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
+    padding: 5px 6px; font-size: 12px; font-family: inherit;
+    background: var(--surface2); color: var(--text); outline: none; cursor: pointer; flex: 1;
   }
 
-  .date-input {
-    border: 0.5px solid var(--border2);
-    border-radius: var(--radius-sm);
-    padding: 5px 6px;
-    font-size: 12px;
-    font-family: inherit;
-    background: var(--surface2);
-    color: var(--text2);
-    outline: none;
-    cursor: pointer;
-    flex: 1;
+  .edit-actions { display: flex; gap: 5px; }
+  .btn-save {
+    flex: 1; padding: 6px 10px; background: var(--text); color: var(--surface);
+    border: none; border-radius: var(--radius-sm); font-size: 12px;
+    font-family: inherit; cursor: pointer; font-weight: 500; transition: opacity 0.15s;
   }
-
-  .edit-actions { display: flex; gap: 6px; }
-
-  .btn-confirm {
-    flex: 1; padding: 6px 10px;
-    background: var(--text); color: var(--surface);
-    border: none; border-radius: var(--radius-sm);
-    font-size: 12px; font-family: inherit;
-    cursor: pointer; font-weight: 500;
-    transition: opacity 0.15s;
-  }
-  .btn-confirm:hover { opacity: 0.85; }
-
+  .btn-save:hover { opacity: 0.85; }
   .btn-cancel {
-    padding: 6px 10px;
-    background: none; color: var(--text2);
-    border: 0.5px solid var(--border2);
-    border-radius: var(--radius-sm);
-    font-size: 12px; font-family: inherit;
-    cursor: pointer; transition: background 0.15s;
+    padding: 6px 10px; background: none; color: var(--text2);
+    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
+    font-size: 12px; font-family: inherit; cursor: pointer; transition: background 0.15s;
   }
   .btn-cancel:hover { background: var(--surface2); }
 
-  .add-form {
-    padding: 0.625rem;
-    border-top: 0.5px solid var(--border);
-    display: none;
-  }
+  .add-form { padding: 0.5rem; border-top: 0.5px solid var(--border); display: none; }
   .add-form.open { display: block; }
-  .add-form .edit-form { padding-top: 0; }
 
-  .empty-state {
-    text-align: center; color: var(--text3);
-    font-size: 12px; padding: 0.5rem 0;
-  }
+  .empty-state { text-align: center; color: var(--text3); font-size: 12px; padding: 0.5rem 0; }
 
-  @media (max-width: 700px) {
-    .board { grid-template-columns: 1fr; }
-    .search-wrap { max-width: none; }
-  }
+  @media (max-width: 900px) { .board { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .board { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -322,9 +251,19 @@
     <h1>Mis prioridades</h1>
     <div class="meta" id="task-summary">cargando...</div>
   </div>
-  <div class="search-wrap">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="search" placeholder="Buscar tarea...">
+  <div class="header-center">
+    <div class="search-wrap">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search" placeholder="Buscar tarea...">
+    </div>
+    <select class="brand-filter" id="brand-filter">
+      <option value="">Todas las marcas</option>
+      <option value="BYD">BYD</option>
+      <option value="BMW">BMW</option>
+      <option value="MINI">MINI</option>
+      <option value="MOTORRAD">MOTORRAD</option>
+      <option value="PERSONAL">PERSONAL</option>
+    </select>
   </div>
   <div class="header-actions">
     <button class="icon-btn" id="toggle-archived">Ver archivadas</button>
@@ -333,15 +272,15 @@
 </header>
 
 <div class="board">
+
   <div class="column" data-col="todo">
     <div class="col-header">
       <div class="col-title">
-        <span class="col-dot"></span>
-        Por hacer
+        <span class="col-dot"></span>Por hacer
         <span class="count-badge" data-count="todo">0</span>
       </div>
       <div class="col-actions">
-        <button class="add-btn" data-target="todo" title="Agregar tarea">+</button>
+        <button class="add-btn" data-target="todo">+</button>
       </div>
     </div>
     <div class="cards" id="cards-todo"></div>
@@ -349,16 +288,24 @@
       <div class="edit-form">
         <textarea placeholder="Nueva tarea..." rows="2" id="text-todo"></textarea>
         <div class="edit-row">
-          <select class="priority-select" id="priority-todo">
+          <select class="form-select" id="brand-todo">
+            <option value="">Sin marca</option>
+            <option value="BYD">BYD</option>
+            <option value="BMW">BMW</option>
+            <option value="MINI">MINI</option>
+            <option value="MOTORRAD">MOTORRAD</option>
+            <option value="PERSONAL">PERSONAL</option>
+          </select>
+          <select class="form-select" id="priority-todo">
             <option value="">Sin prioridad</option>
             <option value="alta">🔴 Alta</option>
             <option value="media">🟡 Media</option>
             <option value="baja">🟢 Baja</option>
           </select>
-          <input type="date" class="date-input" id="date-todo">
         </div>
+        <input type="date" class="form-date" id="date-todo">
         <div class="edit-actions">
-          <button class="btn-confirm" data-col="todo">Agregar</button>
+          <button class="btn-save" data-col="todo">Agregar</button>
           <button class="btn-cancel" data-target="todo">Cancelar</button>
         </div>
       </div>
@@ -368,12 +315,11 @@
   <div class="column" data-col="progress">
     <div class="col-header">
       <div class="col-title">
-        <span class="col-dot"></span>
-        En progreso
+        <span class="col-dot"></span>En progreso
         <span class="count-badge" data-count="progress">0</span>
       </div>
       <div class="col-actions">
-        <button class="add-btn" data-target="progress" title="Agregar tarea">+</button>
+        <button class="add-btn" data-target="progress">+</button>
       </div>
     </div>
     <div class="cards" id="cards-progress"></div>
@@ -381,17 +327,64 @@
       <div class="edit-form">
         <textarea placeholder="Nueva tarea..." rows="2" id="text-progress"></textarea>
         <div class="edit-row">
-          <select class="priority-select" id="priority-progress">
+          <select class="form-select" id="brand-progress">
+            <option value="">Sin marca</option>
+            <option value="BYD">BYD</option>
+            <option value="BMW">BMW</option>
+            <option value="MINI">MINI</option>
+            <option value="MOTORRAD">MOTORRAD</option>
+            <option value="PERSONAL">PERSONAL</option>
+          </select>
+          <select class="form-select" id="priority-progress">
             <option value="">Sin prioridad</option>
             <option value="alta">🔴 Alta</option>
             <option value="media">🟡 Media</option>
             <option value="baja">🟢 Baja</option>
           </select>
-          <input type="date" class="date-input" id="date-progress">
         </div>
+        <input type="date" class="form-date" id="date-progress">
         <div class="edit-actions">
-          <button class="btn-confirm" data-col="progress">Agregar</button>
+          <button class="btn-save" data-col="progress">Agregar</button>
           <button class="btn-cancel" data-target="progress">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="column" data-col="waiting">
+    <div class="col-header">
+      <div class="col-title">
+        <span class="col-dot"></span>Esperando
+        <span class="count-badge" data-count="waiting">0</span>
+      </div>
+      <div class="col-actions">
+        <button class="add-btn" data-target="waiting">+</button>
+      </div>
+    </div>
+    <div class="cards" id="cards-waiting"></div>
+    <div class="add-form" id="form-waiting">
+      <div class="edit-form">
+        <textarea placeholder="¿Qué estás esperando?" rows="2" id="text-waiting"></textarea>
+        <div class="edit-row">
+          <select class="form-select" id="brand-waiting">
+            <option value="">Sin marca</option>
+            <option value="BYD">BYD</option>
+            <option value="BMW">BMW</option>
+            <option value="MINI">MINI</option>
+            <option value="MOTORRAD">MOTORRAD</option>
+            <option value="PERSONAL">PERSONAL</option>
+          </select>
+          <select class="form-select" id="priority-waiting">
+            <option value="">Sin prioridad</option>
+            <option value="alta">🔴 Alta</option>
+            <option value="media">🟡 Media</option>
+            <option value="baja">🟢 Baja</option>
+          </select>
+        </div>
+        <input type="date" class="form-date" id="date-waiting">
+        <div class="edit-actions">
+          <button class="btn-save" data-col="waiting">Agregar</button>
+          <button class="btn-cancel" data-target="waiting">Cancelar</button>
         </div>
       </div>
     </div>
@@ -400,13 +393,12 @@
   <div class="column" data-col="done">
     <div class="col-header">
       <div class="col-title">
-        <span class="col-dot"></span>
-        Hecho
+        <span class="col-dot"></span>Hecho
         <span class="count-badge" data-count="done">0</span>
       </div>
       <div class="col-actions">
-        <button class="archive-btn" data-archive-col="done" title="Archivar todas las completadas">Archivar todo</button>
-        <button class="add-btn" data-target="done" title="Agregar tarea">+</button>
+        <button class="archive-btn" data-archive-col="done">Archivar todo</button>
+        <button class="add-btn" data-target="done">+</button>
       </div>
     </div>
     <div class="cards" id="cards-done"></div>
@@ -414,29 +406,39 @@
       <div class="edit-form">
         <textarea placeholder="Nueva tarea..." rows="2" id="text-done"></textarea>
         <div class="edit-row">
-          <select class="priority-select" id="priority-done">
+          <select class="form-select" id="brand-done">
+            <option value="">Sin marca</option>
+            <option value="BYD">BYD</option>
+            <option value="BMW">BMW</option>
+            <option value="MINI">MINI</option>
+            <option value="MOTORRAD">MOTORRAD</option>
+            <option value="PERSONAL">PERSONAL</option>
+          </select>
+          <select class="form-select" id="priority-done">
             <option value="">Sin prioridad</option>
             <option value="alta">🔴 Alta</option>
             <option value="media">🟡 Media</option>
             <option value="baja">🟢 Baja</option>
           </select>
-          <input type="date" class="date-input" id="date-done">
         </div>
+        <input type="date" class="form-date" id="date-done">
         <div class="edit-actions">
-          <button class="btn-confirm" data-col="done">Agregar</button>
+          <button class="btn-save" data-col="done">Agregar</button>
           <button class="btn-cancel" data-target="done">Cancelar</button>
         </div>
       </div>
     </div>
   </div>
+
 </div>
 
 <script>
+const COLS = ['todo', 'progress', 'waiting', 'done'];
 let tasks = [];
-let dragSrc = null;
 let saveTimer = null;
 let showArchived = false;
 let searchQuery = '';
+let brandFilter = '';
 
 async function load() {
   try {
@@ -472,20 +474,22 @@ function isOverdue(d) {
   return new Date(d + 'T23:59:59') < new Date();
 }
 
-function escHtml(s) {
+function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function matchesSearch(task) {
-  if (!searchQuery) return true;
-  return task.text.toLowerCase().includes(searchQuery.toLowerCase());
+function matches(task) {
+  if (!showArchived && task.archived) return false;
+  if (brandFilter && task.brand !== brandFilter) return false;
+  if (searchQuery && !task.text.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+  return true;
 }
 
 function render() {
-  ['todo', 'progress', 'done'].forEach(col => {
+  COLS.forEach(col => {
     const container = document.getElementById('cards-' + col);
     const colTasks = tasks.filter(t => t.col === col);
-    const visible = colTasks.filter(t => (showArchived || !t.archived) && matchesSearch(t));
+    const visible = colTasks.filter(matches);
 
     container.innerHTML = '';
 
@@ -498,27 +502,28 @@ function render() {
         card.draggable = !task.archived;
         card.dataset.id = task.id;
 
-        const priorityHtml = task.priority
-          ? `<span class="priority-badge ${task.priority}">${task.priority}</span>` : '';
-
-        const dateHtml = task.date
+        const brandBadge = task.brand
+          ? `<span class="badge ${esc(task.brand)}">${esc(task.brand)}</span>` : '';
+        const priBadge = task.priority
+          ? `<span class="badge ${esc(task.priority)}">${esc(task.priority)}</span>` : '';
+        const dateSpan = task.date
           ? `<span class="card-date ${isOverdue(task.date) ? 'overdue' : ''}">
                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M5 1v4M11 1v4M1 7h14" stroke-linecap="round"/></svg>
                ${formatDate(task.date)}${isOverdue(task.date) ? ' · vencida' : ''}
              </span>` : '';
 
-        const archiveIcon = task.archived ? '↩' : '⊘';
-        const archiveTitle = task.archived ? 'Desarchivar' : 'Archivar';
+        const meta = (brandBadge || priBadge || dateSpan)
+          ? `<div class="card-meta">${brandBadge}${priBadge}${dateSpan}</div>` : '';
 
         card.innerHTML = `
           <div class="card-top">
-            <span class="card-text" data-edit="${task.id}">${escHtml(task.text)}</span>
+            <span class="card-text" data-edit="${esc(task.id)}">${esc(task.text)}</span>
             <div class="card-btns">
-              <button class="card-btn" data-archive="${task.id}" title="${archiveTitle}">${archiveIcon}</button>
-              <button class="card-btn del" data-delete="${task.id}" title="Eliminar">✕</button>
+              <button class="card-btn" data-archive="${esc(task.id)}" title="${task.archived ? 'Desarchivar' : 'Archivar'}">${task.archived ? '↩' : '⊘'}</button>
+              <button class="card-btn del" data-delete="${esc(task.id)}" title="Eliminar">✕</button>
             </div>
           </div>
-          ${(priorityHtml || dateHtml) ? `<div class="card-meta">${priorityHtml}${dateHtml}</div>` : ''}
+          ${meta}
         `;
 
         card.addEventListener('dragstart', onDragStart);
@@ -527,8 +532,8 @@ function render() {
       });
     }
 
-    const activeCount = colTasks.filter(t => !t.archived).length;
-    document.querySelector('[data-count="' + col + '"]').textContent = activeCount;
+    document.querySelector(`[data-count="${col}"]`).textContent =
+      colTasks.filter(t => !t.archived).length;
   });
 
   const active = tasks.filter(t => !t.archived);
@@ -540,34 +545,38 @@ function render() {
 function openEditInline(id) {
   const task = tasks.find(t => t.id === id);
   if (!task) return;
-
   const card = document.querySelector(`.card[data-id="${id}"]`);
   if (!card) return;
-
   card.draggable = false;
   card.innerHTML = `
     <div class="edit-form">
-      <textarea id="edit-text-${id}" rows="2">${escHtml(task.text)}</textarea>
+      <textarea id="ei-text-${id}" rows="2">${esc(task.text)}</textarea>
       <div class="edit-row">
-        <select class="priority-select" id="edit-priority-${id}">
-          <option value="" ${!task.priority ? 'selected' : ''}>Sin prioridad</option>
-          <option value="alta" ${task.priority === 'alta' ? 'selected' : ''}>🔴 Alta</option>
-          <option value="media" ${task.priority === 'media' ? 'selected' : ''}>🟡 Media</option>
-          <option value="baja" ${task.priority === 'baja' ? 'selected' : ''}>🟢 Baja</option>
+        <select class="form-select" id="ei-brand-${id}">
+          <option value="" ${!task.brand?'selected':''}>Sin marca</option>
+          <option value="BYD" ${task.brand==='BYD'?'selected':''}>BYD</option>
+          <option value="BMW" ${task.brand==='BMW'?'selected':''}>BMW</option>
+          <option value="MINI" ${task.brand==='MINI'?'selected':''}>MINI</option>
+          <option value="MOTORRAD" ${task.brand==='MOTORRAD'?'selected':''}>MOTORRAD</option>
+          <option value="PERSONAL" ${task.brand==='PERSONAL'?'selected':''}>PERSONAL</option>
         </select>
-        <input type="date" class="date-input" id="edit-date-${id}" value="${task.date || ''}">
+        <select class="form-select" id="ei-priority-${id}">
+          <option value="" ${!task.priority?'selected':''}>Sin prioridad</option>
+          <option value="alta" ${task.priority==='alta'?'selected':''}>🔴 Alta</option>
+          <option value="media" ${task.priority==='media'?'selected':''}>🟡 Media</option>
+          <option value="baja" ${task.priority==='baja'?'selected':''}>🟢 Baja</option>
+        </select>
       </div>
+      <input type="date" class="form-date" id="ei-date-${id}" value="${task.date||''}">
       <div class="edit-actions">
-        <button class="btn-confirm" data-save="${id}">Guardar</button>
-        <button class="btn-cancel" data-cancel-edit="${id}">Cancelar</button>
+        <button class="btn-save" data-save="${id}">Guardar</button>
+        <button class="btn-cancel" data-cancel-edit>Cancelar</button>
       </div>
     </div>
   `;
-
-  const ta = document.getElementById('edit-text-' + id);
+  const ta = document.getElementById('ei-text-' + id);
   ta.focus();
   ta.setSelectionRange(ta.value.length, ta.value.length);
-
   ta.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveEdit(id); }
     if (e.key === 'Escape') render();
@@ -577,13 +586,13 @@ function openEditInline(id) {
 function saveEdit(id) {
   const task = tasks.find(t => t.id === id);
   if (!task) return;
-  const text = document.getElementById('edit-text-' + id).value.trim();
+  const text = document.getElementById('ei-text-' + id).value.trim();
   if (!text) return;
   task.text = text;
-  task.priority = document.getElementById('edit-priority-' + id).value;
-  task.date = document.getElementById('edit-date-' + id).value;
-  save();
-  render();
+  task.brand = document.getElementById('ei-brand-' + id).value;
+  task.priority = document.getElementById('ei-priority-' + id).value;
+  task.date = document.getElementById('ei-date-' + id).value;
+  save(); render();
 }
 
 function addTask(col) {
@@ -591,47 +600,29 @@ function addTask(col) {
   if (!text) return;
   tasks.push({
     id: uid(), col, text,
-    date: document.getElementById('date-' + col).value,
+    brand: document.getElementById('brand-' + col).value,
     priority: document.getElementById('priority-' + col).value,
+    date: document.getElementById('date-' + col).value,
     archived: false
   });
-  save();
-  render();
-  closeForm(col);
-}
-
-function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
-  save();
-  render();
-}
-
-function toggleArchive(id) {
-  const task = tasks.find(t => t.id === id);
-  if (task) { task.archived = !task.archived; save(); render(); }
-}
-
-function archiveAll(col) {
-  tasks.filter(t => t.col === col && !t.archived).forEach(t => t.archived = true);
-  save();
-  render();
+  save(); render(); closeForm(col);
 }
 
 function openForm(col) {
-  ['todo','progress','done'].forEach(c => document.getElementById('form-' + c).classList.remove('open'));
+  COLS.forEach(c => document.getElementById('form-' + c).classList.remove('open'));
   document.getElementById('form-' + col).classList.add('open');
   document.getElementById('text-' + col).focus();
 }
 
 function closeForm(col) {
   document.getElementById('form-' + col).classList.remove('open');
-  document.getElementById('text-' + col).value = '';
-  document.getElementById('date-' + col).value = '';
-  document.getElementById('priority-' + col).value = '';
+  ['text-','brand-','priority-','date-'].forEach(p => {
+    const el = document.getElementById(p + col);
+    if (el) el.value = '';
+  });
 }
 
 function onDragStart(e) {
-  dragSrc = this;
   this.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', this.dataset.id);
@@ -643,17 +634,10 @@ function onDragEnd() {
 }
 
 document.querySelectorAll('.column').forEach(col => {
-  col.addEventListener('dragover', e => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    col.classList.add('drag-over');
-  });
-  col.addEventListener('dragleave', e => {
-    if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
-  });
+  col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+  col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over'); });
   col.addEventListener('drop', e => {
-    e.preventDefault();
-    col.classList.remove('drag-over');
+    e.preventDefault(); col.classList.remove('drag-over');
     const id = e.dataTransfer.getData('text/plain');
     const task = tasks.find(t => t.id === id);
     if (task) { task.col = col.dataset.col; save(); render(); }
@@ -661,38 +645,34 @@ document.querySelectorAll('.column').forEach(col => {
 });
 
 document.addEventListener('click', e => {
-  if (e.target.closest('.add-btn')) { openForm(e.target.closest('.add-btn').dataset.target); return; }
-  if (e.target.closest('.btn-cancel[data-target]')) { closeForm(e.target.closest('.btn-cancel').dataset.target); return; }
-  if (e.target.closest('.btn-confirm[data-col]')) { addTask(e.target.closest('.btn-confirm').dataset.col); return; }
-  if (e.target.closest('[data-delete]')) { deleteTask(e.target.closest('[data-delete]').dataset.delete); return; }
-  if (e.target.closest('[data-archive]')) { toggleArchive(e.target.closest('[data-archive]').dataset.archive); return; }
-  if (e.target.closest('[data-archive-col]')) { archiveAll(e.target.closest('[data-archive-col]').dataset.archiveCol); return; }
-  if (e.target.closest('[data-save]')) { saveEdit(e.target.closest('[data-save]').dataset.save); return; }
-  if (e.target.closest('[data-cancel-edit]')) { render(); return; }
+  const t = e.target;
+  if (t.closest('.add-btn')) { openForm(t.closest('.add-btn').dataset.target); return; }
+  if (t.closest('.btn-cancel[data-target]')) { closeForm(t.closest('.btn-cancel').dataset.target); return; }
+  if (t.closest('.btn-cancel[data-cancel-edit]')) { render(); return; }
+  if (t.closest('.btn-save[data-col]')) { addTask(t.closest('.btn-save').dataset.col); return; }
+  if (t.closest('[data-save]')) { saveEdit(t.closest('[data-save]').dataset.save); return; }
+  if (t.closest('[data-delete]')) { tasks = tasks.filter(tk => tk.id !== t.closest('[data-delete]').dataset.delete); save(); render(); return; }
+  if (t.closest('[data-archive]')) { const tk = tasks.find(tk => tk.id === t.closest('[data-archive]').dataset.archive); if (tk) { tk.archived = !tk.archived; save(); render(); } return; }
+  if (t.closest('[data-archive-col]')) { tasks.filter(tk => tk.col === t.closest('[data-archive-col]').dataset.archiveCol && !tk.archived).forEach(tk => tk.archived = true); save(); render(); return; }
 });
 
 document.addEventListener('dblclick', e => {
-  const editTarget = e.target.closest('[data-edit]');
-  if (editTarget) { openEditInline(editTarget.dataset.edit); }
+  const el = e.target.closest('[data-edit]');
+  if (el) openEditInline(el.dataset.edit);
 });
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    ['todo','progress','done'].forEach(c => closeForm(c));
-    render();
-  }
+  if (e.key === 'Escape') { COLS.forEach(c => closeForm(c)); render(); }
 });
 
-['todo','progress','done'].forEach(col => {
+COLS.forEach(col => {
   document.getElementById('text-' + col).addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addTask(col); }
   });
 });
 
-document.getElementById('search').addEventListener('input', e => {
-  searchQuery = e.target.value;
-  render();
-});
+document.getElementById('search').addEventListener('input', e => { searchQuery = e.target.value; render(); });
+document.getElementById('brand-filter').addEventListener('change', e => { brandFilter = e.target.value; render(); });
 
 document.getElementById('toggle-archived').addEventListener('click', function() {
   showArchived = !showArchived;
