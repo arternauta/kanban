@@ -1,29 +1,288 @@
 [
-  { "id": "default5", "col": "todo", "text": "Armar contenido Shark BYD - Fuertote", "date": "" },
-  { "id": "default9", "col": "todo", "text": "Revision de Feed BYD", "date": "" },
-  { "id": "default10", "col": "todo", "text": "Revision de Feed BMW", "date": "" },
-  { "id": "default11", "col": "todo", "text": "Revision de Feed MINI", "date": "" },
-  { "id": "default12", "col": "todo", "text": "Revision de Feed Motorrad", "date": "" },
-  { "id": "default14", "col": "todo", "text": "Hightligts MOTORRAD", "date": "" },
-  { "id": "default15", "col": "todo", "text": "Hightligts MINI", "date": "" },
-  { "id": "default16", "col": "todo", "text": "Hightligts BMW", "date": "" },
-  { "id": "default17", "col": "todo", "text": "Imprimir tickets UBER", "date": "" },
-  { "id": "default18", "col": "todo", "text": "Crear Post de noticia BYD en 8 minutos", "date": "" },
-  { "id": "default19", "col": "todo", "text": "Agregar cantidad de contenido en el reporte semanal BYD", "date": "" },
-  { "id": "default20", "col": "todo", "text": "POSTEAR VIDEO DE X3", "date": "" },
-  { "id": "default21", "col": "todo", "text": "POSTEAR VIDEO DE X5", "date": "" },
-  { "id": "default22", "col": "todo", "text": "LANZAMIENTO YUAN PRO Y ATTO", "date": "" },
-  { "id": "default23", "col": "inprogress", "text": "POST MINI", "date": "" },
-  { "id": "default2", "col": "done", "text": "Crear nuevo Link Tree - BMW", "date": "" },
-  { "id": "default4", "col": "done", "text": "Armar contenido YUAN PRO - BYD Pelirroja", "date": "" },
-  { "id": "default7", "col": "done", "text": "Postear los videos BMW - X1 X3 X5", "date": "" },
-  { "id": "default3", "col": "done", "text": "Evidencias Mayo BYD", "date": "" },
-  { "id": "default6", "col": "done", "text": "Pedir los videos de BMW - X1 X3 X5", "date": "" },
-  { "id": "default8", "col": "done", "text": "Referencias BYD Journey", "date": "" },
-  { "id": "default13", "col": "done", "text": "Hightligts BYD", "date": "" },
-  { "id": "default24", "col": "done", "text": "Actualizar BIO BYD", "date": "" },
-  { "id": "default25", "col": "done", "text": "Posteo Primeros Auxilio, comunicacion en channel y organico", "date": "" },
-  { "id": "default26", "col": "done", "text": "Estrategia channel BYD", "date": "" },
-  { "id": "default27", "col": "done", "text": "Repostear contenido de la man del balon BYD", "date": "" },
-  { "id": "default28", "col": "done", "text": "POSTEAR VIDEO DE X1", "date": "" }
+  {
+    "id": "default5",
+    "col": "boga",
+    "text": "Armar contenido Shark BYD - Fuertote",
+    "date": ""
+  },
+  {
+    "id": "default9",
+    "col": "todo",
+    "text": "Revision de Feed BYD",
+    "date": ""
+  },
+  {
+    "id": "default10",
+    "col": "todo",
+    "text": "Revision de Feed BMW",
+    "date": ""
+  },
+  {
+    "id": "default11",
+    "col": "todo",
+    "text": "Revision de Feed MINI",
+    "date": ""
+  },
+  {
+    "id": "default12",
+    "col": "todo",
+    "text": "Revision de Feed Motorrad",
+    "date": ""
+  },
+  {
+    "id": "default14",
+    "col": "todo",
+    "text": "Hightligts MOTORRAD",
+    "date": ""
+  },
+  {
+    "id": "default15",
+    "col": "todo",
+    "text": "Hightligts MINI",
+    "date": ""
+  },
+  {
+    "id": "default16",
+    "col": "todo",
+    "text": "Hightligts BMW",
+    "date": ""
+  },
+  {
+    "id": "default17",
+    "col": "boga",
+    "text": "Imprimir tickets UBER",
+    "date": ""
+  },
+  {
+    "id": "default19",
+    "col": "boga",
+    "text": "Agregar cantidad de contenido en el reporte semanal BYD",
+    "date": ""
+  },
+  {
+    "id": "default20",
+    "col": "done",
+    "text": "POSTEAR VIDEO DE X3",
+    "date": ""
+  },
+  {
+    "id": "default21",
+    "col": "boga",
+    "text": "POSTEAR VIDEO DE X5",
+    "date": ""
+  },
+  {
+    "id": "default22",
+    "col": "waiting",
+    "text": "LANZAMIENTO YUAN PRO Y ATTO",
+    "date": "",
+    "brand": "",
+    "priority": "",
+    "assignee": "Joel"
+  },
+  {
+    "id": "default23",
+    "col": "inprogress",
+    "text": "POST MINI",
+    "date": ""
+  },
+  {
+    "id": "default2",
+    "col": "done",
+    "text": "Crear nuevo Link Tree - BMW",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default4",
+    "col": "done",
+    "text": "Armar contenido YUAN PRO - BYD Pelirroja",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default7",
+    "col": "done",
+    "text": "Postear los videos BMW - X1 X3 X5",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default3",
+    "col": "done",
+    "text": "Evidencias Mayo BYD",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default6",
+    "col": "done",
+    "text": "Pedir los videos de BMW - X1 X3 X5",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default8",
+    "col": "done",
+    "text": "Referencias BYD Journey",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default13",
+    "col": "done",
+    "text": "Hightligts BYD",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default24",
+    "col": "done",
+    "text": "Actualizar BIO BYD",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default25",
+    "col": "done",
+    "text": "Posteo Primeros Auxilio, comunicacion en channel y organico",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default26",
+    "col": "done",
+    "text": "Estrategia channel BYD",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default27",
+    "col": "done",
+    "text": "Repostear contenido de la man del balon BYD",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "default28",
+    "col": "done",
+    "text": "POSTEAR VIDEO DE X1",
+    "date": "",
+    "archived": true
+  },
+  {
+    "id": "mqfb5et2l4o8cf8mjvk",
+    "col": "waiting",
+    "text": "Material WON dia del padre",
+    "date": "",
+    "brand": "",
+    "priority": "",
+    "assignee": "Nick"
+  },
+  {
+    "id": "mqfb5qb8ey05ojifq8a",
+    "col": "done",
+    "text": "Material X3",
+    "date": "",
+    "waitStatus": "pending",
+    "brand": "BMW",
+    "priority": "",
+    "assignee": "Nick"
+  },
+  {
+    "id": "mqfc2drwjvltt8cwe5g",
+    "col": "boga",
+    "text": "Material GEN M - ARMAR Nuevo carrusel collage",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "archived": false
+  },
+  {
+    "id": "mqfc2tgd9dkpsljlvj",
+    "col": "done",
+    "text": "Reporte lunes",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "archived": false
+  },
+  {
+    "id": "mqfc37hm6i7dgaajucd",
+    "col": "done",
+    "text": "Publicar MINI COOOOOPER",
+    "brand": "MINI",
+    "priority": "",
+    "date": "",
+    "archived": false
+  },
+  {
+    "id": "mqfc3mhes4uq5gcqaer",
+    "col": "progress",
+    "text": "Publicar Futbol",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "archived": false
+  },
+  {
+    "id": "mqfc64c9dhj8ob7zofb",
+    "col": "boga",
+    "text": "Postear video Yuan Pro, pelirroja",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false
+  },
+  {
+    "id": "mqfcaspzsa8ttfqjr6r",
+    "col": "done",
+    "text": "Reporte presentación plan de contenido",
+    "brand": "BYD",
+    "priority": "alta",
+    "date": "2026-06-15",
+    "assignee": "",
+    "archived": false
+  },
+  {
+    "id": "mqfdc0ythz5b1yeplvg",
+    "col": "done",
+    "text": "Publicar video Karol",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false
+  },
+  {
+    "id": "mqfdcxnh0wpbwwp8rnwp",
+    "col": "progress",
+    "text": "EDITAR Motorrad Mundial",
+    "brand": "MOTORRAD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false
+  },
+  {
+    "id": "mqfk9h3pdfg2da56w6b",
+    "col": "done",
+    "text": "Publicar POST curiosidades futbol BYD",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false
+  },
+  {
+    "id": "mqfkdt08miy8cs0pqop",
+    "col": "todo",
+    "text": "EDITAR VIDEO DE LA 1300 INMERSIVO",
+    "brand": "MOTORRAD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false
+  }
 ]

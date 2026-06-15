@@ -3,492 +3,594 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kanban — Prioridades</title>
+<title>Kanban — Mis Prioridades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg: #f5f5f0;
-    --surface: #ffffff;
-    --surface2: #f0ede8;
-    --border: rgba(0,0,0,0.1);
-    --border2: rgba(0,0,0,0.2);
-    --text: #1a1a18;
-    --text2: #5f5e5a;
-    --text3: #888780;
-    --radius: 10px;
-    --radius-sm: 6px;
-    --danger: #E24B4A;
+body {
+  background: #0e0e0d;
+  color: #d3d1c7;
+  font-family: 'IBM Plex Mono', monospace;
+  min-height: 100vh;
+}
 
-    --col-todo-accent: #185FA5;
-    --col-todo-bg: #E6F1FB;
-    --col-todo-text: #0C447C;
-    --col-progress-accent: #BA7517;
-    --col-progress-bg: #FAEEDA;
-    --col-progress-text: #633806;
-    --col-done-accent: #3B6D11;
-    --col-done-bg: #EAF3DE;
-    --col-done-text: #27500A;
-    --col-waiting-accent: #534AB7;
-    --col-waiting-bg: #EEEDFE;
-    --col-waiting-text: #3C3489;
-    --col-boga-accent: #993C1D;
-    --col-boga-bg: #FAECE7;
-    --col-boga-text: #712B13;
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 0.5px solid #252523;
+  background: #111110;
+  flex-wrap: wrap;
+}
 
-    --p-alta-bg: #FCEBEB; --p-alta-text: #791F1F;
-    --p-media-bg: #FAEEDA; --p-media-text: #633806;
-    --p-baja-bg: #EAF3DE; --p-baja-text: #27500A;
+.logo {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #5f5e5a;
+  flex-shrink: 0;
+}
 
-    --b-byd-bg: #E1F5EE; --b-byd-text: #085041;
-    --b-bmw-bg: #E6F1FB; --b-bmw-text: #0C447C;
-    --b-mini-bg: #FAEEDA; --b-mini-text: #633806;
-    --b-motorrad-bg: #FAECE7; --b-motorrad-text: #712B13;
-    --b-personal-bg: #F1EFE8; --b-personal-text: #444441;
-  }
+.logo span { color: #888780; }
 
-  [data-theme="dark"] {
-    --bg: #1a1a18; --surface: #242422; --surface2: #2c2c2a;
-    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
-    --text: #f0ede8; --text2: #b4b2a9; --text3: #888780;
+.search-box {
+  flex: 1;
+  min-width: 140px;
+  max-width: 200px;
+  background: #1a1a18;
+  border: 0.5px solid #2c2c2a;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #888780;
+  outline: none;
+}
+.search-box::placeholder { color: #444441; }
+.search-box:focus { border-color: #444441; }
 
-    --col-todo-accent: #378ADD; --col-todo-bg: #042C53; --col-todo-text: #B5D4F4;
-    --col-progress-accent: #EF9F27; --col-progress-bg: #412402; --col-progress-text: #FAC775;
-    --col-done-accent: #639922; --col-done-bg: #173404; --col-done-text: #C0DD97;
-    --col-waiting-accent: #7F77DD; --col-waiting-bg: #26215C; --col-waiting-text: #CECBF6;
-    --col-boga-accent: #D85A30; --col-boga-bg: #4A1B0C; --col-boga-text: #F5C4B3;
+.brand-sel {
+  background: #1a1a18;
+  border: 0.5px solid #2c2c2a;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #888780;
+  outline: none;
+  cursor: pointer;
+}
 
-    --p-alta-bg: #501313; --p-alta-text: #F7C1C1;
-    --p-media-bg: #412402; --p-media-text: #FAC775;
-    --p-baja-bg: #173404; --p-baja-text: #C0DD97;
+.hbtn {
+  background: #1a1a18;
+  border: 0.5px solid #2c2c2a;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #5f5e5a;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.hbtn:hover { color: #888780; border-color: #444441; }
+.hbtn.on { color: #9FE1CB; border-color: #1D9E7540; background: #0d2820; }
 
-    --b-byd-bg: #04342C; --b-byd-text: #9FE1CB;
-    --b-bmw-bg: #042C53; --b-bmw-text: #B5D4F4;
-    --b-mini-bg: #412402; --b-mini-text: #FAC775;
-    --b-motorrad-bg: #4A1B0C; --b-motorrad-text: #F5C4B3;
-    --b-personal-bg: #2C2C2A; --b-personal-text: #D3D1C7;
-  }
+.header-right { display: flex; gap: 6px; align-items: center; margin-left: auto; }
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg); color: var(--text);
-    min-height: 100vh; transition: background 0.2s, color 0.2s;
-  }
+.summary { font-size: 10px; color: #2c2c2a; letter-spacing: 0.06em; }
+.summary span { color: #444441; }
 
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 1rem; padding: 1rem 1.5rem;
-    border-bottom: 0.5px solid var(--border); background: var(--surface);
-    flex-wrap: wrap;
-  }
+/* ── Board ── */
+.board {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+  overflow-x: auto;
+  min-height: calc(100vh - 52px);
+  align-items: flex-start;
+}
 
-  header h1 { font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
-  header .meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+/* ── Column ── */
+.col { flex: 1 1 0; min-width: 130px; overflow: visible; }
 
-  .header-center {
-    display: flex; gap: 8px; align-items: center;
-    flex: 1; min-width: 0; flex-wrap: wrap;
-  }
+.col-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
 
-  .search-wrap { position: relative; flex: 1; min-width: 160px; max-width: 240px; }
-  .search-wrap svg {
-    position: absolute; left: 9px; top: 50%;
-    transform: translateY(-50%); color: var(--text3); pointer-events: none;
-  }
-  .search-wrap input {
-    width: 100%; padding: 6px 10px 6px 30px;
-    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
-    background: var(--surface2); color: var(--text);
-    font-size: 13px; font-family: inherit; outline: none;
-  }
-  .search-wrap input:focus { border-color: var(--text3); }
-  .search-wrap input::placeholder { color: var(--text3); }
+.col-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.col-name { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #444441; flex: 1; }
+.col-count { font-size: 9px; color: #2c2c2a; }
 
-  .brand-filter {
-    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
-    padding: 5px 8px; font-size: 13px; font-family: inherit;
-    background: var(--surface2); color: var(--text);
-    outline: none; cursor: pointer;
-  }
+.col-actions-row { display: flex; gap: 5px; align-items: center; }
 
-  .header-actions { display: flex; gap: 6px; align-items: center; }
+.col-add-btn {
+  width: 20px; height: 20px;
+  background: none; border: 0.5px solid #2c2c2a;
+  border-radius: 3px; cursor: pointer;
+  color: #2c2c2a; font-size: 16px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.col-add-btn:hover { color: #888780; border-color: #444441; }
 
-  .icon-btn {
-    background: var(--surface2); border: 0.5px solid var(--border2);
-    border-radius: var(--radius-sm); padding: 6px 10px;
-    cursor: pointer; font-size: 13px; color: var(--text2);
-    transition: background 0.15s; line-height: 1; white-space: nowrap;
-  }
-  .icon-btn:hover { background: var(--border); }
-  .icon-btn.active { background: var(--col-todo-bg); color: var(--col-todo-text); border-color: var(--col-todo-accent); }
+.col-archive-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 9px; letter-spacing: 0.06em;
+  color: #2c2c2a; padding: 0;
+  transition: color 0.15s;
+}
+.col-archive-btn:hover { color: #3B6D11; }
 
-  .board {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.875rem; padding: 1.25rem 1.5rem; align-items: start;
-  }
+.cards { display: flex; flex-direction: column; gap: 9px; overflow: visible; align-items: center; }
 
-  .column {
-    background: var(--surface); border-radius: var(--radius);
-    border: 0.5px solid var(--border); overflow: hidden;
-  }
-  .column.drag-over { border-color: var(--border2); background: var(--surface2); }
+/* ── Cassette ── */
+.cassette {
+  width: 170px;
+  height: 92px;
+  position: relative;
+  cursor: grab;
+  transition: transform 0.18s ease, filter 0.18s;
+  flex-shrink: 0;
+}
+.cassette:active { cursor: grabbing; }
+.cassette:hover {
+  transform: translateY(-4px) rotate(0deg) translateX(0) !important;
+  filter: brightness(1.12);
+  z-index: 20;
+}
+.cassette.dragging { opacity: 0.35; }
 
-  .col-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0.75rem 0.875rem; border-bottom: 0.5px solid var(--border);
-  }
+.c-body {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.055);
+  position: relative;
+  overflow: hidden;
+}
 
-  .col-title { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
-  .col-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .count-badge { font-size: 11px; font-weight: 500; padding: 2px 6px; border-radius: 999px; margin-left: 2px; }
+/* Screws */
+.screw {
+  position: absolute;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #111110;
+  border: 0.5px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 3;
+}
+.screw::after {
+  content: '';
+  width: 4px; height: 0.5px;
+  background: rgba(255,255,255,0.1);
+  transform: rotate(45deg);
+}
+.screw.tl { top: 4px; left: 4px; }
+.screw.tr { top: 4px; right: 4px; }
+.screw.bl { bottom: 4px; left: 4px; }
+.screw.br { bottom: 4px; right: 4px; }
 
-  [data-col="todo"] .col-dot { background: var(--col-todo-accent); }
-  [data-col="todo"] .count-badge { background: var(--col-todo-bg); color: var(--col-todo-text); }
-  [data-col="progress"] .col-dot { background: var(--col-progress-accent); }
-  [data-col="progress"] .count-badge { background: var(--col-progress-bg); color: var(--col-progress-text); }
-  [data-col="done"] .col-dot { background: var(--col-done-accent); }
-  [data-col="done"] .count-badge { background: var(--col-done-bg); color: var(--col-done-text); }
-  [data-col="waiting"] .col-dot { background: var(--col-waiting-accent); }
-  [data-col="waiting"] .count-badge { background: var(--col-waiting-bg); color: var(--col-waiting-text); }
-  [data-col="boga"] .col-dot { background: var(--col-boga-accent); }
-  [data-col="boga"] .count-badge { background: var(--col-boga-bg); color: var(--col-boga-text); }
+/* Label */
+.c-label {
+  position: absolute;
+  top: 7px; left: 11px; right: 11px; bottom: 30px;
+  border-radius: 3px;
+  padding: 5px 7px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  z-index: 2;
+}
+.c-label::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 3px;
+  background: repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);
+  pointer-events: none;
+}
 
-  .col-actions { display: flex; gap: 4px; align-items: center; }
+.l-brand {
+  font-size: 7px; letter-spacing: 0.2em;
+  text-transform: uppercase; opacity: 0.6;
+  font-weight: 600; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
 
-  .add-btn {
-    background: none; border: none; cursor: pointer;
-    color: var(--text3); font-size: 20px; line-height: 1;
-    padding: 0 2px; transition: color 0.15s;
-  }
-  .add-btn:hover { color: var(--text); }
+.l-text {
+  font-family: 'Special Elite', serif;
+  font-size: 10.5px; line-height: 1.25;
+  flex: 1; display: flex; align-items: center;
+  padding: 2px 0; cursor: text;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
 
-  .archive-btn {
-    background: none; border: none; cursor: pointer;
-    color: var(--text3); font-size: 11px; padding: 2px 5px;
-    border-radius: 4px; transition: color 0.15s, background 0.15s; line-height: 1;
-  }
-  .archive-btn:hover { color: var(--col-done-text); background: var(--col-done-bg); }
+.l-badges { display: flex; gap: 3px; flex-wrap: wrap; }
 
-  .cards { padding: 0.5rem; display: flex; flex-direction: column; gap: 5px; min-height: 48px; }
+.lbadge {
+  font-size: 7px; padding: 1px 4px; border-radius: 2px;
+  letter-spacing: 0.06em; font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500; border: none; cursor: pointer; line-height: 1.4;
+}
+.lbadge.alta { background: #3d0f0f; color: #F7C1C1; }
+.lbadge.media { background: #2e1a00; color: #FAC775; }
+.lbadge.baja { background: #122009; color: #C0DD97; }
+.lbadge.wait-pending { background: #1e1a3d; color: #CECBF6; cursor: pointer; }
+.lbadge.wait-sent { background: #122009; color: #C0DD97; cursor: pointer; }
 
-  .card {
-    background: var(--surface); border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm); padding: 0.5rem 0.625rem;
-    cursor: grab; transition: border-color 0.15s, opacity 0.15s; user-select: none;
-  }
-  .card:hover { border-color: var(--border2); }
-  .card.dragging { opacity: 0.4; cursor: grabbing; }
-  .card.archived { opacity: 0.5; }
+/* Bottom window */
+.c-bottom {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 28px;
+  display: flex; align-items: center;
+  z-index: 2;
+}
 
-  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
-  .card-text { font-size: 13px; line-height: 1.45; word-break: break-word; flex: 1; cursor: text; }
+.c-notch {
+  width: 20px; height: 17px;
+  border-radius: 3px 3px 0 0;
+  flex-shrink: 0;
+}
 
-  .card-btns { display: flex; gap: 3px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
-  .card:hover .card-btns { opacity: 1; }
+.c-win {
+  flex: 1; height: 19px;
+  margin: 0 3px;
+  border-radius: 3px;
+  display: flex; align-items: center;
+  justify-content: space-around;
+  padding: 0 7px;
+  position: relative;
+}
 
-  .card-btn {
-    background: none; border: none; cursor: pointer;
-    color: var(--text3); font-size: 12px; padding: 0; line-height: 1; transition: color 0.15s;
-  }
-  .card-btn:hover { color: var(--text); }
-  .card-btn.del:hover { color: var(--danger); }
+.c-tape {
+  position: absolute;
+  left: 20px; right: 20px;
+  top: 50%; height: 1.5px;
+  transform: translateY(-50%);
+  opacity: 0.25;
+}
 
-  .card-meta { display: flex; align-items: center; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+.reel {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; z-index: 1; flex-shrink: 0;
+}
+.reel::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.reel.spin { animation: rspin 1.8s linear infinite; }
+@keyframes rspin { to { transform: rotate(360deg); } }
 
-  .badge {
-    font-size: 10px; font-weight: 500;
-    padding: 2px 5px; border-radius: 999px;
-    text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap;
-  }
-  .badge.alta { background: var(--p-alta-bg); color: var(--p-alta-text); }
-  .badge.media { background: var(--p-media-bg); color: var(--p-media-text); }
-  .badge.baja { background: var(--p-baja-bg); color: var(--p-baja-text); }
-  .badge.BYD { background: var(--b-byd-bg); color: var(--b-byd-text); }
-  .badge.BMW { background: var(--b-bmw-bg); color: var(--b-bmw-text); }
-  .badge.MINI { background: var(--b-mini-bg); color: var(--b-mini-text); }
-  .badge.MOTORRAD { background: var(--b-motorrad-bg); color: var(--b-motorrad-text); }
-  .badge.PERSONAL { background: var(--b-personal-bg); color: var(--b-personal-text); }
+/* Card action buttons (hover) */
+.c-btns {
+  position: absolute;
+  top: 4px; right: 20px;
+  display: flex; gap: 3px;
+  opacity: 0; transition: opacity 0.15s;
+  z-index: 10;
+}
+.cassette:hover .c-btns { opacity: 1; }
 
-  .card-date { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 3px; }
-  .card-date.overdue { color: var(--danger); }
+.cbtn {
+  width: 16px; height: 16px;
+  background: rgba(0,0,0,0.7);
+  border: 0.5px solid rgba(255,255,255,0.1);
+  border-radius: 2px;
+  cursor: pointer; color: #888780;
+  font-size: 9px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.cbtn:hover { color: #d3d1c7; background: rgba(0,0,0,0.9); }
+.cbtn.del:hover { color: #F7C1C1; }
 
-  .wait-status {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10px; font-weight: 500; padding: 3px 7px;
-    border-radius: 999px; cursor: pointer; border: none;
-    letter-spacing: 0.02em; transition: opacity 0.15s; white-space: nowrap;
-    user-select: none;
-  }
-  .wait-status.pending {
-    background: var(--col-waiting-bg); color: var(--col-waiting-text);
-    border: 0.5px dashed var(--col-waiting-accent);
-  }
-  .wait-status.sent {
-    background: var(--col-done-bg); color: var(--col-done-text);
-  }
-  .wait-status:hover { opacity: 0.75; }
+/* Done cassettes */
+.cassette.done-card { opacity: 0.3; }
+.cassette.done-card .c-body { border-style: dashed; }
+.cassette.done-card .reel { border-color: rgba(255,255,255,0.06); }
 
-  .edit-form { display: flex; flex-direction: column; gap: 5px; }
-  .edit-form textarea {
-    width: 100%; border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
-    padding: 6px 8px; font-size: 13px; font-family: inherit;
-    resize: none; background: var(--surface2); color: var(--text); outline: none;
-  }
-  .edit-form textarea:focus { border-color: var(--text3); }
+/* Brand color themes */
+.byd .c-body { background: linear-gradient(145deg,#0f2f1e,#163d27); }
+.byd .c-label { background: #1d4d35; } .byd .l-brand,.byd .l-text { color: #A8EDD5; }
+.byd .c-notch { background: #0f2f1e; } .byd .c-win { background: #091a10; border: 0.5px solid rgba(29,158,117,.3); }
+.byd .reel { border-color: rgba(29,158,117,.6); } .byd .c-tape { background: #1D9E75; }
 
-  .edit-row { display: flex; gap: 5px; }
-  .form-select, .form-date {
-    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
-    padding: 5px 6px; font-size: 12px; font-family: inherit;
-    background: var(--surface2); color: var(--text); outline: none; cursor: pointer; flex: 1;
-  }
+.bmw .c-body { background: linear-gradient(145deg,#0a1f36,#0d2847); }
+.bmw .c-label { background: #112f54; } .bmw .l-brand,.bmw .l-text { color: #C2DDFA; }
+.bmw .c-notch { background: #0a1f36; } .bmw .c-win { background: #071422; border: 0.5px solid rgba(55,138,221,.3); }
+.bmw .reel { border-color: rgba(55,138,221,.6); } .bmw .c-tape { background: #378ADD; }
 
-  .edit-actions { display: flex; gap: 5px; }
-  .btn-save {
-    flex: 1; padding: 6px 10px; background: var(--text); color: var(--surface);
-    border: none; border-radius: var(--radius-sm); font-size: 12px;
-    font-family: inherit; cursor: pointer; font-weight: 500; transition: opacity 0.15s;
-  }
-  .btn-save:hover { opacity: 0.85; }
-  .btn-cancel {
-    padding: 6px 10px; background: none; color: var(--text2);
-    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
-    font-size: 12px; font-family: inherit; cursor: pointer; transition: background 0.15s;
-  }
-  .btn-cancel:hover { background: var(--surface2); }
+.mini .c-body { background: linear-gradient(145deg,#251800,#2f2000); }
+.mini .c-label { background: #3d2b00; } .mini .l-brand,.mini .l-text { color: #FBCF82; }
+.mini .c-notch { background: #251800; } .mini .c-win { background: #160e00; border: 0.5px solid rgba(186,117,23,.3); }
+.mini .reel { border-color: rgba(186,117,23,.6); } .mini .c-tape { background: #BA7517; }
 
-  .add-form { padding: 0.5rem; border-top: 0.5px solid var(--border); display: none; }
-  .add-form.open { display: block; }
+.motorrad .c-body { background: linear-gradient(145deg,#280c0c,#341010); }
+.motorrad .c-label { background: #4a1410; } .motorrad .l-brand,.motorrad .l-text { color: #F8CABC; }
+.motorrad .c-notch { background: #280c0c; } .motorrad .c-win { background: #180808; border: 0.5px solid rgba(216,90,48,.3); }
+.motorrad .reel { border-color: rgba(216,90,48,.6); } .motorrad .c-tape { background: #D85A30; }
 
-  .empty-state { text-align: center; color: var(--text3); font-size: 12px; padding: 0.5rem 0; }
+.personal .c-body { background: linear-gradient(145deg,#1e1e1c,#252523); }
+.personal .c-label { background: #2e2e2c; } .personal .l-brand,.personal .l-text { color: #E0DED5; }
+.personal .c-notch { background: #1e1e1c; } .personal .c-win { background: #141412; border: 0.5px solid rgba(95,94,90,.3); }
+.personal .reel { border-color: rgba(95,94,90,.6); } .personal .c-tape { background: #5F5E5A; }
 
-  @media (max-width: 1100px) { .board { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 750px) { .board { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 520px) { .board { grid-template-columns: 1fr; } }
+/* ── Add form (blank cassette style) ── */
+.add-form {
+  display: none;
+  background: #161614;
+  border: 0.5px dashed #2c2c2a;
+  border-radius: 5px;
+  padding: 10px;
+}
+.add-form.open { display: block; }
+
+.add-form textarea {
+  width: 100%; background: #1a1a18;
+  border: 0.5px solid #2c2c2a; border-radius: 3px;
+  padding: 6px 8px; font-size: 11px;
+  font-family: 'Special Elite', serif;
+  color: #d3d1c7; outline: none; resize: none;
+  line-height: 1.4;
+}
+.add-form textarea:focus { border-color: #444441; }
+.add-form textarea::placeholder { color: #2c2c2a; font-family: 'IBM Plex Mono', monospace; }
+
+.add-form select, .add-form input[type="date"] {
+  width: 100%; background: #1a1a18;
+  border: 0.5px solid #2c2c2a; border-radius: 3px;
+  padding: 4px 6px; font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #888780; outline: none; cursor: pointer;
+  margin-top: 5px;
+}
+.add-form select:focus, .add-form input[type="date"]:focus { border-color: #444441; }
+
+.form-row { display: flex; gap: 4px; margin-top: 5px; }
+.form-row select { margin-top: 0; }
+
+.form-btns { display: flex; gap: 4px; margin-top: 7px; }
+.fbtn-ok {
+  flex: 1; padding: 5px; background: #252523;
+  border: 0.5px solid #444441; border-radius: 3px;
+  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
+  color: #888780; cursor: pointer; letter-spacing: 0.06em;
+  transition: all 0.12s;
+}
+.fbtn-ok:hover { background: #2c2c2a; color: #d3d1c7; }
+
+.fbtn-cancel {
+  padding: 5px 8px; background: none;
+  border: 0.5px solid #2c2c2a; border-radius: 3px;
+  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
+  color: #444441; cursor: pointer;
+  transition: all 0.12s;
+}
+.fbtn-cancel:hover { color: #888780; }
+
+/* ── Inline edit ── */
+.c-edit-wrap {
+  position: absolute; inset: 0;
+  background: #1a1a18;
+  border-radius: 5px;
+  border: 0.5px solid #444441;
+  padding: 8px;
+  display: flex; flex-direction: column; gap: 4px;
+  z-index: 30;
+}
+.c-edit-wrap textarea {
+  width: 100%; background: #111110;
+  border: 0.5px solid #2c2c2a; border-radius: 3px;
+  padding: 4px 6px; font-size: 10.5px;
+  font-family: 'Special Elite', serif;
+  color: #d3d1c7; outline: none; resize: none;
+  flex: 1;
+}
+.c-edit-wrap textarea:focus { border-color: #5f5e5a; }
+.c-edit-row { display: flex; gap: 3px; }
+.c-edit-sel {
+  flex: 1; background: #111110;
+  border: 0.5px solid #2c2c2a; border-radius: 3px;
+  padding: 3px 4px; font-size: 9px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #888780; outline: none; cursor: pointer;
+}
+.c-edit-date {
+  flex: 1; background: #111110;
+  border: 0.5px solid #2c2c2a; border-radius: 3px;
+  padding: 3px 4px; font-size: 9px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #888780; outline: none; cursor: pointer;
+}
+.c-edit-assignee {
+  width: 100%; background: #111110;
+  border: 0.5px solid #2c2c2a; border-radius: 3px;
+  padding: 3px 6px; font-size: 9px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #888780; outline: none;
+}
+.c-edit-assignee::placeholder { color: #2c2c2a; }
+.c-edit-btns { display: flex; gap: 3px; }
+.c-edit-save {
+  flex: 1; background: #252523;
+  border: 0.5px solid #5f5e5a; border-radius: 3px;
+  font-size: 9px; font-family: 'IBM Plex Mono', monospace;
+  color: #888780; cursor: pointer; padding: 3px;
+  transition: all 0.12s;
+}
+.c-edit-save:hover { color: #d3d1c7; }
+.c-edit-cancel {
+  background: none; border: 0.5px solid #2c2c2a; border-radius: 3px;
+  font-size: 9px; font-family: 'IBM Plex Mono', monospace;
+  color: #444441; cursor: pointer; padding: 3px 6px;
+}
+
+/* ── Drop zone highlight ── */
+.col.drag-over .cards { outline: 1px dashed #444441; border-radius: 4px; outline-offset: 4px; }
+
+/* ── Empty state ── */
+.empty { font-size: 9px; color: #252523; letter-spacing: 0.1em; text-align: center; padding: 10px 0; }
 </style>
 </head>
 <body>
+
 <header>
-  <div style="flex-shrink:0">
-    <h1>Mis prioridades</h1>
-    <div class="meta" id="task-summary">cargando...</div>
-  </div>
-  <div class="header-center">
-    <div class="search-wrap">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="search" placeholder="Buscar tarea...">
-    </div>
-    <select class="brand-filter" id="brand-filter">
-      <option value="">Todas las marcas</option>
-      <option value="BYD">BYD</option>
-      <option value="BMW">BMW</option>
-      <option value="MINI">MINI</option>
-      <option value="MOTORRAD">MOTORRAD</option>
-      <option value="PERSONAL">PERSONAL</option>
-    </select>
-  </div>
-  <div class="header-actions">
-    <button class="icon-btn" id="toggle-archived">Ver archivadas</button>
-    <button class="icon-btn" id="theme-toggle">🌙</button>
+  <div class="logo">mis <span>prioridades</span></div>
+  <input class="search-box" id="search" type="text" placeholder="buscar...">
+  <select class="brand-sel" id="brand-filter">
+    <option value="">todas las marcas</option>
+    <option value="BYD">BYD</option>
+    <option value="BMW">BMW</option>
+    <option value="MINI">MINI</option>
+    <option value="MOTORRAD">MOTORRAD</option>
+    <option value="PERSONAL">PERSONAL</option>
+  </select>
+  <div class="header-right">
+    <button class="hbtn" id="toggle-archived">ver archivadas</button>
+    <div class="summary" id="summary">—</div>
   </div>
 </header>
 
 <div class="board">
 
-  <div class="column" data-col="todo">
-    <div class="col-header">
-      <div class="col-title">
-        <span class="col-dot"></span>Por hacer
-        <span class="count-badge" data-count="todo">0</span>
-      </div>
-      <div class="col-actions">
-        <button class="add-btn" data-target="todo">+</button>
+  <div class="col" data-col="todo">
+    <div class="col-head">
+      <div class="col-dot" style="background:#185FA5"></div>
+      <div class="col-name">por hacer</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-count="todo">0</div>
+        <button class="col-add-btn" data-target="todo">+</button>
       </div>
     </div>
     <div class="cards" id="cards-todo"></div>
     <div class="add-form" id="form-todo">
-      <div class="edit-form">
-        <textarea placeholder="Nueva tarea..." rows="2" id="text-todo"></textarea>
-        <div class="edit-row">
-          <select class="form-select" id="brand-todo">
-            <option value="">Sin marca</option>
-            <option value="BYD">BYD</option>
-            <option value="BMW">BMW</option>
-            <option value="MINI">MINI</option>
-            <option value="MOTORRAD">MOTORRAD</option>
-            <option value="PERSONAL">PERSONAL</option>
-          </select>
-          <select class="form-select" id="priority-todo">
-            <option value="">Sin prioridad</option>
-            <option value="alta">🔴 Alta</option>
-            <option value="media">🟡 Media</option>
-            <option value="baja">🟢 Baja</option>
-          </select>
-        </div>
-        <input type="date" class="form-date" id="date-todo">
-        <div class="edit-actions">
-          <button class="btn-save" data-col="todo">Agregar</button>
-          <button class="btn-cancel" data-target="todo">Cancelar</button>
-        </div>
+      <textarea id="text-todo" rows="2" placeholder="nueva tarea..."></textarea>
+      <div class="form-row">
+        <select id="brand-todo"><option value="">sin marca</option><option value="BYD">BYD</option><option value="BMW">BMW</option><option value="MINI">MINI</option><option value="MOTORRAD">MOTORRAD</option><option value="PERSONAL">PERSONAL</option></select>
+        <select id="priority-todo"><option value="">prioridad</option><option value="alta">🔴 alta</option><option value="media">🟡 media</option><option value="baja">🟢 baja</option></select>
+      </div>
+      <input type="date" id="date-todo">
+      <div class="form-btns">
+        <button class="fbtn-ok" data-add="todo">agregar</button>
+        <button class="fbtn-cancel" data-close="todo">✕</button>
       </div>
     </div>
   </div>
 
-  <div class="column" data-col="boga">
-    <div class="col-header">
-      <div class="col-title">
-        <span class="col-dot"></span>En Boga
-        <span class="count-badge" data-count="boga">0</span>
-      </div>
-      <div class="col-actions">
-        <button class="add-btn" data-target="boga">+</button>
+  <div class="col" data-col="boga">
+    <div class="col-head">
+      <div class="col-dot" style="background:#993C1D"></div>
+      <div class="col-name">en boga</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-count="boga">0</div>
+        <button class="col-add-btn" data-target="boga">+</button>
       </div>
     </div>
     <div class="cards" id="cards-boga"></div>
     <div class="add-form" id="form-boga">
-      <div class="edit-form">
-        <textarea placeholder="Tarea de hoy..." rows="2" id="text-boga"></textarea>
-        <div class="edit-row">
-          <select class="form-select" id="brand-boga">
-            <option value="">Sin marca</option>
-            <option value="BYD">BYD</option>
-            <option value="BMW">BMW</option>
-            <option value="MINI">MINI</option>
-            <option value="MOTORRAD">MOTORRAD</option>
-            <option value="PERSONAL">PERSONAL</option>
-          </select>
-          <select class="form-select" id="priority-boga">
-            <option value="">Sin prioridad</option>
-            <option value="alta">🔴 Alta</option>
-            <option value="media">🟡 Media</option>
-            <option value="baja">🟢 Baja</option>
-          </select>
-        </div>
-        <input type="date" class="form-date" id="date-boga">
-        <div class="edit-actions">
-          <button class="btn-save" data-col="boga">Agregar</button>
-          <button class="btn-cancel" data-target="boga">Cancelar</button>
-        </div>
+      <textarea id="text-boga" rows="2" placeholder="tarea de hoy..."></textarea>
+      <div class="form-row">
+        <select id="brand-boga"><option value="">sin marca</option><option value="BYD">BYD</option><option value="BMW">BMW</option><option value="MINI">MINI</option><option value="MOTORRAD">MOTORRAD</option><option value="PERSONAL">PERSONAL</option></select>
+        <select id="priority-boga"><option value="">prioridad</option><option value="alta">🔴 alta</option><option value="media">🟡 media</option><option value="baja">🟢 baja</option></select>
+      </div>
+      <input type="date" id="date-boga">
+      <div class="form-btns">
+        <button class="fbtn-ok" data-add="boga">agregar</button>
+        <button class="fbtn-cancel" data-close="boga">✕</button>
       </div>
     </div>
   </div>
 
-  <div class="column" data-col="progress">
-    <div class="col-header">
-      <div class="col-title">
-        <span class="col-dot"></span>En progreso
-        <span class="count-badge" data-count="progress">0</span>
-      </div>
-      <div class="col-actions">
-        <button class="add-btn" data-target="progress">+</button>
+  <div class="col" data-col="progress">
+    <div class="col-head">
+      <div class="col-dot" style="background:#BA7517"></div>
+      <div class="col-name">en progreso</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-count="progress">0</div>
+        <button class="col-add-btn" data-target="progress">+</button>
       </div>
     </div>
     <div class="cards" id="cards-progress"></div>
     <div class="add-form" id="form-progress">
-      <div class="edit-form">
-        <textarea placeholder="Nueva tarea..." rows="2" id="text-progress"></textarea>
-        <div class="edit-row">
-          <select class="form-select" id="brand-progress">
-            <option value="">Sin marca</option>
-            <option value="BYD">BYD</option>
-            <option value="BMW">BMW</option>
-            <option value="MINI">MINI</option>
-            <option value="MOTORRAD">MOTORRAD</option>
-            <option value="PERSONAL">PERSONAL</option>
-          </select>
-          <select class="form-select" id="priority-progress">
-            <option value="">Sin prioridad</option>
-            <option value="alta">🔴 Alta</option>
-            <option value="media">🟡 Media</option>
-            <option value="baja">🟢 Baja</option>
-          </select>
-        </div>
-        <input type="date" class="form-date" id="date-progress">
-        <div class="edit-actions">
-          <button class="btn-save" data-col="progress">Agregar</button>
-          <button class="btn-cancel" data-target="progress">Cancelar</button>
-        </div>
+      <textarea id="text-progress" rows="2" placeholder="nueva tarea..."></textarea>
+      <div class="form-row">
+        <select id="brand-progress"><option value="">sin marca</option><option value="BYD">BYD</option><option value="BMW">BMW</option><option value="MINI">MINI</option><option value="MOTORRAD">MOTORRAD</option><option value="PERSONAL">PERSONAL</option></select>
+        <select id="priority-progress"><option value="">prioridad</option><option value="alta">🔴 alta</option><option value="media">🟡 media</option><option value="baja">🟢 baja</option></select>
+      </div>
+      <input type="date" id="date-progress">
+      <div class="form-btns">
+        <button class="fbtn-ok" data-add="progress">agregar</button>
+        <button class="fbtn-cancel" data-close="progress">✕</button>
       </div>
     </div>
   </div>
 
-  <div class="column" data-col="waiting">
-    <div class="col-header">
-      <div class="col-title">
-        <span class="col-dot"></span>Esperando
-        <span class="count-badge" data-count="waiting">0</span>
-      </div>
-      <div class="col-actions">
-        <button class="add-btn" data-target="waiting">+</button>
+  <div class="col" data-col="waiting">
+    <div class="col-head">
+      <div class="col-dot" style="background:#534AB7"></div>
+      <div class="col-name">esperando</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-count="waiting">0</div>
+        <button class="col-add-btn" data-target="waiting">+</button>
       </div>
     </div>
     <div class="cards" id="cards-waiting"></div>
     <div class="add-form" id="form-waiting">
-      <div class="edit-form">
-        <textarea placeholder="¿Qué estás esperando?" rows="2" id="text-waiting"></textarea>
-        <input type="text" class="form-date" id="assignee-waiting" placeholder="¿Quién lo tiene? (nombre)">
-        <div class="edit-row">
-          <select class="form-select" id="brand-waiting">
-            <option value="">Sin marca</option>
-            <option value="BYD">BYD</option>
-            <option value="BMW">BMW</option>
-            <option value="MINI">MINI</option>
-            <option value="MOTORRAD">MOTORRAD</option>
-            <option value="PERSONAL">PERSONAL</option>
-          </select>
-          <select class="form-select" id="priority-waiting">
-            <option value="">Sin prioridad</option>
-            <option value="alta">🔴 Alta</option>
-            <option value="media">🟡 Media</option>
-            <option value="baja">🟢 Baja</option>
-          </select>
-        </div>
-        <input type="date" class="form-date" id="date-waiting">
-        <div class="edit-actions">
-          <button class="btn-save" data-col="waiting">Agregar</button>
-          <button class="btn-cancel" data-target="waiting">Cancelar</button>
-        </div>
+      <textarea id="text-waiting" rows="2" placeholder="¿qué estás esperando?"></textarea>
+      <input type="text" id="assignee-waiting" placeholder="¿quién lo tiene?" style="width:100%;background:#1a1a18;border:0.5px solid #2c2c2a;border-radius:3px;padding:4px 6px;font-size:10px;font-family:'IBM Plex Mono',monospace;color:#888780;outline:none;margin-top:5px;">
+      <div class="form-row">
+        <select id="brand-waiting"><option value="">sin marca</option><option value="BYD">BYD</option><option value="BMW">BMW</option><option value="MINI">MINI</option><option value="MOTORRAD">MOTORRAD</option><option value="PERSONAL">PERSONAL</option></select>
+        <select id="priority-waiting"><option value="">prioridad</option><option value="alta">🔴 alta</option><option value="media">🟡 media</option><option value="baja">🟢 baja</option></select>
+      </div>
+      <input type="date" id="date-waiting">
+      <div class="form-btns">
+        <button class="fbtn-ok" data-add="waiting">agregar</button>
+        <button class="fbtn-cancel" data-close="waiting">✕</button>
       </div>
     </div>
   </div>
 
-  <div class="column" data-col="done">
-    <div class="col-header">
-      <div class="col-title">
-        <span class="col-dot"></span>Hecho
-        <span class="count-badge" data-count="done">0</span>
-      </div>
-      <div class="col-actions">
-        <button class="archive-btn" data-archive-col="done">Archivar todo</button>
-        <button class="add-btn" data-target="done">+</button>
+  <div class="col" data-col="done">
+    <div class="col-head">
+      <div class="col-dot" style="background:#3B6D11"></div>
+      <div class="col-name">hecho</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-count="done">0</div>
+        <button class="col-archive-btn" data-archive-col="done">archivar todo</button>
+        <button class="col-add-btn" data-target="done">+</button>
       </div>
     </div>
     <div class="cards" id="cards-done"></div>
     <div class="add-form" id="form-done">
-      <div class="edit-form">
-        <textarea placeholder="Nueva tarea..." rows="2" id="text-done"></textarea>
-        <div class="edit-row">
-          <select class="form-select" id="brand-done">
-            <option value="">Sin marca</option>
-            <option value="BYD">BYD</option>
-            <option value="BMW">BMW</option>
-            <option value="MINI">MINI</option>
-            <option value="MOTORRAD">MOTORRAD</option>
-            <option value="PERSONAL">PERSONAL</option>
-          </select>
-          <select class="form-select" id="priority-done">
-            <option value="">Sin prioridad</option>
-            <option value="alta">🔴 Alta</option>
-            <option value="media">🟡 Media</option>
-            <option value="baja">🟢 Baja</option>
-          </select>
-        </div>
-        <input type="date" class="form-date" id="date-done">
-        <div class="edit-actions">
-          <button class="btn-save" data-col="done">Agregar</button>
-          <button class="btn-cancel" data-target="done">Cancelar</button>
-        </div>
+      <textarea id="text-done" rows="2" placeholder="nueva tarea..."></textarea>
+      <div class="form-row">
+        <select id="brand-done"><option value="">sin marca</option><option value="BYD">BYD</option><option value="BMW">BMW</option><option value="MINI">MINI</option><option value="MOTORRAD">MOTORRAD</option><option value="PERSONAL">PERSONAL</option></select>
+        <select id="priority-done"><option value="">prioridad</option><option value="alta">🔴 alta</option><option value="media">🟡 media</option><option value="baja">🟢 baja</option></select>
+      </div>
+      <input type="date" id="date-done">
+      <div class="form-btns">
+        <button class="fbtn-ok" data-add="done">agregar</button>
+        <button class="fbtn-cancel" data-close="done">✕</button>
       </div>
     </div>
   </div>
@@ -496,248 +598,284 @@
 </div>
 
 <script>
-const COLS = ['todo', 'boga', 'progress', 'waiting', 'done'];
-let tasks = [];
-let saveTimer = null;
-let showArchived = false;
-let searchQuery = '';
-let brandFilter = '';
+const COLS = ['todo','boga','progress','waiting','done'];
+const PRIO = { alta:0, media:1, baja:2, '':3 };
+const BRAND_CLASS = { BYD:'byd', BMW:'bmw', MINI:'mini', MOTORRAD:'motorrad', PERSONAL:'personal', '':'personal' };
+
+let tasks = [], saveTimer = null, showArchived = false, searchQ = '', brandF = '';
 
 async function load() {
-  try {
-    const res = await fetch('/api/tasks');
-    tasks = await res.json();
-  } catch { tasks = []; }
+  try { const r = await fetch('/api/tasks'); tasks = await r.json(); }
+  catch { tasks = []; }
   render();
 }
 
 function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
-    try {
-      await fetch('/api/tasks', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tasks, null, 2)
-      });
-    } catch { console.error('Error guardando'); }
+    try { await fetch('/api/tasks', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(tasks, null, 2) }); }
+    catch { console.error('Error guardando'); }
   }, 400);
 }
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
-function formatDate(d) {
-  if (!d) return '';
-  const [y, m, day] = d.split('-');
-  return `${day}/${m}/${y}`;
+function mhash(s, seed) {
+  let h = seed >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    let c = s.charCodeAt(i);
+    c = Math.imul(c, 0xcc9e2d51) >>> 0;
+    c = ((c << 15) | (c >>> 17)) >>> 0;
+    c = Math.imul(c, 0x1b873593) >>> 0;
+    h ^= c;
+    h = ((h << 13) | (h >>> 19)) >>> 0;
+    h = (Math.imul(h, 5) + 0xe6546b64) >>> 0;
+  }
+  h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b) >>> 0;
+  h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35) >>> 0;
+  return (h ^ h >>> 16) >>> 0;
 }
 
-function isOverdue(d) {
-  if (!d) return false;
-  return new Date(d + 'T23:59:59') < new Date();
+function rot(id) {
+  return ((mhash(id, 1) % 80) - 40) / 10; // -4 to +4 deg
+}
+
+function offsetX(id) {
+  return ((mhash(id, 7) >>> 27) * 24 / 31) - 12; // -12 to +12 px via translateX
 }
 
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function matches(task) {
-  if (!showArchived && task.archived) return false;
-  if (brandFilter && task.brand !== brandFilter) return false;
-  if (searchQuery && !task.text.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+function fmtDate(d) {
+  if (!d) return '';
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+function overdue(d) { return d && new Date(d+'T23:59:59') < new Date(); }
+
+function matches(t) {
+  if (!showArchived && t.archived) return false;
+  if (brandF && t.brand !== brandF) return false;
+  if (searchQ && !t.text.toLowerCase().includes(searchQ.toLowerCase())) return false;
   return true;
+}
+
+function cassette(task) {
+  const cls = BRAND_CLASS[task.brand || ''] || 'personal';
+  const inProgress = task.col === 'progress';
+  const isDone = task.col === 'done';
+  const isWaiting = task.col === 'waiting';
+
+  const brandLabel = isWaiting && task.assignee
+    ? (task.brand ? `${task.brand} · ${task.assignee}` : `· ${task.assignee}`)
+    : (task.brand || '');
+
+  const priBadge = task.priority
+    ? `<span class="lbadge ${esc(task.priority)}">${esc(task.priority)}</span>` : '';
+
+  const waitBadge = isWaiting
+    ? `<button class="lbadge wait-${task.waitStatus === 'sent' ? 'sent' : 'pending'}" data-toggle-wait="${esc(task.id)}">${task.waitStatus === 'sent' ? '✓ enviada' : '· por enviar'}</button>` : '';
+
+  const dateBadge = task.date
+    ? `<span class="lbadge" style="background:#1a1a18;color:${overdue(task.date)?'#F7C1C1':'#444441'}">${fmtDate(task.date)}${overdue(task.date)?' !'  :''}</span>` : '';
+
+  return `
+    <div class="cassette ${cls}${isDone ? ' done-card' : ''}"
+         data-id="${esc(task.id)}"
+         draggable="${task.archived ? 'false' : 'true'}"
+         style="transform:rotate(${rot(task.id)}deg) translateX(${offsetX(task.id).toFixed(1)}px)">
+      <div class="c-body">
+        <div class="screw tl"></div><div class="screw tr"></div>
+        <div class="screw bl"></div><div class="screw br"></div>
+        <div class="c-label">
+          <div class="l-brand">${esc(brandLabel)}</div>
+          <div class="l-text" data-edit="${esc(task.id)}">${esc(task.text)}</div>
+          <div class="l-badges">${waitBadge}${priBadge}${dateBadge}</div>
+        </div>
+        <div class="c-bottom">
+          <div class="c-notch"></div>
+          <div class="c-win">
+            <div class="c-tape"></div>
+            <div class="reel${inProgress?' spin':''}"></div>
+            <div class="reel${inProgress?' spin':''}"></div>
+          </div>
+          <div class="c-notch"></div>
+        </div>
+      </div>
+      <div class="c-btns">
+        <button class="cbtn" data-archive="${esc(task.id)}" title="${task.archived?'desarchivar':'archivar'}">${task.archived?'↩':'⊘'}</button>
+        <button class="cbtn del" data-delete="${esc(task.id)}" title="eliminar">✕</button>
+      </div>
+    </div>`;
 }
 
 function render() {
   COLS.forEach(col => {
-    const container = document.getElementById('cards-' + col);
-    const PRIO = { alta: 0, media: 1, baja: 2, '': 3 };
     const colTasks = tasks.filter(t => t.col === col);
-    const visible = colTasks.filter(matches).sort((a, b) => (PRIO[a.priority||''] ?? 3) - (PRIO[b.priority||''] ?? 3));
+    const visible = colTasks.filter(matches)
+      .sort((a,b) => (PRIO[a.priority||'']??3) - (PRIO[b.priority||'']??3));
 
-    container.innerHTML = '';
-
-    if (!visible.length) {
-      container.innerHTML = '<p class="empty-state">Vacío</p>';
-    } else {
-      visible.forEach(task => {
-        const card = document.createElement('div');
-        card.className = 'card' + (task.archived ? ' archived' : '');
-        card.draggable = !task.archived;
-        card.dataset.id = task.id;
-
-        const brandBadge = task.brand
-          ? `<span class="badge ${esc(task.brand)}">${esc(task.brand)}</span>` : '';
-        const priBadge = task.priority
-          ? `<span class="badge ${esc(task.priority)}">${esc(task.priority)}</span>` : '';
-        const dateSpan = task.date
-          ? `<span class="card-date ${isOverdue(task.date) ? 'overdue' : ''}">
-               <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M5 1v4M11 1v4M1 7h14" stroke-linecap="round"/></svg>
-               ${formatDate(task.date)}${isOverdue(task.date) ? ' · vencida' : ''}
-             </span>` : '';
-
-        const waitBadge = task.col === 'waiting'
-          ? (() => {
-              const sent = task.waitStatus === 'sent';
-              const assigneeHtml = task.assignee
-                ? `<span class="badge PERSONAL" style="background:var(--surface2);color:var(--text2);">👤 ${esc(task.assignee)}</span>` : '';
-              return `<button class="wait-status ${sent ? 'sent' : 'pending'}" data-toggle-wait="${esc(task.id)}">${sent ? '✓ Enviada' : '· Por enviar'}</button>${assigneeHtml}`;
-            })()
-          : '';
-
-        const meta = (brandBadge || priBadge || dateSpan || waitBadge)
-          ? `<div class="card-meta">${waitBadge}${brandBadge}${priBadge}${dateSpan}</div>` : '';
-
-        card.innerHTML = `
-          <div class="card-top">
-            <span class="card-text" data-edit="${esc(task.id)}">${esc(task.text)}</span>
-            <div class="card-btns">
-              <button class="card-btn" data-archive="${esc(task.id)}" title="${task.archived ? 'Desarchivar' : 'Archivar'}">${task.archived ? '↩' : '⊘'}</button>
-              <button class="card-btn del" data-delete="${esc(task.id)}" title="Eliminar">✕</button>
-            </div>
-          </div>
-          ${meta}
-        `;
-
-        card.addEventListener('dragstart', onDragStart);
-        card.addEventListener('dragend', onDragEnd);
-        container.appendChild(card);
-      });
-    }
+    const container = document.getElementById('cards-' + col);
+    container.innerHTML = visible.length
+      ? visible.map(cassette).join('')
+      : '<div class="empty">vacío</div>';
 
     document.querySelector(`[data-count="${col}"]`).textContent =
       colTasks.filter(t => !t.archived).length;
+
+    container.querySelectorAll('.cassette').forEach(el => {
+      el.addEventListener('dragstart', onDragStart);
+      el.addEventListener('dragend', onDragEnd);
+    });
   });
 
   const active = tasks.filter(t => !t.archived);
   const done = active.filter(t => t.col === 'done').length;
-  document.getElementById('task-summary').textContent =
-    active.length === 0 ? 'Sin tareas' : `${done} de ${active.length} completada${done !== 1 ? 's' : ''}`;
+  document.getElementById('summary').innerHTML =
+    active.length === 0 ? '—' : `<span>${done}</span> / ${active.length}`;
 }
 
-function openEditInline(id) {
+function openEdit(id) {
   const task = tasks.find(t => t.id === id);
   if (!task) return;
-  const card = document.querySelector(`.card[data-id="${id}"]`);
+  const card = document.querySelector(`.cassette[data-id="${id}"]`);
   if (!card) return;
   card.draggable = false;
-  card.innerHTML = `
-    <div class="edit-form">
-      <textarea id="ei-text-${id}" rows="2">${esc(task.text)}</textarea>
-      <div class="edit-row">
-        <select class="form-select" id="ei-brand-${id}">
-          <option value="" ${!task.brand?'selected':''}>Sin marca</option>
-          <option value="BYD" ${task.brand==='BYD'?'selected':''}>BYD</option>
-          <option value="BMW" ${task.brand==='BMW'?'selected':''}>BMW</option>
-          <option value="MINI" ${task.brand==='MINI'?'selected':''}>MINI</option>
-          <option value="MOTORRAD" ${task.brand==='MOTORRAD'?'selected':''}>MOTORRAD</option>
-          <option value="PERSONAL" ${task.brand==='PERSONAL'?'selected':''}>PERSONAL</option>
-        </select>
-        <select class="form-select" id="ei-priority-${id}">
-          <option value="" ${!task.priority?'selected':''}>Sin prioridad</option>
-          <option value="alta" ${task.priority==='alta'?'selected':''}>🔴 Alta</option>
-          <option value="media" ${task.priority==='media'?'selected':''}>🟡 Media</option>
-          <option value="baja" ${task.priority==='baja'?'selected':''}>🟢 Baja</option>
-        </select>
-      </div>
-      ${task.col === 'waiting' ? `<input type="text" class="form-date" id="ei-assignee-${id}" placeholder="¿Quién lo tiene?" value="${esc(task.assignee||'')}">` : ''}
-      <input type="date" class="form-date" id="ei-date-${id}" value="${task.date||''}">
-      <div class="edit-actions">
-        <button class="btn-save" data-save="${id}">Guardar</button>
-        <button class="btn-cancel" data-cancel-edit>Cancelar</button>
-      </div>
+  const isWaiting = task.col === 'waiting';
+  const wrap = document.createElement('div');
+  wrap.className = 'c-edit-wrap';
+  wrap.innerHTML = `
+    <textarea id="ei-text" rows="2">${esc(task.text)}</textarea>
+    ${isWaiting ? `<input class="c-edit-assignee" id="ei-assignee" placeholder="¿quién lo tiene?" value="${esc(task.assignee||'')}">` : ''}
+    <div class="c-edit-row">
+      <select class="c-edit-sel" id="ei-brand">
+        <option value="" ${!task.brand?'selected':''}>sin marca</option>
+        <option value="BYD" ${task.brand==='BYD'?'selected':''}>BYD</option>
+        <option value="BMW" ${task.brand==='BMW'?'selected':''}>BMW</option>
+        <option value="MINI" ${task.brand==='MINI'?'selected':''}>MINI</option>
+        <option value="MOTORRAD" ${task.brand==='MOTORRAD'?'selected':''}>MOTORRAD</option>
+        <option value="PERSONAL" ${task.brand==='PERSONAL'?'selected':''}>PERSONAL</option>
+      </select>
+      <select class="c-edit-sel" id="ei-priority">
+        <option value="" ${!task.priority?'selected':''}>—</option>
+        <option value="alta" ${task.priority==='alta'?'selected':''}>🔴 alta</option>
+        <option value="media" ${task.priority==='media'?'selected':''}>🟡 media</option>
+        <option value="baja" ${task.priority==='baja'?'selected':''}>🟢 baja</option>
+      </select>
     </div>
-  `;
-  const ta = document.getElementById('ei-text-' + id);
-  ta.focus();
-  ta.setSelectionRange(ta.value.length, ta.value.length);
+    <input class="c-edit-date" type="date" id="ei-date" value="${task.date||''}">
+    <div class="c-edit-btns">
+      <button class="c-edit-save" data-save="${esc(id)}">guardar</button>
+      <button class="c-edit-cancel" data-cancel-edit>✕</button>
+    </div>`;
+  card.style.height = 'auto';
+  card.appendChild(wrap);
+  const ta = wrap.querySelector('#ei-text');
+  ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
   ta.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveEdit(id); }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSave(id); }
     if (e.key === 'Escape') render();
   });
 }
 
-function saveEdit(id) {
-  const task = tasks.find(t => t.id === id);
-  if (!task) return;
-  const text = document.getElementById('ei-text-' + id).value.trim();
+function doSave(id) {
+  const t = tasks.find(t => t.id === id);
+  if (!t) return;
+  const text = document.getElementById('ei-text')?.value.trim();
   if (!text) return;
-  task.text = text;
-  task.brand = document.getElementById('ei-brand-' + id).value;
-  task.priority = document.getElementById('ei-priority-' + id).value;
-  task.date = document.getElementById('ei-date-' + id).value;
-  const assigneeEl = document.getElementById('ei-assignee-' + id);
-  if (assigneeEl) task.assignee = assigneeEl.value.trim();
+  t.text = text;
+  t.brand = document.getElementById('ei-brand')?.value || '';
+  t.priority = document.getElementById('ei-priority')?.value || '';
+  t.date = document.getElementById('ei-date')?.value || '';
+  const ae = document.getElementById('ei-assignee');
+  if (ae) t.assignee = ae.value.trim();
   save(); render();
 }
 
 function addTask(col) {
-  const text = document.getElementById('text-' + col).value.trim();
+  const text = document.getElementById('text-' + col)?.value.trim();
   if (!text) return;
-  const assigneeInput = document.getElementById('assignee-' + col);
+  const assigneeEl = document.getElementById('assignee-' + col);
   tasks.push({
     id: uid(), col, text,
-    brand: document.getElementById('brand-' + col).value,
-    priority: document.getElementById('priority-' + col).value,
-    date: document.getElementById('date-' + col).value,
-    assignee: assigneeInput ? assigneeInput.value.trim() : '',
+    brand: document.getElementById('brand-' + col)?.value || '',
+    priority: document.getElementById('priority-' + col)?.value || '',
+    date: document.getElementById('date-' + col)?.value || '',
+    assignee: assigneeEl ? assigneeEl.value.trim() : '',
     archived: false
   });
   save(); render(); closeForm(col);
 }
 
 function openForm(col) {
-  COLS.forEach(c => document.getElementById('form-' + c).classList.remove('open'));
-  document.getElementById('form-' + col).classList.add('open');
-  document.getElementById('text-' + col).focus();
+  COLS.forEach(c => document.getElementById('form-'+c)?.classList.remove('open'));
+  document.getElementById('form-'+col)?.classList.add('open');
+  document.getElementById('text-'+col)?.focus();
 }
 
 function closeForm(col) {
-  document.getElementById('form-' + col).classList.remove('open');
+  document.getElementById('form-'+col)?.classList.remove('open');
   ['text-','brand-','priority-','date-','assignee-'].forEach(p => {
-    const el = document.getElementById(p + col);
+    const el = document.getElementById(p+col);
     if (el) el.value = '';
   });
 }
 
+let dragId = null;
 function onDragStart(e) {
+  dragId = this.dataset.id;
   this.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', this.dataset.id);
+  e.dataTransfer.setData('text/plain', dragId);
 }
-
 function onDragEnd() {
   this.classList.remove('dragging');
-  document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+  document.querySelectorAll('.col').forEach(c => c.classList.remove('drag-over'));
 }
 
-document.querySelectorAll('.column').forEach(col => {
+document.querySelectorAll('.col').forEach(col => {
   col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
   col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over'); });
   col.addEventListener('drop', e => {
     e.preventDefault(); col.classList.remove('drag-over');
     const id = e.dataTransfer.getData('text/plain');
-    const task = tasks.find(t => t.id === id);
-    if (task) { task.col = col.dataset.col; save(); render(); }
+    const t = tasks.find(t => t.id === id);
+    if (t) { t.col = col.dataset.col; save(); render(); }
   });
 });
 
 document.addEventListener('click', e => {
-  const t = e.target;
-  if (t.closest('.add-btn')) { openForm(t.closest('.add-btn').dataset.target); return; }
-  if (t.closest('.btn-cancel[data-target]')) { closeForm(t.closest('.btn-cancel').dataset.target); return; }
-  if (t.closest('.btn-cancel[data-cancel-edit]')) { render(); return; }
-  if (t.closest('.btn-save[data-col]')) { addTask(t.closest('.btn-save').dataset.col); return; }
-  if (t.closest('[data-save]')) { saveEdit(t.closest('[data-save]').dataset.save); return; }
-  if (t.closest('[data-delete]')) { tasks = tasks.filter(tk => tk.id !== t.closest('[data-delete]').dataset.delete); save(); render(); return; }
-  if (t.closest('[data-archive]')) { const tk = tasks.find(tk => tk.id === t.closest('[data-archive]').dataset.archive); if (tk) { tk.archived = !tk.archived; save(); render(); } return; }
-  if (t.closest('[data-toggle-wait]')) { const tk = tasks.find(tk => tk.id === t.closest('[data-toggle-wait]').dataset.toggleWait); if (tk) { tk.waitStatus = tk.waitStatus === 'sent' ? 'pending' : 'sent'; save(); render(); } return; }
-  if (t.closest('[data-archive-col]')) { tasks.filter(tk => tk.col === t.closest('[data-archive-col]').dataset.archiveCol && !tk.archived).forEach(tk => tk.archived = true); save(); render(); return; }
+  const el = e.target;
+  if (el.closest('[data-target]') && el.closest('.col-add-btn')) { openForm(el.closest('[data-target]').dataset.target); return; }
+  if (el.closest('[data-close]')) { closeForm(el.closest('[data-close]').dataset.close); return; }
+  if (el.closest('[data-add]')) { addTask(el.closest('[data-add]').dataset.add); return; }
+  if (el.closest('[data-save]')) { doSave(el.closest('[data-save]').dataset.save); return; }
+  if (el.closest('[data-cancel-edit]')) { render(); return; }
+  if (el.closest('[data-delete]')) {
+    tasks = tasks.filter(t => t.id !== el.closest('[data-delete]').dataset.delete);
+    save(); render(); return;
+  }
+  if (el.closest('[data-archive]') && !el.closest('[data-archive-col]')) {
+    const t = tasks.find(t => t.id === el.closest('[data-archive]').dataset.archive);
+    if (t) { t.archived = !t.archived; save(); render(); } return;
+  }
+  if (el.closest('[data-archive-col]')) {
+    const col = el.closest('[data-archive-col]').dataset.archiveCol;
+    tasks.filter(t => t.col === col && !t.archived).forEach(t => t.archived = true);
+    save(); render(); return;
+  }
+  if (el.closest('[data-toggle-wait]')) {
+    const t = tasks.find(t => t.id === el.closest('[data-toggle-wait]').dataset.toggleWait);
+    if (t) { t.waitStatus = t.waitStatus === 'sent' ? 'pending' : 'sent'; save(); render(); } return;
+  }
 });
 
 document.addEventListener('dblclick', e => {
   const el = e.target.closest('[data-edit]');
-  if (el) openEditInline(el.dataset.edit);
+  if (el) openEdit(el.dataset.edit);
 });
 
 document.addEventListener('keydown', e => {
@@ -745,31 +883,20 @@ document.addEventListener('keydown', e => {
 });
 
 COLS.forEach(col => {
-  document.getElementById('text-' + col).addEventListener('keydown', e => {
+  document.getElementById('text-'+col)?.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addTask(col); }
   });
 });
 
-document.getElementById('search').addEventListener('input', e => { searchQuery = e.target.value; render(); });
-document.getElementById('brand-filter').addEventListener('change', e => { brandFilter = e.target.value; render(); });
-
+document.getElementById('search').addEventListener('input', e => { searchQ = e.target.value; render(); });
+document.getElementById('brand-filter').addEventListener('change', e => { brandF = e.target.value; render(); });
 document.getElementById('toggle-archived').addEventListener('click', function() {
   showArchived = !showArchived;
-  this.classList.toggle('active', showArchived);
-  this.textContent = showArchived ? 'Ocultar archivadas' : 'Ver archivadas';
+  this.classList.toggle('on', showArchived);
+  this.textContent = showArchived ? 'ocultar archivadas' : 'ver archivadas';
   render();
 });
 
-const themeBtn = document.getElementById('theme-toggle');
-let dark = localStorage.getItem('kanban-theme') === 'dark';
-function applyTheme() {
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  themeBtn.textContent = dark ? '☀️' : '🌙';
-  localStorage.setItem('kanban-theme', dark ? 'dark' : 'light');
-}
-themeBtn.addEventListener('click', () => { dark = !dark; applyTheme(); });
-
-applyTheme();
 load();
 </script>
 </body>
