@@ -32,6 +32,9 @@
     --col-waiting-accent: #534AB7;
     --col-waiting-bg: #EEEDFE;
     --col-waiting-text: #3C3489;
+    --col-boga-accent: #993C1D;
+    --col-boga-bg: #FAECE7;
+    --col-boga-text: #712B13;
 
     --p-alta-bg: #FCEBEB; --p-alta-text: #791F1F;
     --p-media-bg: #FAEEDA; --p-media-text: #633806;
@@ -53,6 +56,7 @@
     --col-progress-accent: #EF9F27; --col-progress-bg: #412402; --col-progress-text: #FAC775;
     --col-done-accent: #639922; --col-done-bg: #173404; --col-done-text: #C0DD97;
     --col-waiting-accent: #7F77DD; --col-waiting-bg: #26215C; --col-waiting-text: #CECBF6;
+    --col-boga-accent: #D85A30; --col-boga-bg: #4A1B0C; --col-boga-text: #F5C4B3;
 
     --p-alta-bg: #501313; --p-alta-text: #F7C1C1;
     --p-media-bg: #412402; --p-media-text: #FAC775;
@@ -120,7 +124,7 @@
 
   .board {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 0.875rem; padding: 1.25rem 1.5rem; align-items: start;
   }
 
@@ -147,6 +151,8 @@
   [data-col="done"] .count-badge { background: var(--col-done-bg); color: var(--col-done-text); }
   [data-col="waiting"] .col-dot { background: var(--col-waiting-accent); }
   [data-col="waiting"] .count-badge { background: var(--col-waiting-bg); color: var(--col-waiting-text); }
+  [data-col="boga"] .col-dot { background: var(--col-boga-accent); }
+  [data-col="boga"] .count-badge { background: var(--col-boga-bg); color: var(--col-boga-text); }
 
   .col-actions { display: flex; gap: 4px; align-items: center; }
 
@@ -257,7 +263,8 @@
 
   .empty-state { text-align: center; color: var(--text3); font-size: 12px; padding: 0.5rem 0; }
 
-  @media (max-width: 900px) { .board { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 1100px) { .board { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 750px) { .board { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 520px) { .board { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -323,6 +330,45 @@
         <div class="edit-actions">
           <button class="btn-save" data-col="todo">Agregar</button>
           <button class="btn-cancel" data-target="todo">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="column" data-col="boga">
+    <div class="col-header">
+      <div class="col-title">
+        <span class="col-dot"></span>En Boga
+        <span class="count-badge" data-count="boga">0</span>
+      </div>
+      <div class="col-actions">
+        <button class="add-btn" data-target="boga">+</button>
+      </div>
+    </div>
+    <div class="cards" id="cards-boga"></div>
+    <div class="add-form" id="form-boga">
+      <div class="edit-form">
+        <textarea placeholder="Tarea de hoy..." rows="2" id="text-boga"></textarea>
+        <div class="edit-row">
+          <select class="form-select" id="brand-boga">
+            <option value="">Sin marca</option>
+            <option value="BYD">BYD</option>
+            <option value="BMW">BMW</option>
+            <option value="MINI">MINI</option>
+            <option value="MOTORRAD">MOTORRAD</option>
+            <option value="PERSONAL">PERSONAL</option>
+          </select>
+          <select class="form-select" id="priority-boga">
+            <option value="">Sin prioridad</option>
+            <option value="alta">🔴 Alta</option>
+            <option value="media">🟡 Media</option>
+            <option value="baja">🟢 Baja</option>
+          </select>
+        </div>
+        <input type="date" class="form-date" id="date-boga">
+        <div class="edit-actions">
+          <button class="btn-save" data-col="boga">Agregar</button>
+          <button class="btn-cancel" data-target="boga">Cancelar</button>
         </div>
       </div>
     </div>
@@ -450,7 +496,7 @@
 </div>
 
 <script>
-const COLS = ['todo', 'progress', 'waiting', 'done'];
+const COLS = ['todo', 'boga', 'progress', 'waiting', 'done'];
 let tasks = [];
 let saveTimer = null;
 let showArchived = false;
