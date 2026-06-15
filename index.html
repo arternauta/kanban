@@ -320,11 +320,7 @@
     <h1>Mis prioridades</h1>
     <div class="meta" id="task-summary">cargando...</div>
   </div>
-  <div style="display:flex;gap:6px;align-items:center;">
-    <button class="theme-btn" id="btn-export" title="Exportar tareas">↓</button>
-    <label class="theme-btn" id="btn-import-label" title="Importar tareas" style="cursor:pointer;">↑<input type="file" id="btn-import" accept=".json" style="display:none;"></label>
-    <button class="theme-btn" id="theme-toggle" title="Cambiar tema">🌙</button>
-  </div>
+  <button class="theme-btn" id="theme-toggle" title="Cambiar tema">🌙</button>
 </header>
 
 <div class="board">
@@ -390,40 +386,32 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'kanban-v1';
 let tasks = [];
 let dragSrc = null;
+let saveTimer = null;
+const STATUS = document.getElementById('task-summary');
 
-const DEFAULT_TASKS = [
-  "Revisar material M - narrativa para volver a postear",
-  "Diseñar post MINI",
-  "Crear nuevo Link Tree - BMW",
-  "Evidencias Mayo BYD",
-  "Armar contenido YUAN PRO - BYD Pelirroja",
-  "Armar contenido Shark BYD - Fuertote",
-  "Pedir los videos de BMW - X1 X3 X5",
-  "Postear los videos BMW - X1 X3 X5",
-  "Referencias BYD Journey",
-  "Revision de Feed BYD",
-  "Revision de Feed BMW",
-  "Revision de Feed MINI",
-  "Revision de Feed Motorrad",
-  "Hightligts BYD",
-  "Hightligts MOTORRAD",
-  "Hightligts MINI",
-  "Hightligts BMW",
-  "Imprimir tickets UBER"
-].map((text, i) => ({ id: 'default' + i, col: 'todo', text, date: '' }));
-
-function load() {
+async function load() {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    tasks = stored ? JSON.parse(stored) : DEFAULT_TASKS.map(t => ({...t}));
-  } catch { tasks = DEFAULT_TASKS.map(t => ({...t})); }
+    const res = await fetch('/api/tasks');
+    tasks = await res.json();
+  } catch {
+    tasks = [];
+  }
+  render();
 }
 
 function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      await fetch('/api/tasks', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tasks, null, 2)
+      });
+    } catch { console.error('Error guardando'); }
+  }, 400);
 }
 
 function uid() {
@@ -590,32 +578,6 @@ document.addEventListener('keydown', e => {
   });
 });
 
-document.getElementById('btn-export').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(tasks, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'tasks.json';
-  a.click();
-});
-
-document.getElementById('btn-import').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const imported = JSON.parse(ev.target.result);
-      if (Array.isArray(imported)) {
-        tasks = imported;
-        save();
-        render();
-      }
-    } catch { alert('Archivo inválido'); }
-    e.target.value = '';
-  };
-  reader.readAsText(file);
-});
-
 const themeBtn = document.getElementById('theme-toggle');
 const root = document.documentElement;
 let dark = localStorage.getItem('kanban-theme') === 'dark';
@@ -628,9 +590,8 @@ function applyTheme() {
 
 themeBtn.addEventListener('click', () => { dark = !dark; applyTheme(); });
 
-load();
 applyTheme();
-render();
+load();
 </script>
 </body>
 </html>
