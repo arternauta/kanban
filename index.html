@@ -381,6 +381,7 @@
     <div class="add-form" id="form-waiting">
       <div class="edit-form">
         <textarea placeholder="¿Qué estás esperando?" rows="2" id="text-waiting"></textarea>
+        <input type="text" class="form-date" id="assignee-waiting" placeholder="¿Quién lo tiene? (nombre)">
         <div class="edit-row">
           <select class="form-select" id="brand-waiting">
             <option value="">Sin marca</option>
@@ -531,7 +532,9 @@ function render() {
         const waitBadge = task.col === 'waiting'
           ? (() => {
               const sent = task.waitStatus === 'sent';
-              return `<button class="wait-status ${sent ? 'sent' : 'pending'}" data-toggle-wait="${esc(task.id)}">${sent ? '✓ Enviada' : '· Por enviar'}</button>`;
+              const assigneeHtml = task.assignee
+                ? `<span class="badge PERSONAL" style="background:var(--surface2);color:var(--text2);">👤 ${esc(task.assignee)}</span>` : '';
+              return `<button class="wait-status ${sent ? 'sent' : 'pending'}" data-toggle-wait="${esc(task.id)}">${sent ? '✓ Enviada' : '· Por enviar'}</button>${assigneeHtml}`;
             })()
           : '';
 
@@ -590,6 +593,7 @@ function openEditInline(id) {
           <option value="baja" ${task.priority==='baja'?'selected':''}>🟢 Baja</option>
         </select>
       </div>
+      ${task.col === 'waiting' ? `<input type="text" class="form-date" id="ei-assignee-${id}" placeholder="¿Quién lo tiene?" value="${esc(task.assignee||'')}">` : ''}
       <input type="date" class="form-date" id="ei-date-${id}" value="${task.date||''}">
       <div class="edit-actions">
         <button class="btn-save" data-save="${id}">Guardar</button>
@@ -615,17 +619,21 @@ function saveEdit(id) {
   task.brand = document.getElementById('ei-brand-' + id).value;
   task.priority = document.getElementById('ei-priority-' + id).value;
   task.date = document.getElementById('ei-date-' + id).value;
+  const assigneeEl = document.getElementById('ei-assignee-' + id);
+  if (assigneeEl) task.assignee = assigneeEl.value.trim();
   save(); render();
 }
 
 function addTask(col) {
   const text = document.getElementById('text-' + col).value.trim();
   if (!text) return;
+  const assigneeInput = document.getElementById('assignee-' + col);
   tasks.push({
     id: uid(), col, text,
     brand: document.getElementById('brand-' + col).value,
     priority: document.getElementById('priority-' + col).value,
     date: document.getElementById('date-' + col).value,
+    assignee: assigneeInput ? assigneeInput.value.trim() : '',
     archived: false
   });
   save(); render(); closeForm(col);
@@ -639,7 +647,7 @@ function openForm(col) {
 
 function closeForm(col) {
   document.getElementById('form-' + col).classList.remove('open');
-  ['text-','brand-','priority-','date-'].forEach(p => {
+  ['text-','brand-','priority-','date-','assignee-'].forEach(p => {
     const el = document.getElementById(p + col);
     if (el) el.value = '';
   });
