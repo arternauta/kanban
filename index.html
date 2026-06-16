@@ -97,55 +97,54 @@ header {
 }
 
 /* ── Column ── */
-.col { flex: 1 1 0; min-width: 130px; overflow: visible; }
+.col { flex: 1 1 0; min-width: 150px; }
 
 .col-head {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 10px;
-  padding: 0 2px;
+  gap: 7px;
+  margin-bottom: 12px;
+  padding: 0 6px;
 }
 
-.col-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-.col-name { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #444441; flex: 1; }
-.col-count { font-size: 9px; color: #2c2c2a; }
+.col-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.col-name { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #5f5e5a; flex: 1; }
+.col-count { font-size: 10px; color: #444441; }
 
-.col-actions-row { display: flex; gap: 5px; align-items: center; }
+.col-actions-row { display: flex; gap: 6px; align-items: center; }
 
 .col-add-btn {
-  width: 20px; height: 20px;
-  background: none; border: 0.5px solid #2c2c2a;
+  width: 22px; height: 22px;
+  background: none; border: 0.5px solid #333331;
   border-radius: 3px; cursor: pointer;
-  color: #2c2c2a; font-size: 16px; line-height: 1;
+  color: #444441; font-size: 17px; line-height: 1;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.15s; flex-shrink: 0;
 }
-.col-add-btn:hover { color: #888780; border-color: #444441; }
+.col-add-btn:hover { color: #aaa8a0; border-color: #5f5e5a; }
 
 .col-archive-btn {
   background: none; border: none; cursor: pointer;
-  font-size: 9px; letter-spacing: 0.06em;
-  color: #2c2c2a; padding: 0;
+  font-size: 10px; letter-spacing: 0.06em;
+  color: #333331; padding: 0;
   transition: color 0.15s;
 }
 .col-archive-btn:hover { color: #3B6D11; }
 
-.cards { display: flex; flex-direction: column; gap: 9px; overflow: visible; align-items: center; }
+.cards { display: flex; flex-direction: column; gap: 10px; padding: 0 6px; }
 
 /* ── Cassette ── */
 .cassette {
-  width: 170px;
-  height: 92px;
+  width: 100%;
+  height: 110px;
   position: relative;
   cursor: grab;
-  transition: transform 0.18s ease, filter 0.18s;
-  flex-shrink: 0;
+  transition: transform 0.15s ease, filter 0.15s;
 }
 .cassette:active { cursor: grabbing; }
 .cassette:hover {
-  transform: translateY(-4px) rotate(0deg) translateX(0) !important;
-  filter: brightness(1.12);
+  transform: translateY(-3px) !important;
+  filter: brightness(1.1);
   z-index: 20;
 }
 .cassette.dragging { opacity: 0.35; }
@@ -183,9 +182,9 @@ header {
 /* Label */
 .c-label {
   position: absolute;
-  top: 7px; left: 11px; right: 11px; bottom: 30px;
+  top: 8px; left: 12px; right: 12px; bottom: 32px;
   border-radius: 3px;
-  padding: 5px 7px;
+  padding: 7px 9px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -201,35 +200,35 @@ header {
 }
 
 .l-brand {
-  font-size: 7px; letter-spacing: 0.2em;
-  text-transform: uppercase; opacity: 0.6;
+  font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; opacity: 0.7;
   font-weight: 600; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
 }
 
 .l-text {
   font-family: 'Special Elite', serif;
-  font-size: 10.5px; line-height: 1.25;
-  flex: 1; display: flex; align-items: center;
-  padding: 2px 0; cursor: text;
+  font-size: 13px; line-height: 1.3;
+  flex: 1; cursor: text;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  padding: 3px 0;
 }
 
-.l-badges { display: flex; gap: 3px; flex-wrap: wrap; }
+.l-badges { display: flex; gap: 4px; flex-wrap: wrap; }
 
 .lbadge {
-  font-size: 7px; padding: 1px 4px; border-radius: 2px;
+  font-size: 8px; padding: 2px 5px; border-radius: 2px;
   letter-spacing: 0.06em; font-family: 'IBM Plex Mono', monospace;
   font-weight: 500; border: none; cursor: pointer; line-height: 1.4;
 }
-.lbadge.alta { background: #3d0f0f; color: #F7C1C1; }
-.lbadge.media { background: #2e1a00; color: #FAC775; }
-.lbadge.baja { background: #122009; color: #C0DD97; }
+.lbadge.alta { background: #4a1010; color: #FFCDD2; }
+.lbadge.media { background: #3a2200; color: #FFD9A0; }
+.lbadge.baja { background: #142808; color: #C8E6A0; }
 .lbadge.wait-pending { background: #1e1a3d; color: #CECBF6; cursor: pointer; }
-.lbadge.wait-sent { background: #122009; color: #C0DD97; cursor: pointer; }
+.lbadge.wait-sent { background: #142808; color: #C8E6A0; cursor: pointer; }
 
 /* Bottom window */
 .c-bottom {
@@ -305,9 +304,9 @@ header {
 .cbtn.del:hover { color: #F7C1C1; }
 
 /* Done cassettes */
-.cassette.done-card { opacity: 0.3; }
+.cassette.done-card { opacity: 0.5; }
 .cassette.done-card .c-body { border-style: dashed; }
-.cassette.done-card .reel { border-color: rgba(255,255,255,0.06); }
+.cassette.done-card .reel { border-color: rgba(255,255,255,0.08); }
 
 /* Brand color themes */
 .byd .c-body { background: linear-gradient(145deg,#0f2f1e,#163d27); }
@@ -330,10 +329,10 @@ header {
 .motorrad .c-notch { background: #280c0c; } .motorrad .c-win { background: #180808; border: 0.5px solid rgba(216,90,48,.3); }
 .motorrad .reel { border-color: rgba(216,90,48,.6); } .motorrad .c-tape { background: #D85A30; }
 
-.personal .c-body { background: linear-gradient(145deg,#1e1e1c,#252523); }
-.personal .c-label { background: #2e2e2c; } .personal .l-brand,.personal .l-text { color: #E0DED5; }
-.personal .c-notch { background: #1e1e1c; } .personal .c-win { background: #141412; border: 0.5px solid rgba(95,94,90,.3); }
-.personal .reel { border-color: rgba(95,94,90,.6); } .personal .c-tape { background: #5F5E5A; }
+.personal .c-body { background: linear-gradient(145deg,#282825,#2e2e2b); }
+.personal .c-label { background: #363633; } .personal .l-brand,.personal .l-text { color: #E8E6DC; }
+.personal .c-notch { background: #282825; } .personal .c-win { background: #1c1c1a; border: 0.5px solid rgba(120,118,112,.3); }
+.personal .reel { border-color: rgba(120,118,112,.6); } .personal .c-tape { background: #78766F; }
 
 /* ── Add form (blank cassette style) ── */
 .add-form {
@@ -823,7 +822,7 @@ function cassette(task) {
     <div class="cassette ${cls}${isDone ? ' done-card' : ''}"
          data-id="${esc(task.id)}"
          draggable="${task.archived ? 'false' : 'true'}"
-         style="transform:rotate(${rot(task.id)}deg) translateX(${offsetX(task.id).toFixed(1)}px)">
+         style="">
       <div class="c-body">
         <div class="screw tl"></div><div class="screw tr"></div>
         <div class="screw bl"></div><div class="screw br"></div>
