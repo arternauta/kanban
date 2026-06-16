@@ -450,6 +450,56 @@ header {
 
 /* ── Empty state ── */
 .empty { font-size: 9px; color: #252523; letter-spacing: 0.1em; text-align: center; padding: 10px 0; }
+
+/* ── Settings modal ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 100;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #161614; border: 0.5px solid #2c2c2a;
+  border-radius: 6px; padding: 20px; width: 340px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.modal h2 { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #5f5e5a; margin-bottom: 14px; }
+.modal label { display: block; font-size: 9px; color: #5f5e5a; letter-spacing: 0.1em; margin-bottom: 4px; text-transform: uppercase; }
+.modal input[type="text"], .modal input[type="password"] {
+  width: 100%; background: #1a1a18; border: 0.5px solid #2c2c2a;
+  border-radius: 3px; padding: 6px 8px; font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace; color: #d3d1c7; outline: none;
+  margin-bottom: 12px;
+}
+.modal input:focus { border-color: #5f5e5a; }
+.modal-note { font-size: 9px; color: #444441; line-height: 1.6; margin-bottom: 14px; }
+.modal-note a { color: #888780; }
+.modal-btns { display: flex; gap: 6px; }
+.mbtn-save {
+  flex: 1; padding: 7px; background: #252523;
+  border: 0.5px solid #5f5e5a; border-radius: 3px;
+  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
+  color: #888780; cursor: pointer; letter-spacing: 0.08em;
+  transition: all 0.12s;
+}
+.mbtn-save:hover { color: #d3d1c7; border-color: #888780; }
+.mbtn-cancel {
+  padding: 7px 12px; background: none;
+  border: 0.5px solid #2c2c2a; border-radius: 3px;
+  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
+  color: #444441; cursor: pointer;
+}
+.gh-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #2c2c2a; flex-shrink: 0;
+  transition: background 0.3s;
+}
+.gh-dot.ok { background: #3B6D11; }
+.gh-dot.err { background: #8B2020; }
+.save-status { font-size: 9px; color: #2c2c2a; letter-spacing: 0.06em; transition: color 0.3s; }
+.save-status.saving { color: #5f5e5a; }
+.save-status.saved { color: #3B6D11; }
+.save-status.error { color: #8B2020; }
 </style>
 </head>
 <body>
@@ -466,10 +516,29 @@ header {
     <option value="PERSONAL">PERSONAL</option>
   </select>
   <div class="header-right">
+    <div class="gh-dot" id="gh-dot" title="GitHub sync"></div>
+    <div class="save-status" id="save-status"></div>
     <button class="hbtn" id="toggle-archived">ver archivadas</button>
+    <button class="hbtn" id="settings-btn">⚙</button>
     <div class="summary" id="summary">—</div>
   </div>
 </header>
+
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <h2>GitHub Sync</h2>
+    <label>Personal Access Token</label>
+    <input type="password" id="gh-token" placeholder="ghp_...">
+    <p class="modal-note">
+      Crea un token en <strong>github.com → Settings → Developer settings → Personal access tokens → Fine-grained</strong> con permiso <strong>Contents: Read &amp; Write</strong> sobre este repo.<br><br>
+      El token se guarda solo en este navegador (localStorage).
+    </p>
+    <div class="modal-btns">
+      <button class="mbtn-save" id="modal-save">Guardar</button>
+      <button class="mbtn-cancel" id="modal-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <div class="board">
 
@@ -602,20 +671,88 @@ const COLS = ['todo','boga','progress','waiting','done'];
 const PRIO = { alta:0, media:1, baja:2, '':3 };
 const BRAND_CLASS = { BYD:'byd', BMW:'bmw', MINI:'mini', MOTORRAD:'motorrad', PERSONAL:'personal', '':'personal' };
 
+const GH = {
+  owner: 'arternauta',
+  repo:  'kanban',
+  path:  'tasks.json',
+  get token() { return localStorage.getItem('gh_token') || ''; },
+  get isPages() { return location.hostname !== 'localhost' && location.hostname !== '127.0.0.1'; }
+};
+
 let tasks = [], saveTimer = null, showArchived = false, searchQ = '', brandF = '';
+let ghSha = null; // current SHA of tasks.json in GitHub
+
+function setStatus(state, text) {
+  const dot = document.getElementById('gh-dot');
+  const st  = document.getElementById('save-status');
+  if (dot) { dot.className = 'gh-dot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : ''); }
+  if (st)  { st.textContent = text; st.className = 'save-status' + (state ? ' ' + state : ''); }
+}
+
+async function ghGet() {
+  const r = await fetch(
+    `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${GH.path}`,
+    { headers: { Authorization: `Bearer ${GH.token}`, Accept: 'application/vnd.github+json' } }
+  );
+  if (!r.ok) throw new Error(r.status);
+  const data = await r.json();
+  ghSha = data.sha;
+  return JSON.parse(atob(data.content.replace(/\n/g, '')));
+}
+
+async function ghPut(content) {
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
+  const r = await fetch(
+    `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${GH.path}`,
+    {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${GH.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Update tasks', content: b64, sha: ghSha })
+    }
+  );
+  if (!r.ok) throw new Error(r.status);
+  const data = await r.json();
+  ghSha = data.content.sha;
+}
 
 async function load() {
-  try { const r = await fetch('/api/tasks'); tasks = await r.json(); }
-  catch { tasks = []; }
+  try {
+    if (GH.token) {
+      tasks = await ghGet();
+      setStatus('ok', '');
+    } else if (!GH.isPages) {
+      const r = await fetch('/api/tasks');
+      tasks = await r.json();
+    } else {
+      tasks = [];
+      setStatus('err', 'sin token');
+    }
+  } catch(e) {
+    tasks = [];
+    setStatus('err', 'error');
+  }
   render();
 }
 
 function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
-    try { await fetch('/api/tasks', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(tasks, null, 2) }); }
-    catch { console.error('Error guardando'); }
-  }, 400);
+    try {
+      if (GH.token) {
+        setStatus('', 'guardando...');
+        await ghPut(tasks);
+        setStatus('ok', '');
+      } else if (!GH.isPages) {
+        await fetch('/api/tasks', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(tasks, null, 2) });
+      }
+    } catch(e) {
+      if (String(e).includes('409') || String(e).includes('422')) {
+        // SHA conflict — re-fetch and retry once
+        try { tasks = await ghGet(); render(); } catch {}
+      }
+      setStatus('err', 'error al guardar');
+    }
+  }, 1200);
 }
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -895,6 +1032,26 @@ document.getElementById('toggle-archived').addEventListener('click', function() 
   this.classList.toggle('on', showArchived);
   this.textContent = showArchived ? 'ocultar archivadas' : 'ver archivadas';
   render();
+});
+
+// Settings modal
+document.getElementById('settings-btn').addEventListener('click', () => {
+  document.getElementById('gh-token').value = GH.token;
+  document.getElementById('settings-modal').classList.add('open');
+});
+document.getElementById('modal-cancel').addEventListener('click', () => {
+  document.getElementById('settings-modal').classList.remove('open');
+});
+document.getElementById('settings-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+document.getElementById('modal-save').addEventListener('click', () => {
+  const tok = document.getElementById('gh-token').value.trim();
+  if (tok) localStorage.setItem('gh_token', tok);
+  else localStorage.removeItem('gh_token');
+  document.getElementById('settings-modal').classList.remove('open');
+  ghSha = null;
+  load();
 });
 
 load();
