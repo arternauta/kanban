@@ -133,315 +133,193 @@ header {
 
 .cards { display: flex; flex-direction: column; gap: 10px; padding: 0 6px; }
 
-/* ── Cassette ── */
-.cassette {
+/* ── Card (glass) ── */
+.card {
   width: 100%;
-  height: 110px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px 16px;
   position: relative;
   cursor: grab;
-  transition: transform 0.15s ease, filter 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
 }
-.cassette:active { cursor: grabbing; }
-.cassette:hover {
-  transform: translateY(-3px) !important;
-  filter: brightness(1.1);
-  z-index: 20;
-}
-.cassette.dragging { opacity: 0.35; }
-
-.c-body {
-  width: 100%;
-  height: 100%;
-  border-radius: 5px;
-  border: 1px solid rgba(255,255,255,0.055);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Screws */
-.screw {
-  position: absolute;
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #111110;
-  border: 0.5px solid rgba(255,255,255,0.07);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 3;
-}
-.screw::after {
-  content: '';
-  width: 4px; height: 0.5px;
-  background: rgba(255,255,255,0.1);
-  transform: rotate(45deg);
-}
-.screw.tl { top: 4px; left: 4px; }
-.screw.tr { top: 4px; right: 4px; }
-.screw.bl { bottom: 4px; left: 4px; }
-.screw.br { bottom: 4px; right: 4px; }
-
-/* Label */
-.c-label {
-  position: absolute;
-  top: 8px; left: 12px; right: 12px; bottom: 32px;
-  border-radius: 3px;
-  padding: 7px 9px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-  z-index: 2;
-}
-.c-label::after {
-  content: '';
-  position: absolute; inset: 0;
-  border-radius: 3px;
-  background: repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);
-  pointer-events: none;
-}
-
-.l-brand {
-  font-size: 9px; letter-spacing: 0.18em;
-  text-transform: uppercase; opacity: 0.7;
-  font-weight: 600; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
-}
-
-.l-text {
-  font-family: 'Special Elite', serif;
-  font-size: 13px; line-height: 1.3;
-  flex: 1; cursor: text;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  padding: 3px 0;
-}
-
-.l-badges { display: flex; gap: 4px; flex-wrap: wrap; }
-
-.lbadge {
-  font-size: 8px; padding: 2px 5px; border-radius: 2px;
-  letter-spacing: 0.06em; font-family: 'IBM Plex Mono', monospace;
-  font-weight: 500; border: none; cursor: pointer; line-height: 1.4;
-}
-.lbadge.alta { background: #4a1010; color: #FFCDD2; }
-.lbadge.media { background: #3a2200; color: #FFD9A0; }
-.lbadge.baja { background: #142808; color: #C8E6A0; }
-.lbadge.wait-pending { background: #1e1a3d; color: #CECBF6; cursor: pointer; }
-.lbadge.wait-sent { background: #142808; color: #C8E6A0; cursor: pointer; }
-
-/* Bottom window */
-.c-bottom {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 28px;
-  display: flex; align-items: center;
-  z-index: 2;
-}
-
-.c-notch {
-  width: 20px; height: 17px;
-  border-radius: 3px 3px 0 0;
-  flex-shrink: 0;
-}
-
-.c-win {
-  flex: 1; height: 19px;
-  margin: 0 3px;
-  border-radius: 3px;
-  display: flex; align-items: center;
-  justify-content: space-around;
-  padding: 0 7px;
-  position: relative;
-}
-
-.c-tape {
-  position: absolute;
-  left: 20px; right: 20px;
-  top: 50%; height: 1.5px;
-  transform: translateY(-50%);
-  opacity: 0.25;
-}
-
-.reel {
-  width: 13px; height: 13px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255,255,255,0.18);
-  display: flex; align-items: center; justify-content: center;
-  position: relative; z-index: 1; flex-shrink: 0;
-}
-.reel::before {
-  content: '';
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.7);
-  border: 1px solid rgba(255,255,255,0.12);
-}
-.reel.spin { animation: rspin 1.8s linear infinite; }
-@keyframes rspin { to { transform: rotate(360deg); } }
-
-/* Card action buttons (hover) */
-.c-btns {
-  position: absolute;
-  top: 4px; right: 20px;
-  display: flex; gap: 3px;
-  opacity: 0; transition: opacity 0.15s;
+.card:active { cursor: grabbing; }
+.card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   z-index: 10;
 }
-.cassette:hover .c-btns { opacity: 1; }
+.card.dragging { opacity: 0.35; }
+.card.done-card { opacity: 0.45; border-style: dashed; }
 
+/* Brand accent — colored top border + hover glow */
+.card.byd      { border-top: 2px solid #1D9E75; }
+.card.byd:hover      { box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 28px rgba(29,158,117,0.18); }
+.card.bmw      { border-top: 2px solid #378ADD; }
+.card.bmw:hover      { box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 28px rgba(55,138,221,0.18); }
+.card.mini     { border-top: 2px solid #BA7517; }
+.card.mini:hover     { box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 28px rgba(186,117,23,0.18); }
+.card.motorrad { border-top: 2px solid #D85A30; }
+.card.motorrad:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 28px rgba(216,90,48,0.18); }
+.card.personal { border-top: 2px solid #5f5e5a; }
+
+/* Card content */
+.card-brand {
+  font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+  font-weight: 600; margin-bottom: 6px; white-space: nowrap; overflow: hidden;
+}
+.card.byd .card-brand      { color: #2DC98F; }
+.card.bmw .card-brand      { color: #5AAAE8; }
+.card.mini .card-brand     { color: #D49030; }
+.card.motorrad .card-brand { color: #E8754A; }
+.card.personal .card-brand { color: #888780; }
+
+.card-text {
+  font-size: 14px; line-height: 1.45;
+  color: #e8e6dc; margin-bottom: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.card-meta { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+
+.cbadge {
+  font-size: 10px; padding: 2px 8px; border-radius: 20px;
+  font-family: 'IBM Plex Mono', monospace; font-weight: 500;
+  border: 1px solid; cursor: default; line-height: 1.5; white-space: nowrap;
+}
+.cbadge.alta     { background: rgba(220,50,50,0.15);  color: #FFB3B3; border-color: rgba(220,50,50,0.3); }
+.cbadge.media    { background: rgba(200,140,20,0.15); color: #FFD8A0; border-color: rgba(200,140,20,0.3); }
+.cbadge.baja     { background: rgba(50,160,80,0.15);  color: #A8EFC8; border-color: rgba(50,160,80,0.3); }
+.cbadge.date     { background: rgba(255,255,255,0.05); color: #666460; border-color: rgba(255,255,255,0.08); }
+.cbadge.date.overdue { color: #FFB3B3; border-color: rgba(220,50,50,0.35); }
+.cbadge.wait-pending { background: rgba(110,90,220,0.15); color: #C4BFFF; border-color: rgba(110,90,220,0.3); cursor: pointer; }
+.cbadge.wait-sent    { background: rgba(50,160,80,0.15);  color: #A8EFC8; border-color: rgba(50,160,80,0.3);  cursor: pointer; }
+
+/* Card action buttons */
+.card-btns {
+  position: absolute; top: 10px; right: 12px;
+  display: flex; gap: 4px;
+  opacity: 0; transition: opacity 0.15s; z-index: 5;
+}
+.card:hover .card-btns { opacity: 1; }
 .cbtn {
-  width: 16px; height: 16px;
-  background: rgba(0,0,0,0.7);
-  border: 0.5px solid rgba(255,255,255,0.1);
-  border-radius: 2px;
-  cursor: pointer; color: #888780;
-  font-size: 9px; line-height: 1;
-  display: flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  background: rgba(20,20,18,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; cursor: pointer; color: #666460;
+  font-size: 11px; display: flex; align-items: center; justify-content: center;
   transition: all 0.12s;
 }
-.cbtn:hover { color: #d3d1c7; background: rgba(0,0,0,0.9); }
-.cbtn.del:hover { color: #F7C1C1; }
+.cbtn:hover { color: #d3d1c7; border-color: rgba(255,255,255,0.2); }
+.cbtn.del:hover { color: #FFB3B3; }
 
-/* Done cassettes */
-.cassette.done-card { opacity: 0.5; }
-.cassette.done-card .c-body { border-style: dashed; }
-.cassette.done-card .reel { border-color: rgba(255,255,255,0.08); }
-
-/* Brand color themes */
-.byd .c-body { background: linear-gradient(145deg,#0f2f1e,#163d27); }
-.byd .c-label { background: #1d4d35; } .byd .l-brand,.byd .l-text { color: #A8EDD5; }
-.byd .c-notch { background: #0f2f1e; } .byd .c-win { background: #091a10; border: 0.5px solid rgba(29,158,117,.3); }
-.byd .reel { border-color: rgba(29,158,117,.6); } .byd .c-tape { background: #1D9E75; }
-
-.bmw .c-body { background: linear-gradient(145deg,#0a1f36,#0d2847); }
-.bmw .c-label { background: #112f54; } .bmw .l-brand,.bmw .l-text { color: #C2DDFA; }
-.bmw .c-notch { background: #0a1f36; } .bmw .c-win { background: #071422; border: 0.5px solid rgba(55,138,221,.3); }
-.bmw .reel { border-color: rgba(55,138,221,.6); } .bmw .c-tape { background: #378ADD; }
-
-.mini .c-body { background: linear-gradient(145deg,#251800,#2f2000); }
-.mini .c-label { background: #3d2b00; } .mini .l-brand,.mini .l-text { color: #FBCF82; }
-.mini .c-notch { background: #251800; } .mini .c-win { background: #160e00; border: 0.5px solid rgba(186,117,23,.3); }
-.mini .reel { border-color: rgba(186,117,23,.6); } .mini .c-tape { background: #BA7517; }
-
-.motorrad .c-body { background: linear-gradient(145deg,#280c0c,#341010); }
-.motorrad .c-label { background: #4a1410; } .motorrad .l-brand,.motorrad .l-text { color: #F8CABC; }
-.motorrad .c-notch { background: #280c0c; } .motorrad .c-win { background: #180808; border: 0.5px solid rgba(216,90,48,.3); }
-.motorrad .reel { border-color: rgba(216,90,48,.6); } .motorrad .c-tape { background: #D85A30; }
-
-.personal .c-body { background: linear-gradient(145deg,#282825,#2e2e2b); }
-.personal .c-label { background: #363633; } .personal .l-brand,.personal .l-text { color: #E8E6DC; }
-.personal .c-notch { background: #282825; } .personal .c-win { background: #1c1c1a; border: 0.5px solid rgba(120,118,112,.3); }
-.personal .reel { border-color: rgba(120,118,112,.6); } .personal .c-tape { background: #78766F; }
-
-/* ── Add form (blank cassette style) ── */
+/* ── Add form ── */
 .add-form {
   display: none;
-  background: #161614;
-  border: 0.5px dashed #2c2c2a;
-  border-radius: 5px;
-  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px;
 }
 .add-form.open { display: block; }
 
 .add-form textarea {
-  width: 100%; background: #1a1a18;
-  border: 0.5px solid #2c2c2a; border-radius: 3px;
-  padding: 6px 8px; font-size: 11px;
-  font-family: 'Special Elite', serif;
-  color: #d3d1c7; outline: none; resize: none;
-  line-height: 1.4;
+  width: 100%; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+  padding: 8px 10px; font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #e8e6dc; outline: none; resize: none; line-height: 1.4;
 }
-.add-form textarea:focus { border-color: #444441; }
+.add-form textarea:focus { border-color: rgba(255,255,255,0.18); }
 .add-form textarea::placeholder { color: #2c2c2a; font-family: 'IBM Plex Mono', monospace; }
 
-.add-form select, .add-form input[type="date"] {
-  width: 100%; background: #1a1a18;
-  border: 0.5px solid #2c2c2a; border-radius: 3px;
-  padding: 4px 6px; font-size: 10px;
+.add-form select, .add-form input[type="date"], .add-form input[type="text"] {
+  width: 100%; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+  padding: 6px 9px; font-size: 11px;
   font-family: 'IBM Plex Mono', monospace;
   color: #888780; outline: none; cursor: pointer;
-  margin-top: 5px;
+  margin-top: 6px;
 }
-.add-form select:focus, .add-form input[type="date"]:focus { border-color: #444441; }
+.add-form select:focus, .add-form input:focus { border-color: rgba(255,255,255,0.2); }
 
-.form-row { display: flex; gap: 4px; margin-top: 5px; }
+.form-row { display: flex; gap: 5px; margin-top: 6px; }
 .form-row select { margin-top: 0; }
 
-.form-btns { display: flex; gap: 4px; margin-top: 7px; }
+.form-btns { display: flex; gap: 5px; margin-top: 8px; }
 .fbtn-ok {
-  flex: 1; padding: 5px; background: #252523;
-  border: 0.5px solid #444441; border-radius: 3px;
-  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
-  color: #888780; cursor: pointer; letter-spacing: 0.06em;
+  flex: 1; padding: 7px; background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+  font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+  color: #aaa8a0; cursor: pointer; letter-spacing: 0.06em;
   transition: all 0.12s;
 }
-.fbtn-ok:hover { background: #2c2c2a; color: #d3d1c7; }
+.fbtn-ok:hover { background: rgba(255,255,255,0.12); color: #e8e6dc; }
 
 .fbtn-cancel {
-  padding: 5px 8px; background: none;
-  border: 0.5px solid #2c2c2a; border-radius: 3px;
-  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
-  color: #444441; cursor: pointer;
-  transition: all 0.12s;
+  padding: 7px 12px; background: none;
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+  font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+  color: #444441; cursor: pointer; transition: all 0.12s;
 }
 .fbtn-cancel:hover { color: #888780; }
 
 /* ── Inline edit ── */
 .c-edit-wrap {
   position: absolute; inset: 0;
-  background: #1a1a18;
-  border-radius: 5px;
-  border: 0.5px solid #444441;
-  padding: 8px;
-  display: flex; flex-direction: column; gap: 4px;
+  background: #181816;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  padding: 12px;
+  display: flex; flex-direction: column; gap: 6px;
   z-index: 30;
 }
 .c-edit-wrap textarea {
-  width: 100%; background: #111110;
-  border: 0.5px solid #2c2c2a; border-radius: 3px;
-  padding: 4px 6px; font-size: 10.5px;
-  font-family: 'Special Elite', serif;
-  color: #d3d1c7; outline: none; resize: none;
-  flex: 1;
+  width: 100%; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+  padding: 7px 9px; font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #e8e6dc; outline: none; resize: none; flex: 1;
 }
-.c-edit-wrap textarea:focus { border-color: #5f5e5a; }
-.c-edit-row { display: flex; gap: 3px; }
+.c-edit-wrap textarea:focus { border-color: rgba(255,255,255,0.22); }
+.c-edit-row { display: flex; gap: 5px; }
 .c-edit-sel {
-  flex: 1; background: #111110;
-  border: 0.5px solid #2c2c2a; border-radius: 3px;
-  padding: 3px 4px; font-size: 9px;
+  flex: 1; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+  padding: 5px 6px; font-size: 10px;
   font-family: 'IBM Plex Mono', monospace;
   color: #888780; outline: none; cursor: pointer;
 }
 .c-edit-date {
-  flex: 1; background: #111110;
-  border: 0.5px solid #2c2c2a; border-radius: 3px;
-  padding: 3px 4px; font-size: 9px;
-  font-family: 'IBM Plex Mono', monospace;
-  color: #888780; outline: none; cursor: pointer;
-}
-.c-edit-assignee {
-  width: 100%; background: #111110;
-  border: 0.5px solid #2c2c2a; border-radius: 3px;
-  padding: 3px 6px; font-size: 9px;
+  flex: 1; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+  padding: 5px 6px; font-size: 10px;
   font-family: 'IBM Plex Mono', monospace;
   color: #888780; outline: none;
 }
-.c-edit-assignee::placeholder { color: #2c2c2a; }
-.c-edit-btns { display: flex; gap: 3px; }
+.c-edit-assignee {
+  width: 100%; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+  padding: 5px 9px; font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #888780; outline: none;
+}
+.c-edit-assignee::placeholder { color: #333331; }
+.c-edit-btns { display: flex; gap: 5px; }
 .c-edit-save {
-  flex: 1; background: #252523;
-  border: 0.5px solid #5f5e5a; border-radius: 3px;
-  font-size: 9px; font-family: 'IBM Plex Mono', monospace;
-  color: #888780; cursor: pointer; padding: 3px;
+  flex: 1; background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
+  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
+  color: #aaa8a0; cursor: pointer; padding: 5px;
   transition: all 0.12s;
 }
-.c-edit-save:hover { color: #d3d1c7; }
+.c-edit-save:hover { background: rgba(255,255,255,0.12); color: #e8e6dc; }
 .c-edit-cancel {
-  background: none; border: 0.5px solid #2c2c2a; border-radius: 3px;
-  font-size: 9px; font-family: 'IBM Plex Mono', monospace;
-  color: #444441; cursor: pointer; padding: 3px 6px;
+  background: none; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
+  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
+  color: #444441; cursor: pointer; padding: 5px 10px;
 }
 
 /* ── Drop zone highlight ── */
@@ -799,49 +677,33 @@ function matches(t) {
   return true;
 }
 
-function cassette(task) {
+function card(task) {
   const cls = BRAND_CLASS[task.brand || ''] || 'personal';
-  const inProgress = task.col === 'progress';
   const isDone = task.col === 'done';
   const isWaiting = task.col === 'waiting';
 
   const brandLabel = isWaiting && task.assignee
-    ? (task.brand ? `${task.brand} · ${task.assignee}` : `· ${task.assignee}`)
+    ? (task.brand ? `${task.brand} · ${task.assignee}` : task.assignee)
     : (task.brand || '');
 
-  const priBadge = task.priority
-    ? `<span class="lbadge ${esc(task.priority)}">${esc(task.priority)}</span>` : '';
-
-  const waitBadge = isWaiting
-    ? `<button class="lbadge wait-${task.waitStatus === 'sent' ? 'sent' : 'pending'}" data-toggle-wait="${esc(task.id)}">${task.waitStatus === 'sent' ? '✓ enviada' : '· por enviar'}</button>` : '';
-
+  const priBadge  = task.priority
+    ? `<span class="cbadge ${esc(task.priority)}">${esc(task.priority)}</span>` : '';
   const dateBadge = task.date
-    ? `<span class="lbadge" style="background:#1a1a18;color:${overdue(task.date)?'#F7C1C1':'#444441'}">${fmtDate(task.date)}${overdue(task.date)?' !'  :''}</span>` : '';
+    ? `<span class="cbadge date${overdue(task.date)?' overdue':''}">${fmtDate(task.date)}${overdue(task.date)?' !':''}</span>` : '';
+  const waitBadge = isWaiting
+    ? `<button class="cbadge wait-${task.waitStatus==='sent'?'sent':'pending'}" data-toggle-wait="${esc(task.id)}">${task.waitStatus==='sent'?'✓ enviada':'· por enviar'}</button>` : '';
+
+  const meta = priBadge || dateBadge || waitBadge
+    ? `<div class="card-meta">${priBadge}${dateBadge}${waitBadge}</div>` : '';
 
   return `
-    <div class="cassette ${cls}${isDone ? ' done-card' : ''}"
+    <div class="card ${cls}${isDone?' done-card':''}"
          data-id="${esc(task.id)}"
-         draggable="${task.archived ? 'false' : 'true'}"
-         style="">
-      <div class="c-body">
-        <div class="screw tl"></div><div class="screw tr"></div>
-        <div class="screw bl"></div><div class="screw br"></div>
-        <div class="c-label">
-          <div class="l-brand">${esc(brandLabel)}</div>
-          <div class="l-text" data-edit="${esc(task.id)}">${esc(task.text)}</div>
-          <div class="l-badges">${waitBadge}${priBadge}${dateBadge}</div>
-        </div>
-        <div class="c-bottom">
-          <div class="c-notch"></div>
-          <div class="c-win">
-            <div class="c-tape"></div>
-            <div class="reel${inProgress?' spin':''}"></div>
-            <div class="reel${inProgress?' spin':''}"></div>
-          </div>
-          <div class="c-notch"></div>
-        </div>
-      </div>
-      <div class="c-btns">
+         draggable="${task.archived?'false':'true'}">
+      ${brandLabel ? `<div class="card-brand">${esc(brandLabel)}</div>` : ''}
+      <div class="card-text" data-edit="${esc(task.id)}">${esc(task.text)}</div>
+      ${meta}
+      <div class="card-btns">
         <button class="cbtn" data-archive="${esc(task.id)}" title="${task.archived?'desarchivar':'archivar'}">${task.archived?'↩':'⊘'}</button>
         <button class="cbtn del" data-delete="${esc(task.id)}" title="eliminar">✕</button>
       </div>
@@ -856,13 +718,13 @@ function render() {
 
     const container = document.getElementById('cards-' + col);
     container.innerHTML = visible.length
-      ? visible.map(cassette).join('')
+      ? visible.map(card).join('')
       : '<div class="empty">vacío</div>';
 
     document.querySelector(`[data-count="${col}"]`).textContent =
       colTasks.filter(t => !t.archived).length;
 
-    container.querySelectorAll('.cassette').forEach(el => {
+    container.querySelectorAll('.card').forEach(el => {
       el.addEventListener('dragstart', onDragStart);
       el.addEventListener('dragend', onDragEnd);
     });
@@ -877,7 +739,7 @@ function render() {
 function openEdit(id) {
   const task = tasks.find(t => t.id === id);
   if (!task) return;
-  const card = document.querySelector(`.cassette[data-id="${id}"]`);
+  const card = document.querySelector(`.card[data-id="${id}"]`);
   if (!card) return;
   card.draggable = false;
   const isWaiting = task.col === 'waiting';
