@@ -21,13 +21,15 @@
     "id": "default14",
     "col": "done",
     "text": "Hightligts MOTORRAD",
-    "date": ""
+    "date": "",
+    "archived": true
   },
   {
     "id": "default15",
     "col": "done",
     "text": "Hightligts MINI",
-    "date": ""
+    "date": "",
+    "archived": true
   },
   {
     "id": "default16",
@@ -45,19 +47,22 @@
     "id": "default19",
     "col": "done",
     "text": "Agregar cantidad de contenido en el reporte semanal BYD",
-    "date": ""
+    "date": "",
+    "archived": true
   },
   {
     "id": "default20",
     "col": "done",
     "text": "POSTEAR VIDEO DE X3",
-    "date": ""
+    "date": "",
+    "archived": true
   },
   {
     "id": "default21",
     "col": "done",
     "text": "POSTEAR VIDEO DE X5",
-    "date": ""
+    "date": "",
+    "archived": true
   },
   {
     "id": "default22",
@@ -175,7 +180,8 @@
     "waitStatus": "pending",
     "brand": "BMW",
     "priority": "",
-    "assignee": "Nick"
+    "assignee": "Nick",
+    "archived": true
   },
   {
     "id": "mqfc2drwjvltt8cwe5g",
@@ -184,7 +190,7 @@
     "brand": "",
     "priority": "",
     "date": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqfc2tgd9dkpsljlvj",
@@ -193,7 +199,7 @@
     "brand": "BYD",
     "priority": "",
     "date": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqfc37hm6i7dgaajucd",
@@ -202,7 +208,7 @@
     "brand": "MINI",
     "priority": "",
     "date": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqfc3mhes4uq5gcqaer",
@@ -211,7 +217,7 @@
     "brand": "BYD",
     "priority": "",
     "date": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqfc64c9dhj8ob7zofb",
@@ -231,7 +237,7 @@
     "priority": "alta",
     "date": "2026-06-15",
     "assignee": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqfdc0ythz5b1yeplvg",
@@ -241,17 +247,17 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqfdcxnh0wpbwwp8rnwp",
-    "col": "waiting",
-    "text": "EDITAR Motorrad Mundial",
+    "col": "done",
+    "text": "Motorrad Mundial - REEL PENDIENTE CON DICK",
     "brand": "MOTORRAD",
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqfk9h3pdfg2da56w6b",
@@ -261,7 +267,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqfkdt08miy8cs0pqop",
@@ -278,6 +284,36 @@
     "col": "done",
     "text": "Postear carrusel AMIR",
     "brand": "BMW",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": true
+  },
+  {
+    "id": "mqh4c7y37bfslxa9ky9",
+    "col": "done",
+    "text": "CONTENIDO FUTBOL",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false
+  },
+  {
+    "id": "mqh5aig8qyssatrbbvc",
+    "col": "boga",
+    "text": "COPY Para 10 publicaciones FUTBOL",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false
+  },
+  {
+    "id": "mqh7ugy4utt82xcxeab",
+    "col": "progress",
+    "text": "SUBIR CARRUSEL MINI COLLAB 2",
+    "brand": "",
     "priority": "",
     "date": "",
     "assignee": "",
