@@ -108,8 +108,8 @@ header {
 }
 
 .col-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.col-name { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #5f5e5a; flex: 1; }
-.col-count { font-size: 10px; color: #444441; }
+.col-name { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #5f5e5a; flex: 1; }
+.col-count { font-size: 11px; color: #444441; }
 
 .col-actions-row { display: flex; gap: 6px; align-items: center; }
 
@@ -130,6 +130,13 @@ header {
   transition: color 0.15s;
 }
 .col-archive-btn:hover { color: #3B6D11; }
+
+/* Time total below done column header */
+.col-time-total {
+  font-size: 10px; color: #3B6D11; letter-spacing: 0.08em;
+  padding: 0 6px; margin-bottom: 8px; margin-top: -6px;
+  opacity: 0.7;
+}
 
 .cards { display: flex; flex-direction: column; gap: 10px; padding: 0 6px; }
 
@@ -152,7 +159,7 @@ header {
   z-index: 10;
 }
 .card.dragging { opacity: 0.35; }
-.card.done-card { opacity: 0.45; border-style: dashed; }
+.card.done-card { opacity: 0.6; border-style: dashed; }
 
 /* Brand accent — colored top border + hover glow */
 .card.byd      { border-top: 2px solid #1D9E75; }
@@ -167,7 +174,7 @@ header {
 
 /* Card content */
 .card-brand {
-  font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
   font-weight: 600; margin-bottom: 6px; white-space: nowrap; overflow: hidden;
 }
 .card.byd .card-brand      { color: #2DC98F; }
@@ -177,7 +184,7 @@ header {
 .card.personal .card-brand { color: #888780; }
 
 .card-text {
-  font-size: 14px; line-height: 1.45;
+  font-size: 15px; line-height: 1.45;
   color: #e8e6dc; margin-bottom: 10px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -185,7 +192,7 @@ header {
 .card-meta { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
 
 .cbadge {
-  font-size: 10px; padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; padding: 2px 9px; border-radius: 20px;
   font-family: 'IBM Plex Mono', monospace; font-weight: 500;
   border: 1px solid; cursor: default; line-height: 1.5; white-space: nowrap;
 }
@@ -196,6 +203,10 @@ header {
 .cbadge.date.overdue { color: #FFB3B3; border-color: rgba(220,50,50,0.35); }
 .cbadge.wait-pending { background: rgba(110,90,220,0.15); color: #C4BFFF; border-color: rgba(110,90,220,0.3); cursor: pointer; }
 .cbadge.wait-sent    { background: rgba(50,160,80,0.15);  color: #A8EFC8; border-color: rgba(50,160,80,0.3);  cursor: pointer; }
+/* Timer badge — live in progress */
+.cbadge.timer { background: rgba(186,117,23,0.12); color: #D49030; border-color: rgba(186,117,23,0.25); font-variant-numeric: tabular-nums; }
+/* Time done badge */
+.cbadge.time-done { background: rgba(59,109,17,0.12); color: #7EC850; border-color: rgba(59,109,17,0.25); }
 
 /* Card action buttons */
 .card-btns {
@@ -377,6 +388,57 @@ header {
 .save-status.saving { color: #5f5e5a; }
 .save-status.saved { color: #3B6D11; }
 .save-status.error { color: #8B2020; }
+
+/* ── Report modal ── */
+.report-modal {
+  background: #161614; border: 0.5px solid #2c2c2a;
+  border-radius: 8px; padding: 22px;
+  width: min(580px, 95vw); max-height: 80vh;
+  display: flex; flex-direction: column;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.report-modal h2 { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #5f5e5a; margin-bottom: 14px; }
+.report-filters { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.rfbtn {
+  padding: 4px 10px; background: none;
+  border: 0.5px solid #2c2c2a; border-radius: 3px;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #444441; cursor: pointer; transition: all 0.12s;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.rfbtn:hover { color: #888780; border-color: #444441; }
+.rfbtn.active { color: #9FE1CB; border-color: #1D9E7540; background: #0d2820; }
+.report-body { overflow-y: auto; flex: 1; }
+.report-day { margin-bottom: 20px; }
+.report-day-header {
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #5f5e5a; margin-bottom: 8px;
+  padding-bottom: 5px; border-bottom: 0.5px solid #252523;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.report-day-total { color: #3B6D11; }
+.report-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 8px; padding: 4px 0;
+  border-bottom: 0.5px solid #1a1a18;
+}
+.report-row-text {
+  font-size: 11px; color: #888780; flex: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.report-row-brand {
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  flex-shrink: 0; opacity: 0.6;
+}
+.report-row-time { font-size: 11px; color: #7EC850; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.report-grand-total {
+  margin-top: 14px; padding-top: 10px;
+  border-top: 0.5px solid #2c2c2a;
+  font-size: 11px; color: #7EC850;
+  display: flex; justify-content: space-between;
+  letter-spacing: 0.06em;
+}
+.report-empty { font-size: 10px; color: #333331; text-align: center; padding: 30px 0; }
 </style>
 </head>
 <body>
@@ -396,11 +458,13 @@ header {
     <div class="gh-dot" id="gh-dot" title="GitHub sync"></div>
     <div class="save-status" id="save-status"></div>
     <button class="hbtn" id="toggle-archived">ver archivadas</button>
+    <button class="hbtn" id="report-btn">reporte</button>
     <button class="hbtn" id="settings-btn">⚙</button>
     <div class="summary" id="summary">—</div>
   </div>
 </header>
 
+<!-- Settings modal -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal">
     <h2>GitHub Sync</h2>
@@ -413,6 +477,23 @@ header {
     <div class="modal-btns">
       <button class="mbtn-save" id="modal-save">Guardar</button>
       <button class="mbtn-cancel" id="modal-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Report modal -->
+<div class="modal-overlay" id="report-modal">
+  <div class="report-modal">
+    <h2>Reporte de tiempo</h2>
+    <div class="report-filters">
+      <button class="rfbtn active" data-period="today">Hoy</button>
+      <button class="rfbtn" data-period="week">Esta semana</button>
+      <button class="rfbtn" data-period="month">Este mes</button>
+      <button class="rfbtn" data-period="all">Todo</button>
+    </div>
+    <div class="report-body" id="report-body"></div>
+    <div class="modal-btns" style="margin-top:14px">
+      <button class="mbtn-cancel" id="report-close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -526,6 +607,7 @@ header {
         <button class="col-add-btn" data-target="done">+</button>
       </div>
     </div>
+    <div class="col-time-total" id="done-time-total"></div>
     <div class="cards" id="cards-done"></div>
     <div class="add-form" id="form-done">
       <textarea id="text-done" rows="2" placeholder="nueva tarea..."></textarea>
@@ -557,7 +639,57 @@ const GH = {
 };
 
 let tasks = [], saveTimer = null, showArchived = false, searchQ = '', brandF = '';
-let ghSha = null; // current SHA of tasks.json in GitHub
+let ghSha = null;
+
+// ── Time tracking ──────────────────────────────────────────────
+
+function fmtTime(s) {
+  if (!s || s <= 0) return '0m';
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  if (m > 0) return `${m}m`;
+  return `${s}s`;
+}
+
+function getTimeTotal(task) {
+  if (!task.timeLog || !task.timeLog.length) return 0;
+  const now = Date.now();
+  return task.timeLog.reduce((sum, entry) => {
+    const start = new Date(entry.start).getTime();
+    const end = entry.end ? new Date(entry.end).getTime() : now;
+    return sum + Math.floor((end - start) / 1000);
+  }, 0);
+}
+
+function openSession(task) {
+  if (!task.timeLog) task.timeLog = [];
+  // Close any stale open session first (e.g. page was closed mid-session)
+  task.timeLog.forEach(e => { if (!e.end) e.end = new Date().toISOString(); });
+  task.timeLog.push({ start: new Date().toISOString(), end: null });
+}
+
+function closeSession(task) {
+  if (!task.timeLog) return;
+  const open = task.timeLog.find(e => !e.end);
+  if (open) {
+    open.end = new Date().toISOString();
+    task.timeSpent = task.timeLog.reduce((sum, e) => {
+      return sum + Math.floor((new Date(e.end) - new Date(e.start)) / 1000);
+    }, 0);
+  }
+}
+
+// Live timer tick — updates only the badge DOM nodes, no full re-render
+setInterval(() => {
+  document.querySelectorAll('[data-timer]').forEach(el => {
+    const task = tasks.find(t => t.id === el.dataset.timer);
+    if (task) el.textContent = '⏱ ' + fmtTime(getTimeTotal(task));
+  });
+}, 1000);
+
+// ── GitHub API ─────────────────────────────────────────────────
 
 function setStatus(state, text) {
   const dot = document.getElementById('gh-dot');
@@ -624,7 +756,6 @@ function save() {
       }
     } catch(e) {
       if (String(e).includes('409') || String(e).includes('422')) {
-        // SHA conflict — re-fetch and retry once
         try { tasks = await ghGet(); render(); } catch {}
       }
       setStatus('err', 'error al guardar');
@@ -632,31 +763,9 @@ function save() {
   }, 1200);
 }
 
+// ── Helpers ────────────────────────────────────────────────────
+
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-
-function mhash(s, seed) {
-  let h = seed >>> 0;
-  for (let i = 0; i < s.length; i++) {
-    let c = s.charCodeAt(i);
-    c = Math.imul(c, 0xcc9e2d51) >>> 0;
-    c = ((c << 15) | (c >>> 17)) >>> 0;
-    c = Math.imul(c, 0x1b873593) >>> 0;
-    h ^= c;
-    h = ((h << 13) | (h >>> 19)) >>> 0;
-    h = (Math.imul(h, 5) + 0xe6546b64) >>> 0;
-  }
-  h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b) >>> 0;
-  h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35) >>> 0;
-  return (h ^ h >>> 16) >>> 0;
-}
-
-function rot(id) {
-  return ((mhash(id, 1) % 80) - 40) / 10; // -4 to +4 deg
-}
-
-function offsetX(id) {
-  return ((mhash(id, 7) >>> 27) * 24 / 31) - 12; // -12 to +12 px via translateX
-}
 
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -677,9 +786,12 @@ function matches(t) {
   return true;
 }
 
+// ── Card rendering ─────────────────────────────────────────────
+
 function card(task) {
   const cls = BRAND_CLASS[task.brand || ''] || 'personal';
   const isDone = task.col === 'done';
+  const isProgress = task.col === 'progress';
   const isWaiting = task.col === 'waiting';
 
   const brandLabel = isWaiting && task.assignee
@@ -693,8 +805,17 @@ function card(task) {
   const waitBadge = isWaiting
     ? `<button class="cbadge wait-${task.waitStatus==='sent'?'sent':'pending'}" data-toggle-wait="${esc(task.id)}">${task.waitStatus==='sent'?'✓ enviada':'· por enviar'}</button>` : '';
 
-  const meta = priBadge || dateBadge || waitBadge
-    ? `<div class="card-meta">${priBadge}${dateBadge}${waitBadge}</div>` : '';
+  // Timer badge — live running in progress
+  const timerBadge = isProgress
+    ? `<span class="cbadge timer" data-timer="${esc(task.id)}">⏱ ${fmtTime(getTimeTotal(task))}</span>` : '';
+
+  // Static time badge — in done and any other column with accumulated time
+  const totalSecs = getTimeTotal(task);
+  const timeDone = !isProgress && totalSecs >= 60
+    ? `<span class="cbadge time-done">${fmtTime(totalSecs)}</span>` : '';
+
+  const meta = priBadge || dateBadge || waitBadge || timerBadge || timeDone
+    ? `<div class="card-meta">${priBadge}${dateBadge}${waitBadge}${timerBadge}${timeDone}</div>` : '';
 
   return `
     <div class="card ${cls}${isDone?' done-card':''}"
@@ -709,6 +830,8 @@ function card(task) {
       </div>
     </div>`;
 }
+
+// ── Render ─────────────────────────────────────────────────────
 
 function render() {
   COLS.forEach(col => {
@@ -730,18 +853,27 @@ function render() {
     });
   });
 
+  // Done column time total
+  const doneSecs = tasks
+    .filter(t => t.col === 'done' && !t.archived)
+    .reduce((sum, t) => sum + getTimeTotal(t), 0);
+  const doneTotalEl = document.getElementById('done-time-total');
+  if (doneTotalEl) doneTotalEl.textContent = doneSecs >= 60 ? `total: ${fmtTime(doneSecs)}` : '';
+
   const active = tasks.filter(t => !t.archived);
   const done = active.filter(t => t.col === 'done').length;
   document.getElementById('summary').innerHTML =
     active.length === 0 ? '—' : `<span>${done}</span> / ${active.length}`;
 }
 
+// ── Edit ───────────────────────────────────────────────────────
+
 function openEdit(id) {
   const task = tasks.find(t => t.id === id);
   if (!task) return;
-  const card = document.querySelector(`.card[data-id="${id}"]`);
-  if (!card) return;
-  card.draggable = false;
+  const cardEl = document.querySelector(`.card[data-id="${id}"]`);
+  if (!cardEl) return;
+  cardEl.draggable = false;
   const isWaiting = task.col === 'waiting';
   const wrap = document.createElement('div');
   wrap.className = 'c-edit-wrap';
@@ -769,8 +901,8 @@ function openEdit(id) {
       <button class="c-edit-save" data-save="${esc(id)}">guardar</button>
       <button class="c-edit-cancel" data-cancel-edit>✕</button>
     </div>`;
-  card.style.height = 'auto';
-  card.appendChild(wrap);
+  cardEl.style.height = 'auto';
+  cardEl.appendChild(wrap);
   const ta = wrap.querySelector('#ei-text');
   ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
   ta.addEventListener('keydown', e => {
@@ -797,14 +929,18 @@ function addTask(col) {
   const text = document.getElementById('text-' + col)?.value.trim();
   if (!text) return;
   const assigneeEl = document.getElementById('assignee-' + col);
-  tasks.push({
+  const task = {
     id: uid(), col, text,
     brand: document.getElementById('brand-' + col)?.value || '',
     priority: document.getElementById('priority-' + col)?.value || '',
     date: document.getElementById('date-' + col)?.value || '',
     assignee: assigneeEl ? assigneeEl.value.trim() : '',
-    archived: false
-  });
+    archived: false,
+    timeLog: [],
+    timeSpent: 0
+  };
+  if (col === 'progress') openSession(task);
+  tasks.push(task);
   save(); render(); closeForm(col);
 }
 
@@ -821,6 +957,8 @@ function closeForm(col) {
     if (el) el.value = '';
   });
 }
+
+// ── Drag & drop ────────────────────────────────────────────────
 
 let dragId = null;
 function onDragStart(e) {
@@ -841,9 +979,20 @@ document.querySelectorAll('.col').forEach(col => {
     e.preventDefault(); col.classList.remove('drag-over');
     const id = e.dataTransfer.getData('text/plain');
     const t = tasks.find(t => t.id === id);
-    if (t) { t.col = col.dataset.col; save(); render(); }
+    if (t) {
+      const prevCol = t.col;
+      const newCol = col.dataset.col;
+      if (prevCol === 'progress' && newCol !== 'progress') closeSession(t);
+      if (newCol === 'progress' && prevCol !== 'progress') openSession(t);
+      if (newCol === 'done' && prevCol !== 'done') t.completedAt = new Date().toISOString();
+      if (newCol !== 'done' && prevCol === 'done') t.completedAt = null;
+      t.col = newCol;
+      save(); render();
+    }
   });
 });
+
+// ── Events ─────────────────────────────────────────────────────
 
 document.addEventListener('click', e => {
   const el = e.target;
@@ -895,7 +1044,8 @@ document.getElementById('toggle-archived').addEventListener('click', function() 
   render();
 });
 
-// Settings modal
+// ── Settings modal ─────────────────────────────────────────────
+
 document.getElementById('settings-btn').addEventListener('click', () => {
   document.getElementById('gh-token').value = GH.token;
   document.getElementById('settings-modal').classList.add('open');
@@ -913,6 +1063,102 @@ document.getElementById('modal-save').addEventListener('click', () => {
   document.getElementById('settings-modal').classList.remove('open');
   ghSha = null;
   load();
+});
+
+// ── Report modal ───────────────────────────────────────────────
+
+let reportPeriod = 'today';
+
+function periodStart(period) {
+  const now = new Date();
+  if (period === 'today') {
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+  if (period === 'week') {
+    const d = new Date(now);
+    d.setDate(d.getDate() - d.getDay()); // Sunday
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  if (period === 'month') {
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+  return new Date(0); // all
+}
+
+function renderReport() {
+  const cutoff = periodStart(reportPeriod);
+  const body = document.getElementById('report-body');
+
+  // Collect all sessions in period across all tasks
+  const sessions = [];
+  tasks.forEach(task => {
+    if (!task.timeLog) return;
+    task.timeLog.forEach(entry => {
+      const start = new Date(entry.start);
+      if (start < cutoff) return;
+      const end = entry.end ? new Date(entry.end) : new Date();
+      const secs = Math.floor((end - start) / 1000);
+      if (secs <= 0) return;
+      sessions.push({ task, start, end, secs });
+    });
+  });
+
+  if (!sessions.length) {
+    body.innerHTML = '<div class="report-empty">Sin sesiones en este período</div>';
+    return;
+  }
+
+  // Group by day
+  const byDay = {};
+  sessions.forEach(s => {
+    const key = s.start.toLocaleDateString('es-AR', { weekday:'short', day:'numeric', month:'short' });
+    if (!byDay[key]) byDay[key] = { sessions: [], total: 0 };
+    byDay[key].sessions.push(s);
+    byDay[key].total += s.secs;
+  });
+
+  const grandTotal = sessions.reduce((sum, s) => sum + s.secs, 0);
+
+  let html = '';
+  Object.entries(byDay).reverse().forEach(([day, data]) => {
+    html += `<div class="report-day">
+      <div class="report-day-header">
+        <span>${day}</span>
+        <span class="report-day-total">${fmtTime(data.total)}</span>
+      </div>`;
+    data.sessions.forEach(s => {
+      const brandColor = { BYD:'#2DC98F', BMW:'#5AAAE8', MINI:'#D49030', MOTORRAD:'#E8754A' }[s.task.brand] || '#5f5e5a';
+      html += `<div class="report-row">
+        <span class="report-row-text">${esc(s.task.text)}</span>
+        ${s.task.brand ? `<span class="report-row-brand" style="color:${brandColor}">${esc(s.task.brand)}</span>` : ''}
+        <span class="report-row-time">${fmtTime(s.secs)}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `<div class="report-grand-total"><span>Total del período</span><span>${fmtTime(grandTotal)}</span></div>`;
+  body.innerHTML = html;
+}
+
+document.getElementById('report-btn').addEventListener('click', () => {
+  renderReport();
+  document.getElementById('report-modal').classList.add('open');
+});
+document.getElementById('report-close').addEventListener('click', () => {
+  document.getElementById('report-modal').classList.remove('open');
+});
+document.getElementById('report-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+document.querySelectorAll('[data-period]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    reportPeriod = this.dataset.period;
+    document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    renderReport();
+  });
 });
 
 load();
