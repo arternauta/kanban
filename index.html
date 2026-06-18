@@ -6,6 +6,7 @@
 <title>Kanban — Mis Prioridades</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -377,13 +378,16 @@ header {
   font-size: 10px; font-family: 'IBM Plex Mono', monospace;
   color: #444441; cursor: pointer;
 }
-.gh-dot {
+.gh-dot, .cal-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: #2c2c2a; flex-shrink: 0;
   transition: background 0.3s;
 }
-.gh-dot.ok { background: #3B6D11; }
+.gh-dot.ok  { background: #3B6D11; }
 .gh-dot.err { background: #8B2020; }
+.cal-dot.ok  { background: #1a73e8; }
+.cal-dot.err { background: #8B2020; }
+.cal-dot.syncing { background: #BA7517; }
 .save-status { font-size: 9px; color: #2c2c2a; letter-spacing: 0.06em; transition: color 0.3s; }
 .save-status.saving { color: #5f5e5a; }
 .save-status.saved { color: #3B6D11; }
@@ -456,6 +460,7 @@ header {
   </select>
   <div class="header-right">
     <div class="gh-dot" id="gh-dot" title="GitHub sync"></div>
+    <div class="cal-dot" id="cal-dot" title="Google Calendar"></div>
     <div class="save-status" id="save-status"></div>
     <button class="hbtn" id="toggle-archived">ver archivadas</button>
     <button class="hbtn" id="report-btn">reporte</button>
@@ -477,6 +482,18 @@ header {
     <div class="modal-btns">
       <button class="mbtn-save" id="modal-save">Guardar</button>
       <button class="mbtn-cancel" id="modal-cancel">Cancelar</button>
+    </div>
+
+    <div style="border-top:0.5px solid #252523;margin:18px 0 14px"></div>
+    <h2>Google Calendar</h2>
+    <label>OAuth Client ID</label>
+    <input type="text" id="gcal-client-id" placeholder="xxxx.apps.googleusercontent.com">
+    <p class="modal-note">
+      Crea un proyecto en <strong>console.cloud.google.com</strong> → APIs → Google Calendar API → Credenciales → OAuth 2.0 Client ID (tipo "Web application"). Agregá <strong>http://localhost:3000</strong> en "Authorized JavaScript origins".<br><br>
+      Una vez configurado, al completar una tarea se creará un evento por cada sesión trabajada en tu Google Calendar.
+    </p>
+    <div class="modal-btns">
+      <button class="mbtn-save" id="gcal-save">Guardar y conectar</button>
     </div>
   </div>
 </div>
@@ -984,7 +1001,10 @@ document.querySelectorAll('.col').forEach(col => {
       const newCol = col.dataset.col;
       if (prevCol === 'progress' && newCol !== 'progress') closeSession(t);
       if (newCol === 'progress' && prevCol !== 'progress') openSession(t);
-      if (newCol === 'done' && prevCol !== 'done') t.completedAt = new Date().toISOString();
+      if (newCol === 'done' && prevCol !== 'done') {
+        t.completedAt = new Date().toISOString();
+        syncTaskToCalendar(t);
+      }
       if (newCol !== 'done' && prevCol === 'done') t.completedAt = null;
       t.col = newCol;
       save(); render();
@@ -1159,6 +1179,114 @@ document.querySelectorAll('[data-period]').forEach(btn => {
     this.classList.add('active');
     renderReport();
   });
+});
+
+// ── Google Calendar ────────────────────────────────────────────
+
+let tokenClient = null;
+let calToken = null;
+let calTokenExpiry = 0;
+let tokenResolve = null;
+let tokenReject = null;
+
+function calDot(state) {
+  const el = document.getElementById('cal-dot');
+  if (el) el.className = 'cal-dot' + (state ? ' ' + state : '');
+}
+
+function initGoogleAuth() {
+  const clientId = localStorage.getItem('gcal_client_id');
+  if (!clientId || !window.google?.accounts?.oauth2) return;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: 'https://www.googleapis.com/auth/calendar.events',
+    callback: (resp) => {
+      if (resp.access_token) {
+        calToken = resp.access_token;
+        calTokenExpiry = Date.now() + (resp.expires_in - 60) * 1000;
+        calDot('ok');
+        if (tokenResolve) { tokenResolve(calToken); tokenResolve = null; tokenReject = null; }
+      } else {
+        calDot('err');
+        if (tokenReject) { tokenReject(resp.error); tokenResolve = null; tokenReject = null; }
+      }
+    }
+  });
+}
+
+function getCalToken() {
+  return new Promise((resolve, reject) => {
+    if (calToken && Date.now() < calTokenExpiry) { resolve(calToken); return; }
+    if (!tokenClient) { reject('Google Calendar no configurado'); return; }
+    tokenResolve = resolve;
+    tokenReject = reject;
+    tokenClient.requestAccessToken({ prompt: calToken ? '' : 'consent' });
+  });
+}
+
+async function createCalEvent(session, task) {
+  const token = await getCalToken();
+  const title = task.brand ? `[${task.brand}] ${task.text}` : task.text;
+  const totalSecs = getTimeTotal(task);
+  const desc = [
+    task.brand    ? `Marca: ${task.brand}`           : '',
+    task.priority ? `Prioridad: ${task.priority}`    : '',
+    totalSecs >= 60 ? `Tiempo total: ${fmtTime(totalSecs)}` : ''
+  ].filter(Boolean).join('\n');
+
+  const r = await fetch(
+    'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        summary: title,
+        description: desc || undefined,
+        start: { dateTime: session.start, timeZone: 'America/Argentina/Buenos_Aires' },
+        end:   { dateTime: session.end,   timeZone: 'America/Argentina/Buenos_Aires' }
+      })
+    }
+  );
+  if (!r.ok) throw new Error(await r.text());
+  return await r.json();
+}
+
+async function syncTaskToCalendar(task) {
+  if (!task.timeLog || !localStorage.getItem('gcal_client_id')) return;
+  const pending = task.timeLog.filter(s => s.end && !s.calSynced);
+  if (!pending.length) return;
+
+  calDot('syncing');
+  let allOk = true;
+  for (const session of pending) {
+    try {
+      await createCalEvent(session, task);
+      session.calSynced = true;
+    } catch (e) {
+      console.error('Calendar sync error:', e);
+      allOk = false;
+    }
+  }
+  calDot(allOk ? 'ok' : 'err');
+  save();
+}
+
+// Init Google auth once GIS script loads
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(initGoogleAuth, 500));
+} else {
+  setTimeout(initGoogleAuth, 500);
+}
+
+// Google Calendar settings
+document.getElementById('gcal-save').addEventListener('click', () => {
+  const id = document.getElementById('gcal-client-id').value.trim();
+  if (id) {
+    localStorage.setItem('gcal_client_id', id);
+    document.getElementById('settings-modal').classList.remove('open');
+    tokenClient = null; calToken = null;
+    initGoogleAuth();
+  }
 });
 
 load();
