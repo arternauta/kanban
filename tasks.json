@@ -1,9 +1,10 @@
 [
   {
     "id": "default5",
-    "col": "boga",
+    "col": "done",
     "text": "Armar contenido Shark BYD - Fuertote",
-    "date": ""
+    "date": "",
+    "completedAt": "2026-06-18T22:17:24.715Z"
   },
   {
     "id": "default9",
@@ -66,12 +67,13 @@
   },
   {
     "id": "default22",
-    "col": "waiting",
+    "col": "done",
     "text": "LANZAMIENTO YUAN PRO Y ATTO",
     "date": "",
     "brand": "",
     "priority": "",
-    "assignee": "Joel"
+    "assignee": "Joel",
+    "completedAt": "2026-06-18T21:11:27.735Z"
   },
   {
     "id": "default23",
@@ -165,12 +167,13 @@
   },
   {
     "id": "mqfb5et2l4o8cf8mjvk",
-    "col": "waiting",
+    "col": "done",
     "text": "Material WON dia del padre",
     "date": "",
     "brand": "",
     "priority": "",
-    "assignee": "Nick"
+    "assignee": "Nick",
+    "completedAt": "2026-06-18T21:24:52.606Z"
   },
   {
     "id": "mqfb5qb8ey05ojifq8a",
@@ -221,13 +224,21 @@
   },
   {
     "id": "mqfc64c9dhj8ob7zofb",
-    "col": "boga",
+    "col": "done",
     "text": "Postear video Yuan Pro, pelirroja",
     "brand": "BYD",
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T22:14:28.597Z",
+        "end": "2026-06-18T23:39:20.398Z"
+      }
+    ],
+    "timeSpent": 5091,
+    "completedAt": "2026-06-18T23:39:20.398Z"
   },
   {
     "id": "mqfcaspzsa8ttfqjr6r",
@@ -277,7 +288,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqh0rpvd967ankac66j",
@@ -297,17 +308,18 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqh5aig8qyssatrbbvc",
-    "col": "boga",
+    "col": "done",
     "text": "COPY Para 10 publicaciones FUTBOL",
     "brand": "BYD",
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false
+    "archived": false,
+    "completedAt": "2026-06-18T22:17:30.232Z"
   },
   {
     "id": "mqh7ugy4utt82xcxeab",
@@ -317,7 +329,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqi8o28mf8fomlx4r9",
@@ -327,11 +339,11 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false
+    "archived": true
   },
   {
     "id": "mqi93uilb9miadicka",
-    "col": "boga",
+    "col": "todo",
     "text": "ENTREGA MINI",
     "brand": "MINI",
     "priority": "",
@@ -348,5 +360,364 @@
     "date": "",
     "assignee": "",
     "archived": false
+  },
+  {
+    "id": "mqjkiynyznjfgl1omle",
+    "col": "todo",
+    "text": "PROGRAMAR RRSS",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T14:54:03.627Z",
+        "end": "2026-06-18T14:54:10.862Z"
+      }
+    ],
+    "timeSpent": 7
+  },
+  {
+    "id": "mqjkt18uewd5qz81b0g",
+    "col": "done",
+    "text": "Backup SD a disco FASA",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": true,
+    "timeLog": [
+      {
+        "start": "2026-06-18T14:09:18.899Z",
+        "end": "2026-06-18T14:28:50.860Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 1171,
+    "completedAt": "2026-06-18T14:28:50.860Z"
+  },
+  {
+    "id": "mqjlb8cmek7gv1fmct",
+    "col": "done",
+    "text": "Implementación de Google Calendar con Tasket",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": true,
+    "timeLog": [
+      {
+        "start": "2026-06-18T14:23:28.011Z",
+        "end": "2026-06-18T14:27:14.010Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 225,
+    "completedAt": "2026-06-18T14:27:14.010Z"
+  },
+  {
+    "id": "mqjlfq44fx1o56rp05e",
+    "col": "done",
+    "text": "COLORIZAR, EDITAR Y SUBTITULAR VIDEO CLUB M - DIA DEL PADRE",
+    "brand": "BMW",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T14:27:00.488Z",
+        "end": "2026-06-18T15:30:46.512Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 3826,
+    "completedAt": "2026-06-18T15:30:46.512Z"
+  },
+  {
+    "id": "mqjodqedbzynkw42g9",
+    "col": "boga",
+    "text": "REPORTE DE LOS LUNES",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0
+  },
+  {
+    "id": "mqjwqs1p1z66mv5klt7",
+    "col": "done",
+    "text": "GRABACIÓN EN ATRIO MALL",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T19:43:29.726Z",
+        "end": "2026-06-18T19:43:35.010Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 5,
+    "completedAt": "2026-06-18T19:43:35.010Z"
+  },
+  {
+    "id": "mqjwx4f5lq8o9tvq30m",
+    "col": "boga",
+    "text": "ESTRATEGIA RRSS",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T20:13:02.272Z",
+        "end": "2026-06-18T20:53:45.978Z"
+      }
+    ],
+    "timeSpent": 2443
+  },
+  {
+    "id": "mqjwylne6k4c1h8gs7",
+    "col": "done",
+    "text": "Subir contenido Shark Cerro Azul - DRONE",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T19:49:32.584Z",
+        "end": "2026-06-18T20:12:34.704Z",
+        "calSynced": true
+      },
+      {
+        "start": "2026-06-18T20:15:07.431Z",
+        "end": "2026-06-18T20:53:30.567Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 3685,
+    "completedAt": "2026-06-18T20:53:30.567Z"
+  },
+  {
+    "id": "mqjwz580ocmumpkyxa",
+    "col": "done",
+    "text": "SUBIR HISTORIAS BYD SHARK - ANUNCIO CHANNEL",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T19:50:00.516Z",
+        "end": "2026-06-18T20:12:36.622Z",
+        "calSynced": true
+      },
+      {
+        "start": "2026-06-18T21:11:34.749Z",
+        "end": "2026-06-18T22:14:09.073Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 5110,
+    "completedAt": "2026-06-18T22:14:09.073Z"
+  },
+  {
+    "id": "mqjxc3b0mhpsetbnph",
+    "col": "done",
+    "text": "Edición Invitación Fathers Day",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T22:17:14.994Z",
+        "end": "2026-06-18T23:39:17.389Z"
+      }
+    ],
+    "timeSpent": 4922,
+    "completedAt": "2026-06-18T23:39:17.390Z"
+  },
+  {
+    "id": "mqjxci9xpwpjihob6h",
+    "col": "boga",
+    "text": "Edición Historias Atrio Mall",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T22:15:59.346Z",
+        "end": "2026-06-18T23:39:23.913Z"
+      }
+    ],
+    "timeSpent": 5004
+  },
+  {
+    "id": "mqjxczbfzvr4tphk0sq",
+    "col": "todo",
+    "text": "Subir material de grilla para Jesus",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0
+  },
+  {
+    "id": "mqjyvseafh8yx25xcd9",
+    "col": "done",
+    "text": "Publicar expectativa Yuan Pro y Atto",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T20:43:22.142Z",
+        "end": "2026-06-18T21:11:18.683Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 1676,
+    "completedAt": "2026-06-18T21:11:18.683Z"
+  },
+  {
+    "id": "mqjzx5ohuw35bcv5it",
+    "col": "done",
+    "text": "Subir Highlights Sealion 7",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-18T21:24:28.494Z",
+        "end": "2026-06-18T21:28:40.077Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 251,
+    "completedAt": "2026-06-18T21:28:40.077Z"
+  },
+  {
+    "id": "mqkytd3idiyerms0qv",
+    "col": "done",
+    "text": "MODERAR RRSS",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-19T13:29:13.597Z",
+        "end": "2026-06-19T13:58:37.646Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 1764,
+    "completedAt": "2026-06-19T13:58:37.646Z"
+  },
+  {
+    "id": "mqkzwbf1l47xj4wo57a",
+    "col": "boga",
+    "text": "Busqueda de Material MINI para presentacion",
+    "brand": "MINI",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-19T14:05:56.851Z",
+        "end": "2026-06-19T15:23:38.511Z"
+      }
+    ],
+    "timeSpent": 4661,
+    "checklist": [
+      {
+        "id": "mql20lemjanb8hi9ej",
+        "text": "LEO",
+        "done": false
+      },
+      {
+        "id": "mql20qukw5ehej92aif",
+        "text": "WON",
+        "done": false
+      },
+      {
+        "id": "mql20vlxxuw13tcckf",
+        "text": "LMS",
+        "done": false
+      },
+      {
+        "id": "mql210u5przlb2bma9o",
+        "text": "PRODUCCION VERANO",
+        "done": true
+      },
+      {
+        "id": "mql215g2cewb4mhumha",
+        "text": "MERCH MUNDIAL",
+        "done": false
+      },
+      {
+        "id": "mql218srvro9e395e2",
+        "text": "RIDE MINI",
+        "done": false
+      },
+      {
+        "id": "mql2cg89bke5tncafr",
+        "text": "Año nuevo chino",
+        "done": false
+      }
+    ]
+  },
+  {
+    "id": "mql0fjf55aa9ce18tda",
+    "col": "done",
+    "text": "Publicar material de la 310 en historias",
+    "brand": "MOTORRAD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-19T14:14:30.118Z",
+        "end": "2026-06-19T14:53:29.843Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 2339,
+    "completedAt": "2026-06-19T14:53:29.843Z"
+  },
+  {
+    "id": "mql0kqu4qjwhxudysx",
+    "col": "boga",
+    "text": "INFO RECAP BYD",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0
   }
 ]

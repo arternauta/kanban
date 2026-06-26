@@ -60,6 +60,10 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
+  const { networkInterfaces } = require('os');
+  const nets = networkInterfaces();
+  const ips = Object.values(nets).flat().filter(n => n.family === 'IPv4' && !n.internal).map(n => n.address);
   console.log(`Kanban corriendo en http://localhost:${PORT}`);
+  ips.forEach(ip => console.log(`Red local:          http://${ip}:${PORT}`));
 });
