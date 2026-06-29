@@ -1159,7 +1159,7 @@
   },
   {
     "id": "mqzlrn3f2zhhorqhbgn",
-    "col": "progress",
+    "col": "waiting",
     "text": "GRILLA JULIO",
     "brand": "BMW",
     "priority": "",
@@ -1173,10 +1173,10 @@
       },
       {
         "start": "2026-06-29T19:56:39.211Z",
-        "end": null
+        "end": "2026-06-29T21:57:07.251Z"
       }
     ],
-    "timeSpent": 189,
+    "timeSpent": 7417,
     "checklist": [
       {
         "id": "mqzlsy92972ql34ao3q",
@@ -1191,7 +1191,8 @@
       {
         "id": "mqzlt5q5z9z2bk4dice",
         "text": "ESTADISTICAS",
-        "done": false
+        "done": true,
+        "timeAtCheck": 1219
       }
     ],
     "pauseReason": null

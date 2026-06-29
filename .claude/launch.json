@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kanban",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/arternauta/projects/kanban/server.js"],
+      "port": 3000
+    }
+  ]
+}
