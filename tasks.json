@@ -4,19 +4,22 @@
     "col": "done",
     "text": "Armar contenido Shark BYD - Fuertote",
     "date": "",
-    "completedAt": "2026-06-18T22:17:24.715Z"
+    "completedAt": "2026-06-18T22:17:24.715Z",
+    "archived": true
   },
   {
     "id": "default9",
     "col": "todo",
     "text": "Revision de Feed BYD",
-    "date": ""
+    "date": "",
+    "deleted": true
   },
   {
     "id": "default10",
     "col": "todo",
     "text": "Revision de Feed BMW",
-    "date": ""
+    "date": "",
+    "deleted": true
   },
   {
     "id": "default14",
@@ -33,16 +36,35 @@
     "archived": true
   },
   {
-    "id": "default16",
+    "id": "mqv4la6w9eebhu264yv",
     "col": "todo",
-    "text": "Hightligts BMW",
-    "date": ""
+    "text": "COUNT DOWN DE TAi7",
+    "brand": "BYD",
+    "priority": "baja",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T16:11:27.691Z",
+        "end": "2026-06-29T16:11:39.588Z"
+      }
+    ],
+    "timeSpent": 11,
+    "pauseReason": null
   },
   {
-    "id": "default17",
-    "col": "boga",
-    "text": "Imprimir tickets UBER",
-    "date": ""
+    "id": "mqv25r7xegyt3rzw5ra",
+    "col": "todo",
+    "text": "Material 310 en showroom colores",
+    "brand": "MOTORRAD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "pauseReason": null
   },
   {
     "id": "default19",
@@ -73,7 +95,8 @@
     "brand": "",
     "priority": "",
     "assignee": "Joel",
-    "completedAt": "2026-06-18T21:11:27.735Z"
+    "completedAt": "2026-06-18T21:11:27.735Z",
+    "archived": true
   },
   {
     "id": "default23",
@@ -173,7 +196,8 @@
     "brand": "",
     "priority": "",
     "assignee": "Nick",
-    "completedAt": "2026-06-18T21:24:52.606Z"
+    "completedAt": "2026-06-18T21:24:52.606Z",
+    "archived": true
   },
   {
     "id": "mqfb5qb8ey05ojifq8a",
@@ -230,7 +254,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-18T22:14:28.597Z",
@@ -318,7 +342,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "completedAt": "2026-06-18T22:17:30.232Z"
   },
   {
@@ -353,30 +377,14 @@
   },
   {
     "id": "mqibx23ps3xmskl3fp",
-    "col": "todo",
+    "col": "done",
     "text": "PUBLICAR VIDEO DE LA R1300GS",
     "brand": "MOTORRAD",
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false
-  },
-  {
-    "id": "mqjkiynyznjfgl1omle",
-    "col": "todo",
-    "text": "PROGRAMAR RRSS",
-    "brand": "BYD",
-    "priority": "",
-    "date": "",
-    "assignee": "",
-    "archived": false,
-    "timeLog": [
-      {
-        "start": "2026-06-18T14:54:03.627Z",
-        "end": "2026-06-18T14:54:10.862Z"
-      }
-    ],
-    "timeSpent": 7
+    "archived": true,
+    "completedAt": "2026-06-26T14:44:58.216Z"
   },
   {
     "id": "mqjkt18uewd5qz81b0g",
@@ -424,7 +432,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-18T14:27:00.488Z",
@@ -436,18 +444,6 @@
     "completedAt": "2026-06-18T15:30:46.512Z"
   },
   {
-    "id": "mqjodqedbzynkw42g9",
-    "col": "boga",
-    "text": "REPORTE DE LOS LUNES",
-    "brand": "BYD",
-    "priority": "",
-    "date": "",
-    "assignee": "",
-    "archived": false,
-    "timeLog": [],
-    "timeSpent": 0
-  },
-  {
     "id": "mqjwqs1p1z66mv5klt7",
     "col": "done",
     "text": "GRABACIÓN EN ATRIO MALL",
@@ -455,7 +451,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-18T19:43:29.726Z",
@@ -467,23 +463,6 @@
     "completedAt": "2026-06-18T19:43:35.010Z"
   },
   {
-    "id": "mqjwx4f5lq8o9tvq30m",
-    "col": "boga",
-    "text": "ESTRATEGIA RRSS",
-    "brand": "BYD",
-    "priority": "",
-    "date": "",
-    "assignee": "",
-    "archived": false,
-    "timeLog": [
-      {
-        "start": "2026-06-18T20:13:02.272Z",
-        "end": "2026-06-18T20:53:45.978Z"
-      }
-    ],
-    "timeSpent": 2443
-  },
-  {
     "id": "mqjwylne6k4c1h8gs7",
     "col": "done",
     "text": "Subir contenido Shark Cerro Azul - DRONE",
@@ -491,7 +470,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-18T19:49:32.584Z",
@@ -515,7 +494,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-18T19:50:00.516Z",
@@ -539,7 +518,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-18T22:17:14.994Z",
@@ -550,33 +529,28 @@
     "completedAt": "2026-06-18T23:39:17.390Z"
   },
   {
-    "id": "mqjxci9xpwpjihob6h",
-    "col": "boga",
-    "text": "Edición Historias Atrio Mall",
-    "brand": "",
+    "id": "mqjkiynyznjfgl1omle",
+    "col": "todo",
+    "text": "PROGRAMAR RRSS",
+    "brand": "BYD",
     "priority": "",
     "date": "",
     "assignee": "",
     "archived": false,
     "timeLog": [
       {
-        "start": "2026-06-18T22:15:59.346Z",
-        "end": "2026-06-18T23:39:23.913Z"
+        "start": "2026-06-18T14:54:03.627Z",
+        "end": "2026-06-18T14:54:10.862Z"
       }
     ],
-    "timeSpent": 5004
+    "timeSpent": 7,
+    "deleted": true
   },
   {
-    "id": "mqjxczbfzvr4tphk0sq",
+    "id": "default17",
     "col": "todo",
-    "text": "Subir material de grilla para Jesus",
-    "brand": "BYD",
-    "priority": "",
-    "date": "",
-    "assignee": "",
-    "archived": false,
-    "timeLog": [],
-    "timeSpent": 0
+    "text": "Imprimir tickets UBER",
+    "date": ""
   },
   {
     "id": "mqjyvseafh8yx25xcd9",
@@ -586,7 +560,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-18T20:43:22.142Z",
@@ -605,7 +579,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-18T21:24:28.494Z",
@@ -624,7 +598,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-19T13:29:13.597Z",
@@ -636,60 +610,6 @@
     "completedAt": "2026-06-19T13:58:37.646Z"
   },
   {
-    "id": "mqkzwbf1l47xj4wo57a",
-    "col": "boga",
-    "text": "Busqueda de Material MINI para presentacion",
-    "brand": "MINI",
-    "priority": "",
-    "date": "",
-    "assignee": "",
-    "archived": false,
-    "timeLog": [
-      {
-        "start": "2026-06-19T14:05:56.851Z",
-        "end": "2026-06-19T15:23:38.511Z"
-      }
-    ],
-    "timeSpent": 4661,
-    "checklist": [
-      {
-        "id": "mql20lemjanb8hi9ej",
-        "text": "LEO",
-        "done": false
-      },
-      {
-        "id": "mql20qukw5ehej92aif",
-        "text": "WON",
-        "done": false
-      },
-      {
-        "id": "mql20vlxxuw13tcckf",
-        "text": "LMS",
-        "done": false
-      },
-      {
-        "id": "mql210u5przlb2bma9o",
-        "text": "PRODUCCION VERANO",
-        "done": true
-      },
-      {
-        "id": "mql215g2cewb4mhumha",
-        "text": "MERCH MUNDIAL",
-        "done": false
-      },
-      {
-        "id": "mql218srvro9e395e2",
-        "text": "RIDE MINI",
-        "done": false
-      },
-      {
-        "id": "mql2cg89bke5tncafr",
-        "text": "Año nuevo chino",
-        "done": false
-      }
-    ]
-  },
-  {
     "id": "mql0fjf55aa9ce18tda",
     "col": "done",
     "text": "Publicar material de la 310 en historias",
@@ -697,7 +617,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-19T14:14:30.118Z",
@@ -709,15 +629,571 @@
     "completedAt": "2026-06-19T14:53:29.843Z"
   },
   {
-    "id": "mql0kqu4qjwhxudysx",
+    "id": "mqv1pvv0cjh8yaz2xqe",
     "col": "boga",
-    "text": "INFO RECAP BYD",
-    "brand": "",
+    "text": "Carrusel Fotos",
+    "brand": "BYD",
     "priority": "",
     "date": "",
     "assignee": "",
     "archived": false,
     "timeLog": [],
     "timeSpent": 0
+  },
+  {
+    "id": "default16",
+    "col": "done",
+    "text": "Hightligts BMW",
+    "date": "",
+    "completedAt": "2026-06-29T19:20:42.622Z",
+    "pauseReason": null
+  },
+  {
+    "id": "mqvbs0wsprajm3a68lo",
+    "col": "done",
+    "text": "Publicar primer contenido de Julio Terán",
+    "brand": "BMW",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-26T19:29:53.303Z",
+        "end": "2026-06-26T19:48:48.317Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 1135,
+    "completedAt": "2026-06-26T19:48:48.317Z"
+  },
+  {
+    "id": "mqzjudrqlj7xkcilik",
+    "col": "done",
+    "text": "HISTORIAS MUNDIAL",
+    "brand": "TODAS",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T18:26:39.704Z",
+        "end": "2026-06-29T19:13:49.287Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 2829,
+    "pauseReason": null,
+    "completedAt": "2026-06-29T19:13:49.287Z"
+  },
+  {
+    "id": "mqzg13ax8glf7sobyxq",
+    "col": "done",
+    "text": "Reporte grilla MINI y contenido faltante",
+    "brand": "MINI",
+    "priority": "alta",
+    "date": "2026-06-29",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T16:47:36.358Z",
+        "end": "2026-06-29T16:48:16.208Z",
+        "calSynced": true
+      },
+      {
+        "start": "2026-06-29T16:49:31.123Z",
+        "end": "2026-06-29T16:49:37.588Z",
+        "calSynced": true
+      },
+      {
+        "start": "2026-06-29T16:49:40.355Z",
+        "end": "2026-06-29T17:00:53.473Z",
+        "calSynced": true
+      },
+      {
+        "start": "2026-06-29T18:13:53.269Z",
+        "end": "2026-06-29T18:26:44.655Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 1489,
+    "pauseReason": null,
+    "completedAt": "2026-06-29T19:13:39.270Z"
+  },
+  {
+    "id": "mqzeewsk99pd09y0dvo",
+    "col": "done",
+    "text": "Revisar contenido regional que envía LUZ",
+    "brand": "BYD",
+    "priority": "media",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T15:54:37.316Z",
+        "end": "2026-06-29T16:12:52.836Z",
+        "calSynced": true
+      },
+      {
+        "start": "2026-06-29T16:13:04.647Z",
+        "end": "2026-06-29T16:13:58.688Z",
+        "calSynced": true
+      },
+      {
+        "start": "2026-06-29T16:14:06.336Z",
+        "end": "2026-06-29T16:14:08.346Z",
+        "calSynced": true
+      },
+      {
+        "start": "2026-06-29T16:19:50.367Z",
+        "end": "2026-06-29T16:40:06.399Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 2367,
+    "images": [
+      "1782748639531_fipaae58h5.jpeg"
+    ],
+    "cover": "1782748639531_fipaae58h5.jpeg",
+    "pauseReason": null,
+    "completedAt": "2026-06-29T16:40:06.399Z"
+  },
+  {
+    "id": "mqzdljh3qoa5gnnhwy",
+    "col": "done",
+    "text": "Publicar segundo recap de BYD",
+    "brand": "BYD",
+    "priority": "media",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T15:32:18.520Z",
+        "end": "2026-06-29T15:42:38.806Z"
+      }
+    ],
+    "timeSpent": 620,
+    "pauseReason": null,
+    "completedAt": "2026-06-29T15:42:38.806Z"
+  },
+  {
+    "id": "mqjxczbfzvr4tphk0sq",
+    "col": "done",
+    "text": "Subir material de grilla para Jesus",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "completedAt": "2026-06-29T15:45:41.205Z",
+    "pauseReason": null
+  },
+  {
+    "id": "mqv4dvjtv7voabcius",
+    "col": "done",
+    "text": "Publicar evento del fin de semana",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "completedAt": "2026-06-29T15:45:25.138Z",
+    "pauseReason": null
+  },
+  {
+    "id": "mqzbsh4s2mk5op9b3zl",
+    "col": "done",
+    "text": "Conestar DMs",
+    "brand": "TODAS",
+    "priority": "media",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T14:41:13.471Z",
+        "end": "2026-06-29T15:05:47.644Z",
+        "calSynced": true
+      },
+      {
+        "start": "2026-06-29T15:11:22.885Z",
+        "end": "2026-06-29T15:32:11.198Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 2722,
+    "pauseReason": null,
+    "completedAt": "2026-06-29T15:32:11.198Z"
+  },
+  {
+    "id": "mqv1jicnnv7avqz3ru",
+    "col": "done",
+    "text": "JULIO CON JULIO",
+    "brand": "",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "checklist": [
+      {
+        "id": "mqv1knuf1wfxipdgq8t",
+        "text": "HIGHLIGHTS",
+        "done": false
+      },
+      {
+        "id": "mqv1krk5kgmyiw2znxc",
+        "text": "CONTENIDO",
+        "done": false
+      },
+      {
+        "id": "mqv1kv731g909tvdvuw",
+        "text": "BOOST",
+        "done": false
+      }
+    ],
+    "completedAt": "2026-06-29T15:31:33.213Z",
+    "pauseReason": null
+  },
+  {
+    "id": "mqzablgzdklo82gru5f",
+    "col": "done",
+    "text": "Publicar contenido en RRSS",
+    "brand": "TODAS",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T14:00:04.211Z",
+        "end": "2026-06-29T14:40:42.199Z"
+      }
+    ],
+    "timeSpent": 2437,
+    "completedAt": "2026-06-29T14:40:42.201Z",
+    "pauseReason": null
+  },
+  {
+    "id": "mqz9q0tj6j9si4nupxv",
+    "col": "done",
+    "text": "desactivar publicacion automatica de atrio mall",
+    "brand": "BYD",
+    "priority": "baja",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T13:50:22.399Z",
+        "end": "2026-06-29T13:57:49.190Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 446,
+    "pauseReason": null,
+    "completedAt": "2026-06-29T13:57:49.190Z"
+  },
+  {
+    "id": "mqz9lo8f60ry5hyup0b",
+    "col": "done",
+    "text": "Highlights BMW experts",
+    "brand": "BMW",
+    "priority": "media",
+    "date": "2026-06-29",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T13:39:59.543Z",
+        "end": "2026-06-29T13:48:56.968Z"
+      }
+    ],
+    "timeSpent": 537,
+    "completedAt": "2026-06-29T13:48:56.968Z",
+    "pauseReason": null
+  },
+  {
+    "id": "mqvbrltx39zolylkbsb",
+    "col": "done",
+    "text": "Programar contenido de JULIO TERAN",
+    "brand": "BMW",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T13:38:28.277Z",
+        "end": "2026-06-29T13:50:12.525Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 704,
+    "completedAt": "2026-06-29T13:50:12.525Z",
+    "pauseReason": null
+  },
+  {
+    "id": "mqv1q6ajifjofsuzbk",
+    "col": "done",
+    "text": "GRILLA MOTORRAD",
+    "brand": "MOTORRAD",
+    "priority": "alta",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-26T15:00:00.000Z",
+        "end": "2026-06-26T18:00:00.000Z"
+      }
+    ],
+    "timeSpent": 10800,
+    "checklist": [
+      {
+        "id": "mqv2feekhaxtzl4c4vt",
+        "text": "HISTORIAS",
+        "done": true,
+        "timeAtCheck": 10800
+      },
+      {
+        "id": "mqv2h60e5suwl4rzhjx",
+        "text": "POSTS",
+        "done": true,
+        "timeAtCheck": 10800
+      }
+    ],
+    "completedAt": "2026-06-29T13:33:47.433Z"
+  },
+  {
+    "id": "mqv3ahmiog2cztqhao",
+    "col": "done",
+    "text": "REPORTE LUNES",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T13:37:27.445Z",
+        "end": "2026-06-29T13:45:02.407Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 454,
+    "pauseReason": null,
+    "completedAt": "2026-06-29T13:45:02.407Z"
+  },
+  {
+    "id": "mqv3ac319x1pcgh5bxv",
+    "col": "done",
+    "text": "SLIDES CON RESULTADOS DE LOS LIVES",
+    "brand": "BYD",
+    "priority": "media",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T13:33:55.033Z",
+        "end": "2026-06-29T13:44:45.210Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 650,
+    "completedAt": "2026-06-29T13:44:45.210Z",
+    "pauseReason": null
+  },
+  {
+    "id": "mqvf6ptspn06kpvucvn",
+    "col": "done",
+    "text": "PUBLICAR CONTENIDO MUNDIAL",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-26T21:05:00.000Z",
+        "end": "2026-06-26T21:15:00.000Z"
+      }
+    ],
+    "timeSpent": 600,
+    "completedAt": "2026-06-29T13:33:35.228Z"
+  },
+  {
+    "id": "mqv53yhzx1nrjjqcocr",
+    "col": "done",
+    "text": "Armar presentacion de contenido de munidal",
+    "brand": "TODAS",
+    "priority": "alta",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-26T16:23:16.870Z",
+        "end": "2026-06-26T16:55:26.003Z",
+        "calSynced": true
+      },
+      {
+        "start": "2026-06-26T20:43:40.374Z",
+        "end": "2026-06-26T20:43:45.990Z",
+        "calSynced": true
+      }
+    ],
+    "timeSpent": 1934,
+    "completedAt": "2026-06-26T20:43:45.990Z"
+  },
+  {
+    "id": "mqze27prq6b4dw9k19",
+    "col": "todo",
+    "text": "Recap mes de junio",
+    "brand": "BYD",
+    "priority": "baja",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T15:44:46.741Z",
+        "end": "2026-06-29T15:45:07.835Z"
+      }
+    ],
+    "timeSpent": 21,
+    "pauseReason": null
+  },
+  {
+    "id": "mqze40aa2dpsyg4pcxe",
+    "col": "todo",
+    "text": "Campaña \"Sabes que es un MINI\"",
+    "brand": "MINI",
+    "priority": "baja",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0
+  },
+  {
+    "id": "mqzjcdu62xzkysr2i9v",
+    "col": "todo",
+    "text": "EL YUE",
+    "brand": "BYD",
+    "priority": "media",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "checklist": [
+      {
+        "id": "mqzjco9flcnni577joj",
+        "text": "Expectativa",
+        "done": false
+      },
+      {
+        "id": "mqzjcpquyvup7mlj7c",
+        "text": "VIDEOS",
+        "done": false
+      },
+      {
+        "id": "mqzjcr4oqm0a2ok9nn",
+        "text": "HISTORIAs",
+        "done": false
+      }
+    ]
+  },
+  {
+    "id": "mqzjfhwfcil0x6wpmgr",
+    "col": "todo",
+    "text": "Reporte de competencias",
+    "brand": "TODAS",
+    "priority": "media",
+    "date": "2026-07-01",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0
+  },
+  {
+    "id": "mqzlvv04gpzo9m4tvkp",
+    "col": "todo",
+    "text": "PLANIFICAR BYD JOURNEY",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0
+  },
+  {
+    "id": "mqzlpwkvwjz4v7z4prr",
+    "col": "waiting",
+    "text": "Portadas Reels Julio Terán",
+    "brand": "BMW",
+    "priority": "media",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T19:32:18.046Z",
+        "end": "2026-06-29T19:47:24.125Z"
+      }
+    ],
+    "timeSpent": 906,
+    "pauseReason": "A la espera de aprobación"
+  },
+  {
+    "id": "mqzlrn3f2zhhorqhbgn",
+    "col": "progress",
+    "text": "GRILLA JULIO",
+    "brand": "BMW",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T19:28:57.549Z",
+        "end": "2026-06-29T19:32:06.788Z"
+      },
+      {
+        "start": "2026-06-29T19:56:39.211Z",
+        "end": null
+      }
+    ],
+    "timeSpent": 189,
+    "checklist": [
+      {
+        "id": "mqzlsy92972ql34ao3q",
+        "text": "HISTORIAS",
+        "done": false
+      },
+      {
+        "id": "mqzlt08wy2slsak3ci",
+        "text": "POSTS",
+        "done": false
+      },
+      {
+        "id": "mqzlt5q5z9z2bk4dice",
+        "text": "ESTADISTICAS",
+        "done": false
+      }
+    ],
+    "pauseReason": null
   }
 ]

@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kanban — Mis Prioridades</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230e0e0d'/><path d='M7 17 L13 23 L25 9' stroke='%235BA32A' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tasker">
+<meta name="theme-color" content="#111110">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -67,20 +73,20 @@ header {
 }
 
 .hbtn {
-  background: #1a1a18;
-  border: 0.5px solid #2c2c2a;
-  border-radius: 4px;
-  padding: 5px 10px;
-  font-size: 10px;
+  background: #252523;
+  border: 1px solid #444441;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 12px;
   font-family: 'IBM Plex Mono', monospace;
-  color: #5f5e5a;
+  color: #aaa8a0;
   cursor: pointer;
   letter-spacing: 0.06em;
   white-space: nowrap;
   transition: all 0.15s;
 }
-.hbtn:hover { color: #888780; border-color: #444441; }
-.hbtn.on { color: #9FE1CB; border-color: #1D9E7540; background: #0d2820; }
+.hbtn:hover { color: #e8e6dc; border-color: #888780; background: #2c2c2a; }
+.hbtn.on { color: #9FE1CB; border-color: #1D9E75; background: #0d2820; }
 
 .header-right { display: flex; gap: 6px; align-items: center; margin-left: auto; }
 
@@ -94,11 +100,11 @@ header {
   padding: 20px;
   overflow-x: auto;
   min-height: calc(100vh - 52px);
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 /* ── Column ── */
-.col { flex: 1 1 0; min-width: 150px; }
+.col { flex: 1 1 0; min-width: 150px; display: flex; flex-direction: column; }
 
 .col-head {
   display: flex;
@@ -139,7 +145,61 @@ header {
   opacity: 0.7;
 }
 
-.cards { display: flex; flex-direction: column; gap: 10px; padding: 0 6px; }
+/* ── Progress column highlight ── */
+.cbadge.pause-reason { background: rgba(83,74,183,0.18); color: #9490d0; border-color: rgba(83,74,183,0.3); max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+
+.pause-modal-box {
+  background: #161614; border: 0.5px solid #2c2c2a;
+  border-radius: 12px; padding: 22px;
+  width: min(400px, 95vw);
+  display: flex; flex-direction: column; gap: 14px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.pause-modal-title { font-size: 11px; color: #5f5e5a; letter-spacing: 0.08em; text-transform: uppercase; }
+.pause-options { display: flex; flex-direction: column; gap: 8px; }
+.pause-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.03);
+  transition: all 0.12s; font-size: 13px; color: #aaa8a0;
+}
+.pause-option:hover, .pause-option.selected { background: rgba(83,74,183,0.12); border-color: rgba(83,74,183,0.35); color: #e8e6dc; }
+.pause-option input[type="radio"] { accent-color: #534AB7; width: 14px; height: 14px; flex-shrink: 0; }
+.pause-other-input {
+  width: 100%; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+  padding: 8px 12px; font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #e8e6dc; outline: none;
+  display: none;
+}
+.pause-other-input.visible { display: block; }
+.pause-other-input:focus { border-color: rgba(83,74,183,0.5); }
+.pause-modal-btns { display: flex; gap: 8px; }
+
+.col[data-col="progress"] {
+  background: rgba(186, 117, 23, 0.04);
+  border: 1px solid rgba(186, 117, 23, 0.14);
+  border-radius: 12px;
+  padding: 14px 8px 14px;
+}
+.col[data-col="progress"] .col-head { padding: 0 0 0 2px; }
+.col[data-col="progress"] .cards { padding: 0 2px; }
+
+.progress-total {
+  font-size: 38px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  color: rgba(186, 117, 23, 0.7);
+  letter-spacing: -0.02em;
+  text-align: center;
+  padding: 8px 0 14px;
+  line-height: 1;
+}
+.progress-total.active { color: #BA7517; }
+
+.cards { display: flex; flex-direction: column; gap: 10px; padding: 0 6px; flex: 1; }
 
 /* ── Card (glass) ── */
 .card {
@@ -151,7 +211,36 @@ header {
   position: relative;
   cursor: grab;
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  overflow: hidden;
 }
+
+/* Cover image */
+.card-cover {
+  width: calc(100% + 32px);
+  margin: -14px -16px 12px;
+  height: 130px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px 12px 0 0;
+}
+.card.has-cover { padding-top: 0; }
+
+/* Image gallery in edit modal */
+.em-gallery { display: flex; flex-wrap: wrap; gap: 8px; }
+.em-gallery-img { position: relative; width: 80px; height: 80px; }
+.em-gallery-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); }
+.em-gallery-del { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: #1a1a18; border: 1px solid #444441; border-radius: 50%; color: #888780; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.em-gallery-del:hover { color: #e8e6dc; border-color: #888780; }
+.em-img-upload { display: flex; flex-direction: column; gap: 6px; }
+.em-img-upload-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 8px; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.12);
+  font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: #5f5e5a;
+  transition: all 0.12s;
+}
+.em-img-upload-label:hover, .em-img-upload-label.drag-over { border-color: rgba(255,255,255,0.4); color: #e8e6dc; background: rgba(255,255,255,0.07); }
+.em-img-upload input[type="file"] { display: none; }
 .card:active { cursor: grabbing; }
 .card:hover {
   transform: translateY(-2px);
@@ -160,6 +249,9 @@ header {
   z-index: 10;
 }
 .card.dragging { opacity: 0.35; }
+.card.touch-dragging { opacity: 0; pointer-events: none; }
+.card.insert-before { border-top: 2px solid #aaa8a0 !important; }
+.card.insert-after  { border-bottom: 2px solid #aaa8a0 !important; }
 .card.done-card { opacity: 0.6; border-style: dashed; }
 
 /* Brand accent — colored top border + hover glow */
@@ -208,6 +300,8 @@ header {
 .cbadge.timer { background: rgba(186,117,23,0.12); color: #D49030; border-color: rgba(186,117,23,0.25); font-variant-numeric: tabular-nums; }
 /* Time done badge */
 .cbadge.time-done { background: rgba(59,109,17,0.12); color: #7EC850; border-color: rgba(59,109,17,0.25); }
+/* Cal exclude badge */
+.cal-exclude-badge { font-size: 9px; color: #444441; margin-top: 6px; letter-spacing: 0.06em; }
 /* Checklist progress badge */
 .cbadge.cl-prog { background: rgba(255,255,255,0.05); color: #666460; border-color: rgba(255,255,255,0.08); }
 .cbadge.cl-prog.done { background: rgba(59,109,17,0.12); color: #7EC850; border-color: rgba(59,109,17,0.25); }
@@ -321,67 +415,115 @@ header {
 }
 .fbtn-cancel:hover { color: #888780; }
 
-/* ── Inline edit ── */
-.c-edit-wrap {
-  position: absolute; inset: 0;
-  background: #181816;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.14);
-  padding: 12px;
-  display: flex; flex-direction: column; gap: 6px;
-  z-index: 30;
+/* ── Edit modal ── */
+.edit-modal {
+  background: #161614; border: 0.5px solid #2c2c2a;
+  border-radius: 12px; padding: 22px;
+  width: min(500px, 95vw);
+  display: flex; flex-direction: column; gap: 12px;
+  font-family: 'IBM Plex Mono', monospace;
 }
-.c-edit-wrap textarea {
+.edit-modal textarea {
   width: 100%; background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
-  padding: 7px 9px; font-size: 13px;
+  padding: 10px 12px; font-size: 15px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #e8e6dc; outline: none; resize: none; flex: 1;
+  color: #e8e6dc; outline: none; resize: none; min-height: 80px;
 }
-.c-edit-wrap textarea:focus { border-color: rgba(255,255,255,0.22); }
-.c-edit-row { display: flex; gap: 5px; }
-.c-edit-sel {
+.edit-modal textarea:focus { border-color: rgba(255,255,255,0.22); }
+.edit-modal-row { display: flex; gap: 8px; }
+.edit-modal select, .edit-modal input[type="date"], .edit-modal input[type="text"] {
   flex: 1; background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
-  padding: 5px 6px; font-size: 10px;
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+  padding: 10px 12px; font-size: 13px;
   font-family: 'IBM Plex Mono', monospace;
   color: #888780; outline: none; cursor: pointer;
 }
-.c-edit-date {
-  flex: 1; background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
-  padding: 5px 6px; font-size: 10px;
-  font-family: 'IBM Plex Mono', monospace;
-  color: #888780; outline: none;
+.edit-modal input[type="date"] { cursor: text; }
+.edit-modal-label {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: #5f5e5a; cursor: pointer;
 }
-.c-edit-assignee {
-  width: 100%; background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
-  padding: 5px 9px; font-size: 11px;
-  font-family: 'IBM Plex Mono', monospace;
-  color: #888780; outline: none;
-}
-.c-edit-assignee::placeholder { color: #333331; }
-.c-edit-btns { display: flex; gap: 5px; }
-.c-edit-save {
-  flex: 1; background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
-  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
-  color: #aaa8a0; cursor: pointer; padding: 5px;
+.edit-modal-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+.em-cl-section { display: flex; flex-direction: column; gap: 4px; }
+.em-cl-section-title { font-size: 10px; color: #5f5e5a; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 2px; }
+.em-cl-item { display: flex; align-items: center; gap: 8px; }
+.em-cl-item input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
+.em-cl-item-text { flex: 1; font-size: 12px; color: #aaa8a0; }
+.em-cl-item-text.done { text-decoration: line-through; color: #5f5e5a; }
+.em-cl-split { font-size: 10px; color: #5f5e5a; font-family: 'IBM Plex Mono', monospace; margin-left: auto; padding-right: 4px; flex-shrink: 0; }
+.em-cl-del { background: none; border: none; color: #444441; font-size: 14px; cursor: pointer; padding: 0 2px; line-height: 1; }
+.em-cl-del:hover { color: #888780; }
+.em-cl-add { display: flex; gap: 6px; margin-top: 4px; }
+.em-cl-add input { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 5px 8px; font-size: 12px; font-family: 'IBM Plex Mono', monospace; color: #888780; outline: none; }
+.em-cl-add input:focus { border-color: rgba(255,255,255,0.18); }
+.em-cl-add input::placeholder { color: #2c2c2a; }
+.em-cl-add-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 5px 10px; font-size: 12px; font-family: 'IBM Plex Mono', monospace; color: #aaa8a0; cursor: pointer; }
+.em-cl-add-btn:hover { background: rgba(255,255,255,0.1); color: #e8e6dc; }
+
+.edit-modal-btns { display: flex; gap: 8px; }
+.edit-modal-save {
+  flex: 1; padding: 12px; background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+  font-size: 13px; font-family: 'IBM Plex Mono', monospace;
+  color: #aaa8a0; cursor: pointer; letter-spacing: 0.06em;
   transition: all 0.12s;
 }
-.c-edit-save:hover { background: rgba(255,255,255,0.12); color: #e8e6dc; }
-.c-edit-cancel {
-  background: none; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
-  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
-  color: #444441; cursor: pointer; padding: 5px 10px;
+.edit-modal-save:hover { background: rgba(255,255,255,0.12); color: #e8e6dc; }
+.edit-modal-cancel {
+  padding: 12px 18px; background: none;
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+  font-size: 13px; font-family: 'IBM Plex Mono', monospace;
+  color: #444441; cursor: pointer; transition: all 0.12s;
 }
+.edit-modal-cancel:hover { color: #888780; }
 
 /* ── Drop zone highlight ── */
 .col.drag-over .cards { outline: 1px dashed #444441; border-radius: 4px; outline-offset: 4px; }
 
 /* ── Empty state ── */
 .empty { font-size: 9px; color: #252523; letter-spacing: 0.1em; text-align: center; padding: 10px 0; }
+
+/* ── Trash modal ── */
+.trash-modal {
+  background: #161614; border: 0.5px solid #2c2c2a;
+  border-radius: 8px; padding: 22px;
+  width: min(520px, 95vw); max-height: 80vh;
+  display: flex; flex-direction: column;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.trash-modal h2 { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #5f5e5a; margin-bottom: 14px; }
+.trash-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.trash-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 8px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+}
+.trash-item-text { flex: 1; font-size: 12px; color: #666460; }
+.trash-item-brand { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #444441; }
+.trash-restore {
+  background: none; border: 1px solid #333331; border-radius: 4px;
+  padding: 3px 8px; font-size: 9px; letter-spacing: 0.08em;
+  font-family: 'IBM Plex Mono', monospace; color: #5f5e5a;
+  cursor: pointer; transition: all 0.12s; white-space: nowrap;
+}
+.trash-restore:hover { color: #9FE1CB; border-color: #1D9E7540; }
+.trash-perm-del {
+  background: none; border: 1px solid #333331; border-radius: 4px;
+  padding: 3px 8px; font-size: 9px; letter-spacing: 0.08em;
+  font-family: 'IBM Plex Mono', monospace; color: #5f5e5a;
+  cursor: pointer; transition: all 0.12s; white-space: nowrap;
+}
+.trash-perm-del:hover { color: #FFB3B3; border-color: rgba(220,50,50,0.3); }
+.trash-empty-msg { font-size: 10px; color: #333331; text-align: center; padding: 30px 0; }
+.trash-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+.trash-clear {
+  background: none; border: 1px solid rgba(220,50,50,0.2); border-radius: 4px;
+  padding: 5px 12px; font-size: 10px; letter-spacing: 0.08em;
+  font-family: 'IBM Plex Mono', monospace; color: #8B2020;
+  cursor: pointer; transition: all 0.12s;
+}
+.trash-clear:hover { border-color: rgba(220,50,50,0.5); color: #FFB3B3; }
 
 /* ── Settings modal ── */
 .modal-overlay {
@@ -501,11 +643,19 @@ header {
     <option value="MOTORRAD">MOTORRAD</option>
     <option value="PERSONAL">PERSONAL</option>
   </select>
+  <select class="brand-sel" id="sort-filter">
+    <option value="">sin orden</option>
+    <option value="brand">por marca</option>
+    <option value="date">por fecha</option>
+    <option value="priority">por prioridad</option>
+  </select>
   <div class="header-right">
     <div class="gh-dot" id="gh-dot" title="GitHub sync"></div>
     <div class="cal-dot" id="cal-dot" title="Google Calendar"></div>
     <div class="save-status" id="save-status"></div>
     <button class="hbtn" id="toggle-archived">ver archivadas</button>
+    <button class="hbtn" id="fullscreen-btn">⛶</button>
+    <button class="hbtn" id="trash-btn">papelera</button>
     <button class="hbtn" id="report-btn">reporte</button>
     <button class="hbtn" id="settings-btn">⚙</button>
     <div class="summary" id="summary">—</div>
@@ -541,6 +691,126 @@ header {
   </div>
 </div>
 
+<!-- Pause modal -->
+<div class="modal-overlay" id="pause-modal">
+  <div class="pause-modal-box">
+    <div class="pause-modal-title">¿Por qué está en pausa?</div>
+    <div class="pause-options">
+      <label class="pause-option">
+        <input type="radio" name="pause-reason" value="A la espera de aprobación">
+        A la espera de aprobación
+      </label>
+      <label class="pause-option">
+        <input type="radio" name="pause-reason" value="Por interrupción">
+        Por interrupción
+      </label>
+      <label class="pause-option">
+        <input type="radio" name="pause-reason" value="__otro__">
+        Otro
+      </label>
+    </div>
+    <input class="pause-other-input" id="pause-other-text" placeholder="Describí el motivo...">
+    <div class="pause-modal-btns">
+      <button class="edit-modal-save" id="pause-confirm">confirmar</button>
+      <button class="edit-modal-cancel" id="pause-skip">omitir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="edit-modal">
+    <div style="font-size:11px;color:#5f5e5a;letter-spacing:0.08em;text-transform:uppercase" id="am-title">nueva tarea</div>
+    <select id="am-brand">
+      <option value="">sin marca</option>
+      <option value="BYD">BYD</option>
+      <option value="BMW">BMW</option>
+      <option value="MINI">MINI</option>
+      <option value="MOTORRAD">MOTORRAD</option>
+      <option value="TODAS">TODAS LAS MARCAS</option>
+      <option value="PERSONAL">PERSONAL</option>
+    </select>
+    <textarea id="am-text" rows="3" placeholder="descripción de la tarea..."></textarea>
+    <div id="am-assignee-row" style="display:none">
+      <input type="text" id="am-assignee" placeholder="¿quién lo tiene?">
+    </div>
+    <div class="edit-modal-row">
+      <select id="am-priority">
+        <option value="">prioridad</option>
+        <option value="alta">🔴 alta</option>
+        <option value="media">🟡 media</option>
+        <option value="baja">🟢 baja</option>
+      </select>
+      <input type="date" id="am-date">
+    </div>
+    <div class="em-cl-section" id="am-checklist-section">
+      <div class="em-cl-section-title">subtareas</div>
+      <div id="am-cl-list"></div>
+      <div class="em-cl-add">
+        <input id="am-cl-input" placeholder="+ agregar subtarea..." autocomplete="off">
+        <button class="em-cl-add-btn" id="am-cl-add-btn">+</button>
+      </div>
+    </div>
+    <div class="edit-modal-btns">
+      <button class="edit-modal-save" id="am-save">agregar</button>
+      <button class="edit-modal-cancel" id="am-cancel">cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="edit-modal">
+    <select id="em-brand">
+      <option value="">sin marca</option>
+      <option value="BYD">BYD</option>
+      <option value="BMW">BMW</option>
+      <option value="MINI">MINI</option>
+      <option value="MOTORRAD">MOTORRAD</option>
+      <option value="TODAS">TODAS LAS MARCAS</option>
+      <option value="PERSONAL">PERSONAL</option>
+    </select>
+    <textarea id="em-text" rows="3" placeholder="descripción de la tarea..."></textarea>
+    <div id="em-assignee-row" style="display:none">
+      <input type="text" id="em-assignee" placeholder="¿quién lo tiene?">
+    </div>
+    <div class="edit-modal-row">
+      <select id="em-priority">
+        <option value="">prioridad</option>
+        <option value="alta">🔴 alta</option>
+        <option value="media">🟡 media</option>
+        <option value="baja">🟢 baja</option>
+      </select>
+      <input type="date" id="em-date">
+    </div>
+    <div class="em-img-upload">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">imágenes</div>
+      <div id="em-gallery" class="em-gallery"></div>
+      <label class="em-img-upload-label">
+        + agregar imagen
+        <input type="file" id="em-img-input" accept="image/*" multiple>
+      </label>
+    </div>
+    <div id="em-checklist"></div>
+    <div class="edit-modal-btns">
+      <button class="edit-modal-save" id="em-save">guardar</button>
+      <button class="edit-modal-cancel" id="em-cancel">cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Trash modal -->
+<div class="modal-overlay" id="trash-modal">
+  <div class="trash-modal">
+    <h2>Papelera</h2>
+    <div class="trash-list" id="trash-list"></div>
+    <div class="trash-footer">
+      <button class="trash-clear" id="trash-clear">vaciar papelera</button>
+      <button class="mbtn-cancel" id="trash-close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Report modal -->
 <div class="modal-overlay" id="report-modal">
   <div class="report-modal">
@@ -570,18 +840,6 @@ header {
       </div>
     </div>
     <div class="cards" id="cards-todo"></div>
-    <div class="add-form" id="form-todo">
-      <textarea id="text-todo" rows="2" placeholder="nueva tarea..."></textarea>
-      <div class="form-row">
-        <select id="brand-todo"><option value="">sin marca</option><option value="BYD">BYD</option><option value="BMW">BMW</option><option value="MINI">MINI</option><option value="MOTORRAD">MOTORRAD</option><option value="PERSONAL">PERSONAL</option></select>
-        <select id="priority-todo"><option value="">prioridad</option><option value="alta">🔴 alta</option><option value="media">🟡 media</option><option value="baja">🟢 baja</option></select>
-      </div>
-      <input type="date" id="date-todo">
-      <div class="form-btns">
-        <button class="fbtn-ok" data-add="todo">agregar</button>
-        <button class="fbtn-cancel" data-close="todo">✕</button>
-      </div>
-    </div>
   </div>
 
   <div class="col" data-col="boga">
@@ -594,18 +852,6 @@ header {
       </div>
     </div>
     <div class="cards" id="cards-boga"></div>
-    <div class="add-form" id="form-boga">
-      <textarea id="text-boga" rows="2" placeholder="tarea de hoy..."></textarea>
-      <div class="form-row">
-        <select id="brand-boga"><option value="">sin marca</option><option value="BYD">BYD</option><option value="BMW">BMW</option><option value="MINI">MINI</option><option value="MOTORRAD">MOTORRAD</option><option value="PERSONAL">PERSONAL</option></select>
-        <select id="priority-boga"><option value="">prioridad</option><option value="alta">🔴 alta</option><option value="media">🟡 media</option><option value="baja">🟢 baja</option></select>
-      </div>
-      <input type="date" id="date-boga">
-      <div class="form-btns">
-        <button class="fbtn-ok" data-add="boga">agregar</button>
-        <button class="fbtn-cancel" data-close="boga">✕</button>
-      </div>
-    </div>
   </div>
 
   <div class="col" data-col="progress">
@@ -617,44 +863,20 @@ header {
         <button class="col-add-btn" data-target="progress">+</button>
       </div>
     </div>
+    <div class="progress-total" id="progress-total">—</div>
     <div class="cards" id="cards-progress"></div>
-    <div class="add-form" id="form-progress">
-      <textarea id="text-progress" rows="2" placeholder="nueva tarea..."></textarea>
-      <div class="form-row">
-        <select id="brand-progress"><option value="">sin marca</option><option value="BYD">BYD</option><option value="BMW">BMW</option><option value="MINI">MINI</option><option value="MOTORRAD">MOTORRAD</option><option value="PERSONAL">PERSONAL</option></select>
-        <select id="priority-progress"><option value="">prioridad</option><option value="alta">🔴 alta</option><option value="media">🟡 media</option><option value="baja">🟢 baja</option></select>
-      </div>
-      <input type="date" id="date-progress">
-      <div class="form-btns">
-        <button class="fbtn-ok" data-add="progress">agregar</button>
-        <button class="fbtn-cancel" data-close="progress">✕</button>
-      </div>
-    </div>
   </div>
 
   <div class="col" data-col="waiting">
     <div class="col-head">
       <div class="col-dot" style="background:#534AB7"></div>
-      <div class="col-name">esperando</div>
+      <div class="col-name">en pausa</div>
       <div class="col-actions-row">
         <div class="col-count" data-count="waiting">0</div>
         <button class="col-add-btn" data-target="waiting">+</button>
       </div>
     </div>
     <div class="cards" id="cards-waiting"></div>
-    <div class="add-form" id="form-waiting">
-      <textarea id="text-waiting" rows="2" placeholder="¿qué estás esperando?"></textarea>
-      <input type="text" id="assignee-waiting" placeholder="¿quién lo tiene?" style="width:100%;background:#1a1a18;border:0.5px solid #2c2c2a;border-radius:3px;padding:4px 6px;font-size:10px;font-family:'IBM Plex Mono',monospace;color:#888780;outline:none;margin-top:5px;">
-      <div class="form-row">
-        <select id="brand-waiting"><option value="">sin marca</option><option value="BYD">BYD</option><option value="BMW">BMW</option><option value="MINI">MINI</option><option value="MOTORRAD">MOTORRAD</option><option value="PERSONAL">PERSONAL</option></select>
-        <select id="priority-waiting"><option value="">prioridad</option><option value="alta">🔴 alta</option><option value="media">🟡 media</option><option value="baja">🟢 baja</option></select>
-      </div>
-      <input type="date" id="date-waiting">
-      <div class="form-btns">
-        <button class="fbtn-ok" data-add="waiting">agregar</button>
-        <button class="fbtn-cancel" data-close="waiting">✕</button>
-      </div>
-    </div>
   </div>
 
   <div class="col" data-col="done">
@@ -669,18 +891,6 @@ header {
     </div>
     <div class="col-time-total" id="done-time-total"></div>
     <div class="cards" id="cards-done"></div>
-    <div class="add-form" id="form-done">
-      <textarea id="text-done" rows="2" placeholder="nueva tarea..."></textarea>
-      <div class="form-row">
-        <select id="brand-done"><option value="">sin marca</option><option value="BYD">BYD</option><option value="BMW">BMW</option><option value="MINI">MINI</option><option value="MOTORRAD">MOTORRAD</option><option value="PERSONAL">PERSONAL</option></select>
-        <select id="priority-done"><option value="">prioridad</option><option value="alta">🔴 alta</option><option value="media">🟡 media</option><option value="baja">🟢 baja</option></select>
-      </div>
-      <input type="date" id="date-done">
-      <div class="form-btns">
-        <button class="fbtn-ok" data-add="done">agregar</button>
-        <button class="fbtn-cancel" data-close="done">✕</button>
-      </div>
-    </div>
   </div>
 
 </div>
@@ -698,7 +908,7 @@ const GH = {
   get isPages() { return location.port !== '3000' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1'; }
 };
 
-let tasks = [], saveTimer = null, showArchived = false, searchQ = '', brandF = '';
+let tasks = [], saveTimer = null, showArchived = false, searchQ = '', brandF = '', sortF = '';
 let ghSha = null;
 
 // ── Time tracking ──────────────────────────────────────────────
@@ -747,6 +957,13 @@ setInterval(() => {
     const task = tasks.find(t => t.id === el.dataset.timer);
     if (task) el.textContent = '⏱ ' + fmtTime(getTimeTotal(task));
   });
+  const progressTasks = tasks.filter(t => t.col === 'progress' && !t.archived && !t.deleted);
+  const totalSecs = progressTasks.reduce((sum, t) => sum + getTimeTotal(t), 0);
+  const el = document.getElementById('progress-total');
+  if (el) {
+    el.textContent = progressTasks.length ? fmtTime(totalSecs) : '—';
+    el.classList.toggle('active', progressTasks.length > 0);
+  }
 }, 1000);
 
 // ── GitHub API ─────────────────────────────────────────────────
@@ -840,6 +1057,7 @@ function fmtDate(d) {
 function overdue(d) { return d && new Date(d+'T23:59:59') < new Date(); }
 
 function matches(t) {
+  if (t.deleted) return false;
   if (!showArchived && t.archived) return false;
   if (brandF && t.brand !== brandF) return false;
   if (searchQ && !t.text.toLowerCase().includes(searchQ.toLowerCase())) return false;
@@ -862,8 +1080,8 @@ function card(task) {
     ? `<span class="cbadge ${esc(task.priority)}">${esc(task.priority)}</span>` : '';
   const dateBadge = task.date
     ? `<span class="cbadge date${overdue(task.date)?' overdue':''}">${fmtDate(task.date)}${overdue(task.date)?' !':''}</span>` : '';
-  const waitBadge = isWaiting
-    ? `<button class="cbadge wait-${task.waitStatus==='sent'?'sent':'pending'}" data-toggle-wait="${esc(task.id)}">${task.waitStatus==='sent'?'✓ enviada':'· por enviar'}</button>` : '';
+  const waitBadge = isWaiting && task.pauseReason
+    ? `<span class="cbadge pause-reason">${esc(task.pauseReason)}</span>` : '';
 
   // Timer badge — live running in progress
   const timerBadge = isProgress
@@ -883,27 +1101,28 @@ function card(task) {
   const meta = priBadge || dateBadge || waitBadge || timerBadge || timeDone || clProg
     ? `<div class="card-meta">${priBadge}${dateBadge}${waitBadge}${timerBadge}${timeDone}${clProg}</div>` : '';
 
-  // Checklist items
-  const clHTML = cl.length || !task.archived ? `
+  // Checklist preview (toggle only, no add/delete — manage in edit modal)
+  const clHTML = cl.length ? `
     <div class="card-checklist">
       ${cl.map(item => `
         <div class="cl-item">
           <input type="checkbox" class="cl-check" ${item.done ? 'checked' : ''}
             data-cl-toggle="${esc(task.id)}:${esc(item.id)}">
           <span class="cl-text${item.done ? ' done' : ''}">${esc(item.text)}</span>
-          <button class="cl-del" data-cl-del="${esc(task.id)}:${esc(item.id)}">×</button>
         </div>`).join('')}
-      ${!task.archived ? `<div class="cl-add-row">
-        <input class="cl-add-input" placeholder="+ subtarea..." data-cl-add="${esc(task.id)}">
-      </div>` : ''}
     </div>` : '';
 
+  const coverHTML = task.cover
+    ? `<img class="card-cover" src="/uploads/${esc(task.cover)}" alt="">` : '';
+
   return `
-    <div class="card ${cls}${isDone?' done-card':''}"
+    <div class="card ${cls}${isDone?' done-card':''}${task.cover?' has-cover':''}"
          data-id="${esc(task.id)}"
+         data-edit="${esc(task.id)}"
          draggable="${task.archived?'false':'true'}">
+      ${coverHTML}
       ${brandLabel ? `<div class="card-brand">${esc(brandLabel)}</div>` : ''}
-      <div class="card-text" data-edit="${esc(task.id)}">${esc(task.text)}</div>
+      <div class="card-text">${esc(task.text)}</div>
       ${meta}
       ${clHTML}
       <div class="card-btns">
@@ -918,8 +1137,18 @@ function card(task) {
 function render() {
   COLS.forEach(col => {
     const colTasks = tasks.filter(t => t.col === col);
-    const visible = colTasks.filter(matches)
-      .sort((a,b) => (PRIO[a.priority||'']??3) - (PRIO[b.priority||'']??3));
+    const visible = colTasks.filter(matches);
+
+    if (sortF) {
+      const BRAND_ORDER = ['BYD','BMW','MINI','MOTORRAD','TODAS','PERSONAL',''];
+      const PRI_ORDER = ['alta','media','baja',''];
+      visible.sort((a, b) => {
+        if (sortF === 'brand') return BRAND_ORDER.indexOf(a.brand||'') - BRAND_ORDER.indexOf(b.brand||'');
+        if (sortF === 'date') return (a.date||'9999-99-99') < (b.date||'9999-99-99') ? -1 : 1;
+        if (sortF === 'priority') return PRI_ORDER.indexOf(a.priority||'') - PRI_ORDER.indexOf(b.priority||'');
+        return 0;
+      });
+    }
 
     const container = document.getElementById('cards-' + col);
     container.innerHTML = visible.length
@@ -932,6 +1161,7 @@ function render() {
     container.querySelectorAll('.card').forEach(el => {
       el.addEventListener('dragstart', onDragStart);
       el.addEventListener('dragend', onDragEnd);
+      el.addEventListener('dragover', onCardDragOver);
     });
   });
 
@@ -948,101 +1178,381 @@ function render() {
     active.length === 0 ? '—' : `<span>${done}</span> / ${active.length}`;
 }
 
+// ── Image upload ───────────────────────────────────────────────
+
+async function uploadImage(file) {
+  const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+  const r = await fetch(`/api/upload?ext=${ext}`, {
+    method: 'POST',
+    headers: { 'Content-Type': file.type },
+    body: file
+  });
+  const data = await r.json();
+  return data.file;
+}
+
+function renderEmGallery() {
+  const task = tasks.find(t => t.id === editingId);
+  if (!task) return;
+  const images = task.images || [];
+  const gallery = document.getElementById('em-gallery');
+  gallery.innerHTML = images.map((img, idx) => `
+    <div class="em-gallery-img" data-img-idx="${idx}">
+      <img src="/uploads/${esc(img)}" alt="">
+      ${idx === 0 && task.cover === img ? '<div style="position:absolute;bottom:2px;left:2px;font-size:8px;background:rgba(0,0,0,0.7);color:#e8e6dc;padding:1px 4px;border-radius:3px">portada</div>' : ''}
+      <button class="em-gallery-del" data-del-img="${idx}">×</button>
+    </div>`).join('');
+
+  gallery.querySelectorAll('[data-del-img]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.delImg);
+      if (task.images[idx] === task.cover) task.cover = task.images[idx + 1] || task.images[idx - 1] || null;
+      task.images.splice(idx, 1);
+      if (!task.images.length) task.cover = null;
+      save(); renderEmGallery(); render();
+    });
+  });
+
+  // tap on image to set as cover
+  gallery.querySelectorAll('.em-gallery-img img').forEach((img, idx) => {
+    img.addEventListener('click', () => {
+      task.cover = task.images[idx];
+      save(); renderEmGallery(); render();
+    });
+    img.title = 'tap para usar como portada';
+    img.style.cursor = 'pointer';
+  });
+}
+
+const emUploadLabel = document.querySelector('.em-img-upload-label');
+emUploadLabel.addEventListener('dragover', e => { e.preventDefault(); emUploadLabel.classList.add('drag-over'); });
+emUploadLabel.addEventListener('dragleave', () => emUploadLabel.classList.remove('drag-over'));
+emUploadLabel.addEventListener('drop', async e => {
+  e.preventDefault();
+  emUploadLabel.classList.remove('drag-over');
+  const task = tasks.find(t => t.id === editingId);
+  if (!task) return;
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  for (const file of files) {
+    const filename = await uploadImage(file);
+    if (!task.images) task.images = [];
+    task.images.push(filename);
+    if (!task.cover) task.cover = filename;
+  }
+  save(); renderEmGallery(); render();
+});
+
+document.getElementById('em-img-input').addEventListener('change', async e => {
+  const task = tasks.find(t => t.id === editingId);
+  if (!task) return;
+  const files = Array.from(e.target.files);
+  for (const file of files) {
+    const filename = await uploadImage(file);
+    if (!task.images) task.images = [];
+    task.images.push(filename);
+    if (!task.cover) task.cover = filename;
+  }
+  e.target.value = '';
+  save(); renderEmGallery(); render();
+});
+
 // ── Edit ───────────────────────────────────────────────────────
+
+let editingId = null;
+
+function renderEmChecklist() {
+  const task = tasks.find(t => t.id === editingId);
+  if (!task) return;
+  const cl = task.checklist || [];
+
+  // Build split map: timeAtCheck per item, delta from previous checked
+  const checked = cl.filter(i => i.done && i.timeAtCheck != null)
+    .sort((a, b) => a.timeAtCheck - b.timeAtCheck);
+  const splitMap = {};
+  checked.forEach((item, idx) => {
+    const prev = idx === 0 ? 0 : checked[idx - 1].timeAtCheck;
+    splitMap[item.id] = item.timeAtCheck - prev;
+  });
+
+  const container = document.getElementById('em-checklist');
+  container.innerHTML = `
+    <div class="em-cl-section">
+      <div class="em-cl-section-title">subtareas</div>
+      ${cl.map(item => {
+        const split = item.done && splitMap[item.id] != null
+          ? `<span class="em-cl-split">+${fmtTime(splitMap[item.id])}</span>` : '';
+        return `
+        <div class="em-cl-item">
+          <input type="checkbox" ${item.done ? 'checked' : ''} data-em-cl-toggle="${item.id}">
+          <span class="em-cl-item-text${item.done ? ' done' : ''}">${esc(item.text)}</span>
+          ${split}
+          <button class="em-cl-del" data-em-cl-del="${item.id}">×</button>
+        </div>`;
+      }).join('')}
+      <div class="em-cl-add">
+        <input id="em-cl-input" placeholder="+ agregar subtarea..." autocomplete="off">
+        <button class="em-cl-add-btn" id="em-cl-add-btn">+</button>
+      </div>
+    </div>`;
+
+  document.getElementById('em-cl-add-btn').addEventListener('click', () => {
+    const input = document.getElementById('em-cl-input');
+    const text = input.value.trim();
+    if (!text) return;
+    if (!task.checklist) task.checklist = [];
+    task.checklist.push({ id: uid(), text, done: false });
+    save();
+    renderEmChecklist();
+    document.getElementById('em-cl-input').focus();
+  });
+
+  document.getElementById('em-cl-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); document.getElementById('em-cl-add-btn').click(); }
+  });
+
+  container.querySelectorAll('[data-em-cl-toggle]').forEach(el => {
+    el.addEventListener('change', () => {
+      const item = (task.checklist || []).find(i => i.id === el.dataset.emClToggle);
+      if (item) {
+        item.done = el.checked;
+        if (el.checked) item.timeAtCheck = getTimeTotal(task);
+        else delete item.timeAtCheck;
+        save(); renderEmChecklist();
+      }
+    });
+  });
+
+  container.querySelectorAll('[data-em-cl-del]').forEach(el => {
+    el.addEventListener('click', () => {
+      task.checklist = (task.checklist || []).filter(i => i.id !== el.dataset.emClDel);
+      save();
+      renderEmChecklist();
+    });
+  });
+}
 
 function openEdit(id) {
   const task = tasks.find(t => t.id === id);
   if (!task) return;
-  const cardEl = document.querySelector(`.card[data-id="${id}"]`);
-  if (!cardEl) return;
-  cardEl.draggable = false;
+  editingId = id;
   const isWaiting = task.col === 'waiting';
-  const wrap = document.createElement('div');
-  wrap.className = 'c-edit-wrap';
-  wrap.innerHTML = `
-    <textarea id="ei-text" rows="2">${esc(task.text)}</textarea>
-    ${isWaiting ? `<input class="c-edit-assignee" id="ei-assignee" placeholder="¿quién lo tiene?" value="${esc(task.assignee||'')}">` : ''}
-    <div class="c-edit-row">
-      <select class="c-edit-sel" id="ei-brand">
-        <option value="" ${!task.brand?'selected':''}>sin marca</option>
-        <option value="BYD" ${task.brand==='BYD'?'selected':''}>BYD</option>
-        <option value="BMW" ${task.brand==='BMW'?'selected':''}>BMW</option>
-        <option value="MINI" ${task.brand==='MINI'?'selected':''}>MINI</option>
-        <option value="MOTORRAD" ${task.brand==='MOTORRAD'?'selected':''}>MOTORRAD</option>
-        <option value="PERSONAL" ${task.brand==='PERSONAL'?'selected':''}>PERSONAL</option>
-      </select>
-      <select class="c-edit-sel" id="ei-priority">
-        <option value="" ${!task.priority?'selected':''}>—</option>
-        <option value="alta" ${task.priority==='alta'?'selected':''}>🔴 alta</option>
-        <option value="media" ${task.priority==='media'?'selected':''}>🟡 media</option>
-        <option value="baja" ${task.priority==='baja'?'selected':''}>🟢 baja</option>
-      </select>
-    </div>
-    <input class="c-edit-date" type="date" id="ei-date" value="${task.date||''}">
-    <div class="c-edit-btns">
-      <button class="c-edit-save" data-save="${esc(id)}">guardar</button>
-      <button class="c-edit-cancel" data-cancel-edit>✕</button>
-    </div>`;
-  cardEl.style.height = 'auto';
-  cardEl.appendChild(wrap);
-  const ta = wrap.querySelector('#ei-text');
-  ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
-  ta.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSave(id); }
-    if (e.key === 'Escape') render();
-  });
+
+  document.getElementById('em-brand').value    = task.brand || '';
+  document.getElementById('em-text').value     = task.text || '';
+  document.getElementById('em-priority').value = task.priority || '';
+  document.getElementById('em-date').value     = task.date || '';
+
+  const assigneeRow = document.getElementById('em-assignee-row');
+  assigneeRow.style.display = isWaiting ? 'block' : 'none';
+  if (isWaiting) document.getElementById('em-assignee').value = task.assignee || '';
+
+  renderEmChecklist();
+  renderEmGallery();
+
+  document.getElementById('edit-modal').classList.add('open');
+  setTimeout(() => document.getElementById('em-text').focus(), 50);
 }
 
-function doSave(id) {
-  const t = tasks.find(t => t.id === id);
+function doSave() {
+  const t = tasks.find(t => t.id === editingId);
   if (!t) return;
-  const text = document.getElementById('ei-text')?.value.trim();
+  const text = document.getElementById('em-text').value.trim();
   if (!text) return;
-  t.text = text;
-  t.brand = document.getElementById('ei-brand')?.value || '';
-  t.priority = document.getElementById('ei-priority')?.value || '';
-  t.date = document.getElementById('ei-date')?.value || '';
-  const ae = document.getElementById('ei-assignee');
-  if (ae) t.assignee = ae.value.trim();
+  t.text     = text;
+  t.brand    = document.getElementById('em-brand').value || '';
+  t.priority = document.getElementById('em-priority').value || '';
+  t.date     = document.getElementById('em-date').value || '';
+  if (t.col === 'waiting') t.assignee = document.getElementById('em-assignee').value.trim();
+  document.getElementById('edit-modal').classList.remove('open');
+  editingId = null;
   save(); render();
 }
 
-function addTask(col) {
-  const text = document.getElementById('text-' + col)?.value.trim();
+document.getElementById('em-save').addEventListener('click', doSave);
+document.getElementById('em-cancel').addEventListener('click', () => {
+  document.getElementById('edit-modal').classList.remove('open');
+  editingId = null;
+});
+document.getElementById('edit-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('edit-modal').classList.remove('open');
+    editingId = null;
+  }
+});
+document.getElementById('em-text').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSave(); }
+  if (e.key === 'Escape') { document.getElementById('edit-modal').classList.remove('open'); editingId = null; }
+});
+
+// ── Pause modal ────────────────────────────────────────────────
+let pauseTaskId = null;
+
+function openPauseModal(taskId) {
+  pauseTaskId = taskId;
+  document.querySelectorAll('input[name="pause-reason"]').forEach(r => r.checked = false);
+  document.getElementById('pause-other-text').value = '';
+  document.getElementById('pause-other-text').classList.remove('visible');
+  document.querySelectorAll('.pause-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('pause-modal').classList.add('open');
+}
+
+function closePauseModal() {
+  document.getElementById('pause-modal').classList.remove('open');
+  pauseTaskId = null;
+}
+
+document.querySelectorAll('.pause-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.pause-option').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    const isOther = opt.querySelector('input').value === '__otro__';
+    document.getElementById('pause-other-text').classList.toggle('visible', isOther);
+    if (isOther) setTimeout(() => document.getElementById('pause-other-text').focus(), 50);
+  });
+});
+
+document.getElementById('pause-confirm').addEventListener('click', () => {
+  const selected = document.querySelector('input[name="pause-reason"]:checked');
+  if (!selected) { closePauseModal(); return; }
+  const reason = selected.value === '__otro__'
+    ? document.getElementById('pause-other-text').value.trim() || 'Otro'
+    : selected.value;
+  const t = tasks.find(t => t.id === pauseTaskId);
+  if (t) { t.pauseReason = reason; save(); render(); }
+  closePauseModal();
+});
+
+document.getElementById('pause-skip').addEventListener('click', closePauseModal);
+document.getElementById('pause-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closePauseModal();
+});
+
+let addingCol = null;
+let amChecklist = [];
+const COL_LABELS = { todo: 'pendientes', boga: 'en boga', progress: 'en progreso', waiting: 'en pausa', done: 'hecho' };
+
+function renderAmChecklist() {
+  const list = document.getElementById('am-cl-list');
+  list.innerHTML = amChecklist.map((item, idx) => `
+    <div class="em-cl-item">
+      <span class="em-cl-item-text">${esc(item.text)}</span>
+      <button class="em-cl-del" data-am-del="${idx}">×</button>
+    </div>`).join('');
+  list.querySelectorAll('[data-am-del]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      amChecklist.splice(parseInt(btn.dataset.amDel), 1);
+      renderAmChecklist();
+    });
+  });
+}
+
+document.getElementById('am-cl-add-btn').addEventListener('click', () => {
+  const input = document.getElementById('am-cl-input');
+  const text = input.value.trim();
   if (!text) return;
-  const assigneeEl = document.getElementById('assignee-' + col);
+  amChecklist.push({ id: uid(), text, done: false });
+  input.value = '';
+  renderAmChecklist();
+  input.focus();
+});
+document.getElementById('am-cl-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); document.getElementById('am-cl-add-btn').click(); }
+});
+
+function openForm(col) {
+  addingCol = col;
+  amChecklist = [];
+  document.getElementById('am-title').textContent = '+ ' + (COL_LABELS[col] || col);
+  document.getElementById('am-brand').value    = '';
+  document.getElementById('am-text').value     = '';
+  document.getElementById('am-priority').value = '';
+  document.getElementById('am-date').value     = '';
+  document.getElementById('am-cl-input').value = '';
+  renderAmChecklist();
+  const assigneeRow = document.getElementById('am-assignee-row');
+  assigneeRow.style.display = col === 'waiting' ? 'block' : 'none';
+  if (col === 'waiting') document.getElementById('am-assignee').value = '';
+  document.getElementById('add-modal').classList.add('open');
+  setTimeout(() => document.getElementById('am-text').focus(), 50);
+}
+
+function closeForm() {
+  document.getElementById('add-modal').classList.remove('open');
+  addingCol = null;
+  amChecklist = [];
+}
+
+function addTask() {
+  const col   = addingCol;
+  const text  = document.getElementById('am-text').value.trim();
+  const brand = document.getElementById('am-brand').value;
+  if (!text || !col) return;
+  if (!brand) {
+    const sel = document.getElementById('am-brand');
+    sel.style.borderColor = '#8B2020';
+    sel.animate([{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(-4px)'},{transform:'translateX(0)'}], {duration:250});
+    setTimeout(() => sel.style.borderColor = '', 1500);
+    return;
+  }
   const task = {
-    id: uid(), col, text,
-    brand: document.getElementById('brand-' + col)?.value || '',
-    priority: document.getElementById('priority-' + col)?.value || '',
-    date: document.getElementById('date-' + col)?.value || '',
-    assignee: assigneeEl ? assigneeEl.value.trim() : '',
+    id: uid(), col, text, brand,
+    priority: document.getElementById('am-priority').value || '',
+    date:     document.getElementById('am-date').value || '',
+    assignee: col === 'waiting' ? document.getElementById('am-assignee').value.trim() : '',
+    checklist: amChecklist.length ? [...amChecklist] : undefined,
     archived: false,
     timeLog: [],
     timeSpent: 0
   };
   if (col === 'progress') openSession(task);
   tasks.push(task);
-  save(); render(); closeForm(col);
+  save(); render(); closeForm();
 }
 
-function openForm(col) {
-  COLS.forEach(c => document.getElementById('form-'+c)?.classList.remove('open'));
-  document.getElementById('form-'+col)?.classList.add('open');
-  document.getElementById('text-'+col)?.focus();
-}
-
-function closeForm(col) {
-  document.getElementById('form-'+col)?.classList.remove('open');
-  ['text-','brand-','priority-','date-','assignee-'].forEach(p => {
-    const el = document.getElementById(p+col);
-    if (el) el.value = '';
-  });
-}
+document.getElementById('am-save').addEventListener('click', addTask);
+document.getElementById('am-cancel').addEventListener('click', closeForm);
+document.getElementById('add-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeForm();
+});
+document.getElementById('am-text').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addTask(); }
+  if (e.key === 'Escape') closeForm();
+});
 
 // ── Drag & drop ────────────────────────────────────────────────
 
 let dragId = null;
+let dragOverCardId = null;
+let dragOverPos = null;
+
+function clearInsertIndicators() {
+  document.querySelectorAll('.insert-before, .insert-after').forEach(el => {
+    el.classList.remove('insert-before', 'insert-after');
+  });
+}
+
+function performDrop(id, newCol) {
+  const t = tasks.find(t => t.id === id);
+  if (!t) return;
+  const prevCol = t.col;
+  if (prevCol === 'progress' && newCol !== 'progress') closeSession(t);
+  if (newCol === 'progress' && prevCol !== 'progress') openSession(t);
+  if (newCol === 'done' && prevCol !== 'done') { t.completedAt = new Date().toISOString(); syncTaskToCalendar(t); }
+  if (newCol !== 'done' && prevCol === 'done') t.completedAt = null;
+  if (newCol !== 'waiting') t.pauseReason = null;
+  t.col = newCol;
+  tasks = tasks.filter(task => task.id !== id);
+  if (dragOverCardId && dragOverCardId !== id) {
+    const targetIdx = tasks.findIndex(task => task.id === dragOverCardId);
+    if (targetIdx !== -1) tasks.splice(dragOverPos === 'before' ? targetIdx : targetIdx + 1, 0, t);
+    else tasks.push(t);
+  } else { tasks.push(t); }
+  dragOverCardId = null; dragOverPos = null;
+  save(); render();
+  if (newCol === 'waiting') openPauseModal(t.id);
+}
+
+// ── Mouse drag ──────────────────────────────────────────────────
 function onDragStart(e) {
   dragId = this.dataset.id;
   this.classList.add('dragging');
@@ -1052,6 +1562,16 @@ function onDragStart(e) {
 function onDragEnd() {
   this.classList.remove('dragging');
   document.querySelectorAll('.col').forEach(c => c.classList.remove('drag-over'));
+  clearInsertIndicators();
+  dragOverCardId = null; dragOverPos = null;
+}
+function onCardDragOver(e) {
+  e.preventDefault(); e.stopPropagation();
+  const rect = this.getBoundingClientRect();
+  dragOverCardId = this.dataset.id;
+  dragOverPos = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+  clearInsertIndicators();
+  this.classList.add(dragOverPos === 'before' ? 'insert-before' : 'insert-after');
 }
 
 document.querySelectorAll('.col').forEach(col => {
@@ -1059,22 +1579,104 @@ document.querySelectorAll('.col').forEach(col => {
   col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over'); });
   col.addEventListener('drop', e => {
     e.preventDefault(); col.classList.remove('drag-over');
-    const id = e.dataTransfer.getData('text/plain');
-    const t = tasks.find(t => t.id === id);
-    if (t) {
-      const prevCol = t.col;
-      const newCol = col.dataset.col;
-      if (prevCol === 'progress' && newCol !== 'progress') closeSession(t);
-      if (newCol === 'progress' && prevCol !== 'progress') openSession(t);
-      if (newCol === 'done' && prevCol !== 'done') {
-        t.completedAt = new Date().toISOString();
-        syncTaskToCalendar(t);
-      }
-      if (newCol !== 'done' && prevCol === 'done') t.completedAt = null;
-      t.col = newCol;
-      save(); render();
-    }
+    clearInsertIndicators();
+    performDrop(e.dataTransfer.getData('text/plain'), col.dataset.col);
   });
+});
+
+// ── Touch drag ──────────────────────────────────────────────────
+let touchDragEl = null;
+let touchGhost = null;
+let touchHoldTimer = null;
+let touchDragOriginalCol = null;
+
+function touchUpdateTarget(x, y) {
+  if (touchGhost) touchGhost.style.display = 'none';
+  const el = document.elementFromPoint(x, y);
+  if (touchGhost) touchGhost.style.display = '';
+
+  document.querySelectorAll('.col').forEach(c => c.classList.remove('drag-over'));
+  clearInsertIndicators();
+
+  const targetCard = el?.closest('.card');
+  if (targetCard && targetCard.dataset.id !== dragId) {
+    const rect = targetCard.getBoundingClientRect();
+    dragOverCardId = targetCard.dataset.id;
+    dragOverPos = y < rect.top + rect.height / 2 ? 'before' : 'after';
+    targetCard.classList.add(dragOverPos === 'before' ? 'insert-before' : 'insert-after');
+  } else {
+    dragOverCardId = null; dragOverPos = null;
+  }
+
+  const col = el?.closest('.col');
+  if (col) col.classList.add('drag-over');
+  return col;
+}
+
+document.addEventListener('touchstart', e => {
+  const card = e.target.closest('.card[data-id]');
+  if (!card || card.dataset.draggable === 'false') return;
+  if (e.target.closest('button, input, textarea, select, .card-btns, .cl-item, .cl-add-row')) return;
+
+  const touch = e.touches[0];
+  const startX = touch.clientX, startY = touch.clientY;
+
+  touchHoldTimer = setTimeout(() => {
+    dragId = card.dataset.id;
+    touchDragEl = card;
+    touchDragOriginalCol = tasks.find(t => t.id === dragId)?.col || null;
+
+    if (navigator.vibrate) navigator.vibrate(40);
+    card.classList.add('touch-dragging');
+
+    const rect = card.getBoundingClientRect();
+    touchGhost = card.cloneNode(true);
+    touchGhost.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;
+      pointer-events:none;z-index:9999;opacity:0.85;transform:scale(1.05) rotate(1.5deg);
+      transition:none;box-shadow:0 16px 48px rgba(0,0,0,0.7);`;
+    document.body.appendChild(touchGhost);
+  }, 180);
+
+  const cancel = () => { clearTimeout(touchHoldTimer); touchHoldTimer = null; };
+  card.addEventListener('touchend', cancel, { once: true });
+  card.addEventListener('touchmove', ev => {
+    const t = ev.touches[0];
+    if (Math.abs(t.clientX - startX) > 8 || Math.abs(t.clientY - startY) > 8) cancel();
+  }, { once: true });
+}, { passive: true });
+
+document.addEventListener('touchmove', e => {
+  if (!touchDragEl) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  const x = touch.clientX, y = touch.clientY;
+
+  if (touchGhost) {
+    touchGhost.style.left = (x - touchGhost.offsetWidth / 2) + 'px';
+    touchGhost.style.top  = (y - 40) + 'px';
+  }
+
+  touchUpdateTarget(x, y);
+}, { passive: false });
+
+document.addEventListener('touchend', e => {
+  if (!touchDragEl) return;
+  const touch = e.changedTouches[0];
+  const col = touchUpdateTarget(touch.clientX, touch.clientY);
+
+  if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+  touchDragEl.classList.remove('touch-dragging');
+  document.querySelectorAll('.col').forEach(c => c.classList.remove('drag-over'));
+  clearInsertIndicators();
+
+  if (col && dragId) {
+    performDrop(dragId, col.dataset.col);
+  } else if (dragId && touchDragOriginalCol) {
+    // dropped outside any column — silently restore to original
+    render();
+  }
+
+  touchDragEl = null; dragId = null; touchDragOriginalCol = null;
 });
 
 // ── Events ─────────────────────────────────────────────────────
@@ -1082,13 +1684,10 @@ document.querySelectorAll('.col').forEach(col => {
 document.addEventListener('click', e => {
   const el = e.target;
   if (el.closest('[data-target]') && el.closest('.col-add-btn')) { openForm(el.closest('[data-target]').dataset.target); return; }
-  if (el.closest('[data-close]')) { closeForm(el.closest('[data-close]').dataset.close); return; }
-  if (el.closest('[data-add]')) { addTask(el.closest('[data-add]').dataset.add); return; }
-  if (el.closest('[data-save]')) { doSave(el.closest('[data-save]').dataset.save); return; }
-  if (el.closest('[data-cancel-edit]')) { render(); return; }
+
   if (el.closest('[data-delete]')) {
-    tasks = tasks.filter(t => t.id !== el.closest('[data-delete]').dataset.delete);
-    save(); render(); return;
+    const t = tasks.find(t => t.id === el.closest('[data-delete]').dataset.delete);
+    if (t) { t.deleted = true; save(); render(); } return;
   }
   if (el.closest('[data-archive]') && !el.closest('[data-archive-col]')) {
     const t = tasks.find(t => t.id === el.closest('[data-archive]').dataset.archive);
@@ -1099,10 +1698,7 @@ document.addEventListener('click', e => {
     tasks.filter(t => t.col === col && !t.archived).forEach(t => t.archived = true);
     save(); render(); return;
   }
-  if (el.closest('[data-toggle-wait]')) {
-    const t = tasks.find(t => t.id === el.closest('[data-toggle-wait]').dataset.toggleWait);
-    if (t) { t.waitStatus = t.waitStatus === 'sent' ? 'pending' : 'sent'; save(); render(); } return;
-  }
+
   if (el.closest('[data-cl-del]')) {
     const [tid, iid] = el.closest('[data-cl-del]').dataset.clDel.split(':');
     const t = tasks.find(t => t.id === tid);
@@ -1117,7 +1713,12 @@ document.addEventListener('change', e => {
     const t = tasks.find(t => t.id === tid);
     if (t) {
       const item = (t.checklist || []).find(i => i.id === iid);
-      if (item) { item.done = el.checked; save(); render(); }
+      if (item) {
+        item.done = el.checked;
+        if (el.checked) item.timeAtCheck = getTimeTotal(t);
+        else delete item.timeAtCheck;
+        save(); render();
+      }
     }
   }
 });
@@ -1137,22 +1738,18 @@ document.addEventListener('keydown', e => {
 }, true);
 
 document.addEventListener('dblclick', e => {
+  if (e.target.closest('button, input, textarea, select, .card-btns, .cl-item, .cl-add-row')) return;
   const el = e.target.closest('[data-edit]');
   if (el) openEdit(el.dataset.edit);
 });
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { COLS.forEach(c => closeForm(c)); render(); }
-});
-
-COLS.forEach(col => {
-  document.getElementById('text-'+col)?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addTask(col); }
-  });
+  if (e.key === 'Escape') closeForm();
 });
 
 document.getElementById('search').addEventListener('input', e => { searchQ = e.target.value; render(); });
 document.getElementById('brand-filter').addEventListener('change', e => { brandF = e.target.value; render(); });
+document.getElementById('sort-filter').addEventListener('change', e => { sortF = e.target.value; render(); });
 document.getElementById('toggle-archived').addEventListener('click', function() {
   showArchived = !showArchived;
   this.classList.toggle('on', showArchived);
@@ -1277,6 +1874,59 @@ document.querySelectorAll('[data-period]').forEach(btn => {
   });
 });
 
+// ── Fullscreen ─────────────────────────────────────────────────
+
+document.getElementById('fullscreen-btn').addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+// ── Trash ──────────────────────────────────────────────────────
+
+function renderTrash() {
+  const deleted = tasks.filter(t => t.deleted);
+  const list = document.getElementById('trash-list');
+  if (!deleted.length) {
+    list.innerHTML = '<div class="trash-empty-msg">La papelera está vacía</div>';
+    return;
+  }
+  list.innerHTML = deleted.map(t => `
+    <div class="trash-item">
+      <div class="trash-item-text">${esc(t.text)}</div>
+      ${t.brand ? `<div class="trash-item-brand">${esc(t.brand)}</div>` : ''}
+      <button class="trash-restore" data-restore="${esc(t.id)}">↩ restaurar</button>
+      <button class="trash-perm-del" data-perm-del="${esc(t.id)}">✕ borrar</button>
+    </div>`).join('');
+}
+
+document.getElementById('trash-btn').addEventListener('click', () => {
+  renderTrash();
+  document.getElementById('trash-modal').classList.add('open');
+});
+document.getElementById('trash-close').addEventListener('click', () => {
+  document.getElementById('trash-modal').classList.remove('open');
+});
+document.getElementById('trash-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  const restore = e.target.closest('[data-restore]');
+  if (restore) {
+    const t = tasks.find(t => t.id === restore.dataset.restore);
+    if (t) { t.deleted = false; save(); render(); renderTrash(); } return;
+  }
+  const permDel = e.target.closest('[data-perm-del]');
+  if (permDel) {
+    tasks = tasks.filter(t => t.id !== permDel.dataset.permDel);
+    save(); renderTrash(); return;
+  }
+});
+document.getElementById('trash-clear').addEventListener('click', () => {
+  tasks = tasks.filter(t => !t.deleted);
+  save(); renderTrash();
+});
+
 // ── Google Calendar ────────────────────────────────────────────
 
 let tokenClient = null;
@@ -1290,6 +1940,12 @@ function calDot(state) {
   if (el) el.className = 'cal-dot' + (state ? ' ' + state : '');
 }
 
+document.getElementById('cal-dot').addEventListener('click', () => {
+  if (!tokenClient) return;
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+});
+document.getElementById('cal-dot').style.cursor = 'pointer';
+
 function initGoogleAuth() {
   const clientId = localStorage.getItem('gcal_client_id');
   if (!clientId || !window.google?.accounts?.oauth2) return;
@@ -1300,6 +1956,7 @@ function initGoogleAuth() {
       if (resp.access_token) {
         calToken = resp.access_token;
         calTokenExpiry = Date.now() + (resp.expires_in - 60) * 1000;
+        localStorage.setItem('gcal_consented', '1');
         calDot('ok');
         if (tokenResolve) { tokenResolve(calToken); tokenResolve = null; tokenReject = null; }
       } else {
@@ -1316,7 +1973,7 @@ function getCalToken() {
     if (!tokenClient) { reject('Google Calendar no configurado'); return; }
     tokenResolve = resolve;
     tokenReject = reject;
-    tokenClient.requestAccessToken({ prompt: calToken ? '' : 'consent' });
+    tokenClient.requestAccessToken({ prompt: localStorage.getItem('gcal_consented') ? 'none' : 'consent' });
   });
 }
 
@@ -1347,8 +2004,10 @@ async function createCalEvent(session, task) {
   return await r.json();
 }
 
+const CAL_BRANDS = ['BYD', 'BMW', 'MINI', 'MOTORRAD', 'TODAS'];
+
 async function syncTaskToCalendar(task) {
-  if (!task.timeLog || !localStorage.getItem('gcal_client_id')) return;
+  if (!CAL_BRANDS.includes(task.brand) || !task.timeLog || !localStorage.getItem('gcal_client_id')) return;
   const pending = task.timeLog.filter(s => s.end && !s.calSynced);
   if (!pending.length) return;
 
@@ -1386,6 +2045,17 @@ document.getElementById('gcal-save').addEventListener('click', () => {
 });
 
 load();
+
+// ── Live sync via SSE ──────────────────────────────────────────
+if (!GH.isPages) {
+  const sse = new EventSource('/api/events');
+  sse.onmessage = () => {
+    // Don't interrupt if user is actively doing something
+    if (dragId || editingId || addingCol || pauseTaskId) return;
+    load();
+  };
+  sse.onerror = () => sse.close();
+}
 </script>
 </body>
 </html>
