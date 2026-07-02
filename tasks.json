@@ -668,6 +668,47 @@
     "completedAt": "2026-06-26T19:48:48.317Z"
   },
   {
+    "id": "mqzlrn3f2zhhorqhbgn",
+    "col": "done",
+    "text": "GRILLA JULIO",
+    "brand": "BMW",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T19:28:57.549Z",
+        "end": "2026-06-29T19:32:06.788Z"
+      },
+      {
+        "start": "2026-06-29T19:56:39.211Z",
+        "end": "2026-06-29T21:57:07.251Z"
+      }
+    ],
+    "timeSpent": 7417,
+    "checklist": [
+      {
+        "id": "mqzlsy92972ql34ao3q",
+        "text": "HISTORIAS",
+        "done": false
+      },
+      {
+        "id": "mqzlt08wy2slsak3ci",
+        "text": "POSTS",
+        "done": false
+      },
+      {
+        "id": "mqzlt5q5z9z2bk4dice",
+        "text": "ESTADISTICAS",
+        "done": true,
+        "timeAtCheck": 1219
+      }
+    ],
+    "pauseReason": null,
+    "completedAt": "2026-07-01T22:06:16.598Z"
+  },
+  {
     "id": "mqzjudrqlj7xkcilik",
     "col": "done",
     "text": "HISTORIAS MUNDIAL",
@@ -1156,45 +1197,5 @@
     ],
     "timeSpent": 906,
     "pauseReason": "A la espera de aprobación"
-  },
-  {
-    "id": "mqzlrn3f2zhhorqhbgn",
-    "col": "waiting",
-    "text": "GRILLA JULIO",
-    "brand": "BMW",
-    "priority": "",
-    "date": "",
-    "assignee": "",
-    "archived": false,
-    "timeLog": [
-      {
-        "start": "2026-06-29T19:28:57.549Z",
-        "end": "2026-06-29T19:32:06.788Z"
-      },
-      {
-        "start": "2026-06-29T19:56:39.211Z",
-        "end": "2026-06-29T21:57:07.251Z"
-      }
-    ],
-    "timeSpent": 7417,
-    "checklist": [
-      {
-        "id": "mqzlsy92972ql34ao3q",
-        "text": "HISTORIAS",
-        "done": false
-      },
-      {
-        "id": "mqzlt08wy2slsak3ci",
-        "text": "POSTS",
-        "done": false
-      },
-      {
-        "id": "mqzlt5q5z9z2bk4dice",
-        "text": "ESTADISTICAS",
-        "done": true,
-        "timeAtCheck": 1219
-      }
-    ],
-    "pauseReason": null
   }
 ]
