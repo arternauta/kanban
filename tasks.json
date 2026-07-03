@@ -36,37 +36,6 @@
     "archived": true
   },
   {
-    "id": "mqv4la6w9eebhu264yv",
-    "col": "todo",
-    "text": "COUNT DOWN DE TAi7",
-    "brand": "BYD",
-    "priority": "baja",
-    "date": "",
-    "assignee": "",
-    "archived": false,
-    "timeLog": [
-      {
-        "start": "2026-06-29T16:11:27.691Z",
-        "end": "2026-06-29T16:11:39.588Z"
-      }
-    ],
-    "timeSpent": 11,
-    "pauseReason": null
-  },
-  {
-    "id": "mqv25r7xegyt3rzw5ra",
-    "col": "todo",
-    "text": "Material 310 en showroom colores",
-    "brand": "MOTORRAD",
-    "priority": "",
-    "date": "",
-    "assignee": "",
-    "archived": false,
-    "timeLog": [],
-    "timeSpent": 0,
-    "pauseReason": null
-  },
-  {
     "id": "default19",
     "col": "done",
     "text": "Agregar cantidad de contenido en el reporte semanal BYD",
@@ -547,12 +516,6 @@
     "deleted": true
   },
   {
-    "id": "default17",
-    "col": "todo",
-    "text": "Imprimir tickets UBER",
-    "date": ""
-  },
-  {
     "id": "mqjyvseafh8yx25xcd9",
     "col": "done",
     "text": "Publicar expectativa Yuan Pro y Atto",
@@ -629,24 +592,64 @@
     "completedAt": "2026-06-19T14:53:29.843Z"
   },
   {
-    "id": "mqv1pvv0cjh8yaz2xqe",
-    "col": "boga",
-    "text": "Carrusel Fotos",
-    "brand": "BYD",
-    "priority": "",
-    "date": "",
-    "assignee": "",
-    "archived": false,
-    "timeLog": [],
-    "timeSpent": 0
-  },
-  {
     "id": "default16",
     "col": "done",
     "text": "Hightligts BMW",
     "date": "",
     "completedAt": "2026-06-29T19:20:42.622Z",
-    "pauseReason": null
+    "pauseReason": null,
+    "archived": true
+  },
+  {
+    "id": "mqzlpwkvwjz4v7z4prr",
+    "col": "done",
+    "text": "Portadas Reels Julio Terán",
+    "brand": "BMW",
+    "priority": "media",
+    "date": "",
+    "assignee": "",
+    "archived": true,
+    "timeLog": [
+      {
+        "start": "2026-06-29T19:32:18.046Z",
+        "end": "2026-06-29T19:47:24.125Z"
+      }
+    ],
+    "timeSpent": 906,
+    "pauseReason": null,
+    "completedAt": "2026-07-02T13:45:17.186Z"
+  },
+  {
+    "id": "default17",
+    "col": "done",
+    "text": "Imprimir tickets UBER",
+    "date": "",
+    "completedAt": "2026-07-02T15:08:59.442Z",
+    "pauseReason": null,
+    "archived": true
+  },
+  {
+    "id": "mr3k4r5mujxw5oeuwpm",
+    "col": "done",
+    "text": "PROGRAMAR CUENTA REGRESIVA TAI7",
+    "brand": "BYD",
+    "priority": "media",
+    "date": "",
+    "assignee": "",
+    "archived": true,
+    "timeLog": [
+      {
+        "start": "2026-07-02T13:45:48.385Z",
+        "end": "2026-07-02T14:09:08.677Z"
+      },
+      {
+        "start": "2026-07-02T14:24:59.530Z",
+        "end": "2026-07-02T15:08:11.478Z"
+      }
+    ],
+    "timeSpent": 3991,
+    "pauseReason": null,
+    "completedAt": "2026-07-02T15:08:11.478Z"
   },
   {
     "id": "mqvbs0wsprajm3a68lo",
@@ -656,7 +659,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-26T19:29:53.303Z",
@@ -675,7 +678,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T19:28:57.549Z",
@@ -716,7 +719,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T18:26:39.704Z",
@@ -736,7 +739,7 @@
     "priority": "alta",
     "date": "2026-06-29",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T16:47:36.358Z",
@@ -771,7 +774,7 @@
     "priority": "media",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T15:54:37.316Z",
@@ -810,7 +813,7 @@
     "priority": "media",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T15:32:18.520Z",
@@ -829,7 +832,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [],
     "timeSpent": 0,
     "completedAt": "2026-06-29T15:45:41.205Z",
@@ -843,7 +846,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [],
     "timeSpent": 0,
     "completedAt": "2026-06-29T15:45:25.138Z",
@@ -857,7 +860,7 @@
     "priority": "media",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T14:41:13.471Z",
@@ -882,7 +885,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [],
     "timeSpent": 0,
     "checklist": [
@@ -913,7 +916,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T14:00:04.211Z",
@@ -932,7 +935,7 @@
     "priority": "baja",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T13:50:22.399Z",
@@ -952,7 +955,7 @@
     "priority": "media",
     "date": "2026-06-29",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T13:39:59.543Z",
@@ -971,7 +974,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T13:38:28.277Z",
@@ -991,7 +994,7 @@
     "priority": "alta",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-26T15:00:00.000Z",
@@ -1023,7 +1026,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T13:37:27.445Z",
@@ -1043,7 +1046,7 @@
     "priority": "media",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-29T13:33:55.033Z",
@@ -1063,7 +1066,7 @@
     "priority": "",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-26T21:05:00.000Z",
@@ -1081,7 +1084,7 @@
     "priority": "alta",
     "date": "",
     "assignee": "",
-    "archived": false,
+    "archived": true,
     "timeLog": [
       {
         "start": "2026-06-26T16:23:16.870Z",
@@ -1098,24 +1101,6 @@
     "completedAt": "2026-06-26T20:43:45.990Z"
   },
   {
-    "id": "mqze27prq6b4dw9k19",
-    "col": "todo",
-    "text": "Recap mes de junio",
-    "brand": "BYD",
-    "priority": "baja",
-    "date": "",
-    "assignee": "",
-    "archived": false,
-    "timeLog": [
-      {
-        "start": "2026-06-29T15:44:46.741Z",
-        "end": "2026-06-29T15:45:07.835Z"
-      }
-    ],
-    "timeSpent": 21,
-    "pauseReason": null
-  },
-  {
     "id": "mqze40aa2dpsyg4pcxe",
     "col": "todo",
     "text": "Campaña \"Sabes que es un MINI\"",
@@ -1128,8 +1113,20 @@
     "timeSpent": 0
   },
   {
-    "id": "mqzjcdu62xzkysr2i9v",
+    "id": "mqzlvv04gpzo9m4tvkp",
     "col": "todo",
+    "text": "PLANIFICAR BYD JOURNEY",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0
+  },
+  {
+    "id": "mqzjcdu62xzkysr2i9v",
+    "col": "waiting",
     "text": "EL YUE",
     "brand": "BYD",
     "priority": "media",
@@ -1154,25 +1151,303 @@
         "text": "HISTORIAs",
         "done": false
       }
-    ]
+    ],
+    "pauseReason": null
+  },
+  {
+    "id": "mqze27prq6b4dw9k19",
+    "col": "done",
+    "text": "Recap mes de junio",
+    "brand": "BYD",
+    "priority": "baja",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T15:44:46.741Z",
+        "end": "2026-06-29T15:45:07.835Z"
+      }
+    ],
+    "timeSpent": 21,
+    "pauseReason": null,
+    "completedAt": "2026-07-03T15:38:03.612Z"
+  },
+  {
+    "id": "mr3vx7j3gaggboks8xr",
+    "col": "done",
+    "text": "RIDER DEL MES\nSeleccion de material",
+    "brand": "MOTORRAD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-07-02T19:18:03.376Z",
+        "end": "2026-07-02T20:42:06.677Z"
+      },
+      {
+        "start": "2026-07-03T14:39:44.629Z",
+        "end": "2026-07-03T14:39:50.462Z"
+      }
+    ],
+    "timeSpent": 5048,
+    "pauseReason": null,
+    "completedAt": "2026-07-03T21:36:18.395Z"
+  },
+  {
+    "id": "mr3kypp2v061rcs4gi",
+    "col": "done",
+    "text": "HIGHLIGHTS ATTO 8",
+    "brand": "BYD",
+    "priority": "alta",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-07-02T14:09:05.605Z",
+        "end": "2026-07-02T14:24:55.046Z"
+      },
+      {
+        "start": "2026-07-02T21:44:51.035Z",
+        "end": "2026-07-03T13:53:54.937Z"
+      }
+    ],
+    "timeSpent": 59092,
+    "pauseReason": null,
+    "timeAdjust": -57649,
+    "completedAt": "2026-07-03T13:53:54.937Z"
   },
   {
     "id": "mqzjfhwfcil0x6wpmgr",
-    "col": "todo",
+    "col": "done",
     "text": "Reporte de competencias",
     "brand": "TODAS",
     "priority": "media",
     "date": "2026-07-01",
     "assignee": "",
     "archived": false,
-    "timeLog": [],
-    "timeSpent": 0
+    "timeLog": [
+      {
+        "start": "2026-07-02T16:01:55.548Z",
+        "end": "2026-07-02T16:34:15.630Z"
+      },
+      {
+        "start": "2026-07-03T15:40:54.178Z",
+        "end": "2026-07-03T16:42:02.340Z"
+      },
+      {
+        "start": "2026-07-03T20:08:31.375Z",
+        "end": "2026-07-03T20:37:04.001Z"
+      }
+    ],
+    "timeSpent": 7320,
+    "pauseReason": null,
+    "completedAt": "2026-07-03T21:36:25.524Z"
   },
   {
-    "id": "mqzlvv04gpzo9m4tvkp",
-    "col": "todo",
-    "text": "PLANIFICAR BYD JOURNEY",
+    "id": "mr51t3xmiysn61gef67",
+    "col": "done",
+    "text": "HIGHTLIGHTS YUAN PRO",
     "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-07-03T19:23:17.023Z",
+        "end": "2026-07-03T19:31:14.011Z"
+      }
+    ],
+    "timeSpent": 476,
+    "pauseReason": null,
+    "completedAt": "2026-07-03T19:31:14.011Z"
+  },
+  {
+    "id": "mr3k41yp3z31tnzbat4",
+    "col": "done",
+    "text": "CONTENIDO MEMEs",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-07-02T15:08:15.528Z",
+        "end": "2026-07-02T15:09:29.561Z"
+      },
+      {
+        "start": "2026-07-02T15:09:36.023Z",
+        "end": "2026-07-02T15:12:38.460Z"
+      },
+      {
+        "start": "2026-07-02T18:48:39.365Z",
+        "end": "2026-07-02T19:03:08.583Z"
+      }
+    ],
+    "timeSpent": 1125,
+    "pauseReason": null,
+    "completedAt": "2026-07-03T13:52:16.986Z"
+  },
+  {
+    "id": "mr3lt4s9siu0htuwu7",
+    "col": "waiting",
+    "text": "Verificación de Instagram",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "pauseReason": "A la espera de aprobación"
+  },
+  {
+    "id": "mr3ugjg96d15777r9l7",
+    "col": "boga",
+    "text": "Referencias grillas",
+    "brand": "TODAS",
+    "priority": "media",
+    "date": "2026-07-06",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-07-02T21:26:53.671Z",
+        "end": "2026-07-02T21:27:00.437Z"
+      },
+      {
+        "start": "2026-07-02T21:27:03.937Z",
+        "end": "2026-07-02T21:27:33.336Z"
+      }
+    ],
+    "timeSpent": 35,
+    "pauseReason": null
+  },
+  {
+    "id": "mqv4la6w9eebhu264yv",
+    "col": "boga",
+    "text": "COUNT DOWN DE TAi7",
+    "brand": "BYD",
+    "priority": "baja",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-06-29T16:11:27.691Z",
+        "end": "2026-06-29T16:11:39.588Z"
+      }
+    ],
+    "timeSpent": 11,
+    "pauseReason": null
+  },
+  {
+    "id": "mqv1pvv0cjh8yaz2xqe",
+    "col": "done",
+    "text": "Carrusel Fotos",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "pauseReason": null,
+    "completedAt": "2026-07-03T15:38:12.561Z"
+  },
+  {
+    "id": "mr3pghkiyu8pqwut1be",
+    "col": "waiting",
+    "text": "Descarga material de regional y programacion",
+    "brand": "BMW",
+    "priority": "media",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [
+      {
+        "start": "2026-07-02T16:14:52.793Z",
+        "end": "2026-07-02T18:34:17.532Z"
+      }
+    ],
+    "timeSpent": 8364,
+    "pauseReason": null
+  },
+  {
+    "id": "mr3vk5u5jfv0s8bcnec",
+    "col": "boga",
+    "text": "PROGRAMAR GRILLA",
+    "brand": "MOTORRAD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "pauseReason": null
+  },
+  {
+    "id": "mr3vk9syh9zk7asc6a",
+    "col": "todo",
+    "text": "PROGRAMAR GRILLA",
+    "brand": "MINI",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "pauseReason": null
+  },
+  {
+    "id": "mr3vhacx98nlwqb7s",
+    "col": "todo",
+    "text": "PROGRAMAR GRILLA",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "pauseReason": null
+  },
+  {
+    "id": "mr3pinny8qtt7cqvn5",
+    "col": "todo",
+    "text": "HIGHT LIGHTS SHARK",
+    "brand": "BYD",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "pauseReason": null
+  },
+  {
+    "id": "mr3vk1udxmvd281udl",
+    "col": "todo",
+    "text": "PROGRAMAR GRILLA",
+    "brand": "BMW",
+    "priority": "",
+    "date": "",
+    "assignee": "",
+    "archived": false,
+    "timeLog": [],
+    "timeSpent": 0,
+    "pauseReason": null
+  },
+  {
+    "id": "mr3z0fogd595angxy5e",
+    "col": "boga",
+    "text": "EVENTO JUJITSU",
+    "brand": "BMW",
     "priority": "",
     "date": "",
     "assignee": "",
@@ -1181,21 +1456,21 @@
     "timeSpent": 0
   },
   {
-    "id": "mqzlpwkvwjz4v7z4prr",
-    "col": "waiting",
-    "text": "Portadas Reels Julio Terán",
-    "brand": "BMW",
-    "priority": "media",
+    "id": "mqv25r7xegyt3rzw5ra",
+    "col": "boga",
+    "text": "Material 310 en showroom colores",
+    "brand": "MOTORRAD",
+    "priority": "",
     "date": "",
     "assignee": "",
     "archived": false,
     "timeLog": [
       {
-        "start": "2026-06-29T19:32:18.046Z",
-        "end": "2026-06-29T19:47:24.125Z"
+        "start": "2026-07-03T16:41:50.674Z",
+        "end": "2026-07-03T16:42:56.712Z"
       }
     ],
-    "timeSpent": 906,
-    "pauseReason": "A la espera de aprobación"
+    "timeSpent": 66,
+    "pauseReason": null
   }
 ]

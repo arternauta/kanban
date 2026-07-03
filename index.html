@@ -783,6 +783,11 @@ header {
       </select>
       <input type="date" id="em-date">
     </div>
+    <div id="em-time-row" style="display:none;align-items:center;gap:6px;margin-top:2px">
+      <span style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;flex:1">tiempo registrado</span>
+      <input type="number" id="em-time-h" min="0" max="999" style="width:54px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#e8e6dc;padding:4px 6px;font-size:13px;text-align:right"> h
+      <input type="number" id="em-time-m" min="0" max="59" style="width:46px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#e8e6dc;padding:4px 6px;font-size:13px;text-align:right"> m
+    </div>
     <div class="em-img-upload">
       <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">imágenes</div>
       <div id="em-gallery" class="em-gallery"></div>
@@ -924,13 +929,13 @@ function fmtTime(s) {
 }
 
 function getTimeTotal(task) {
-  if (!task.timeLog || !task.timeLog.length) return 0;
   const now = Date.now();
-  return task.timeLog.reduce((sum, entry) => {
+  const computed = (task.timeLog || []).reduce((sum, entry) => {
     const start = new Date(entry.start).getTime();
     const end = entry.end ? new Date(entry.end).getTime() : now;
     return sum + Math.floor((end - start) / 1000);
   }, 0);
+  return Math.max(0, computed + (task.timeAdjust || 0));
 }
 
 function openSession(task) {
@@ -1126,6 +1131,7 @@ function card(task) {
       ${meta}
       ${clHTML}
       <div class="card-btns">
+        <button class="cbtn" data-duplicate="${esc(task.id)}" title="duplicar">⧉</button>
         <button class="cbtn" data-archive="${esc(task.id)}" title="${task.archived?'desarchivar':'archivar'}">${task.archived?'↩':'⊘'}</button>
         <button class="cbtn del" data-delete="${esc(task.id)}" title="eliminar">✕</button>
       </div>
@@ -1349,6 +1355,15 @@ function openEdit(id) {
   renderEmChecklist();
   renderEmGallery();
 
+  const timeRow = document.getElementById('em-time-row');
+  const hasTime = task.timeLog && task.timeLog.length > 0;
+  timeRow.style.display = hasTime ? 'flex' : 'none';
+  if (hasTime) {
+    const totalSecs = getTimeTotal(task);
+    document.getElementById('em-time-h').value = Math.floor(totalSecs / 3600);
+    document.getElementById('em-time-m').value = Math.floor((totalSecs % 3600) / 60);
+  }
+
   document.getElementById('edit-modal').classList.add('open');
   setTimeout(() => document.getElementById('em-text').focus(), 50);
 }
@@ -1363,6 +1378,18 @@ function doSave() {
   t.priority = document.getElementById('em-priority').value || '';
   t.date     = document.getElementById('em-date').value || '';
   if (t.col === 'waiting') t.assignee = document.getElementById('em-assignee').value.trim();
+  if (t.timeLog && t.timeLog.length > 0) {
+    const h = parseInt(document.getElementById('em-time-h').value) || 0;
+    const m = parseInt(document.getElementById('em-time-m').value) || 0;
+    const wantedSecs = h * 3600 + m * 60;
+    const now = Date.now();
+    const computed = t.timeLog.reduce((sum, e) => {
+      const s = new Date(e.start).getTime();
+      const en = e.end ? new Date(e.end).getTime() : now;
+      return sum + Math.floor((en - s) / 1000);
+    }, 0);
+    t.timeAdjust = wantedSecs - computed;
+  }
   document.getElementById('edit-modal').classList.remove('open');
   editingId = null;
   save(); render();
@@ -1480,6 +1507,25 @@ function closeForm() {
   document.getElementById('add-modal').classList.remove('open');
   addingCol = null;
   amChecklist = [];
+}
+
+function openDuplicate(id) {
+  const src = tasks.find(t => t.id === id);
+  if (!src) return;
+  addingCol = src.col;
+  amChecklist = src.checklist ? src.checklist.map(i => ({ id: uid(), text: i.text, done: false })) : [];
+  document.getElementById('am-title').textContent = 'Duplicar tarea';
+  document.getElementById('am-brand').value    = '';
+  document.getElementById('am-text').value     = src.text;
+  document.getElementById('am-priority').value = src.priority || '';
+  document.getElementById('am-date').value     = src.date || '';
+  document.getElementById('am-cl-input').value = '';
+  renderAmChecklist();
+  const assigneeRow = document.getElementById('am-assignee-row');
+  assigneeRow.style.display = src.col === 'waiting' ? 'block' : 'none';
+  if (src.col === 'waiting') document.getElementById('am-assignee').value = src.assignee || '';
+  document.getElementById('add-modal').classList.add('open');
+  setTimeout(() => document.getElementById('am-brand').focus(), 50);
 }
 
 function addTask() {
@@ -1685,6 +1731,9 @@ document.addEventListener('click', e => {
   const el = e.target;
   if (el.closest('[data-target]') && el.closest('.col-add-btn')) { openForm(el.closest('[data-target]').dataset.target); return; }
 
+  if (el.closest('[data-duplicate]')) {
+    openDuplicate(el.closest('[data-duplicate]').dataset.duplicate); return;
+  }
   if (el.closest('[data-delete]')) {
     const t = tasks.find(t => t.id === el.closest('[data-delete]').dataset.delete);
     if (t) { t.deleted = true; save(); render(); } return;
