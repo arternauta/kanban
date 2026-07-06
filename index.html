@@ -913,7 +913,7 @@ const db      = firebase.firestore();
 const storage = firebase.storage();
 const TASKS_DOC = db.collection('kanban').doc('tasks');
 
-let tasks = [], saveTimer = null, showArchived = false, searchQ = '', brandF = '', sortF = '';
+let tasks = [], saveTimer = null, pendingWrite = false, showArchived = false, searchQ = '', brandF = '', sortF = '';
 
 // ── Time tracking ──────────────────────────────────────────────
 
@@ -973,9 +973,12 @@ setInterval(() => {
 // ── Firebase data layer ────────────────────────────────────────
 
 function save() {
+  pendingWrite = true;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    TASKS_DOC.set({ data: tasks }).catch(() => {});
+    TASKS_DOC.set({ data: tasks })
+      .then(() => { pendingWrite = false; })
+      .catch(() => { pendingWrite = false; });
   }, 800);
 }
 
@@ -2018,6 +2021,7 @@ document.getElementById('gcal-save').addEventListener('click', () => {
 // ── Firebase real-time listener ────────────────────────────────
 TASKS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
   if (snap.metadata.hasPendingWrites) return;
+  if (pendingWrite) return;
   if (dragId || editingId || addingCol || pauseTaskId) return;
   tasks = snap.data()?.data || [];
   render();
