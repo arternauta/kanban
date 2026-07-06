@@ -13,6 +13,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -650,7 +653,6 @@ header {
     <option value="priority">por prioridad</option>
   </select>
   <div class="header-right">
-    <div class="gh-dot" id="gh-dot" title="GitHub sync"></div>
     <div class="cal-dot" id="cal-dot" title="Google Calendar"></div>
     <div class="save-status" id="save-status"></div>
     <button class="hbtn" id="toggle-archived">ver archivadas</button>
@@ -665,16 +667,10 @@ header {
 <!-- Settings modal -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal">
-    <h2>GitHub Sync</h2>
-    <label>Personal Access Token</label>
-    <input type="password" id="gh-token" placeholder="ghp_...">
-    <p class="modal-note">
-      Crea un token en <strong>github.com → Settings → Developer settings → Personal access tokens → Fine-grained</strong> con permiso <strong>Contents: Read &amp; Write</strong> sobre este repo.<br><br>
-      El token se guarda solo en este navegador (localStorage).
-    </p>
+    <h2>Firebase</h2>
+    <p class="modal-note">Conectado a <strong>kanbarter</strong> · Firestore + Storage.<br>Los datos se sincronizan en tiempo real entre todos tus dispositivos.</p>
     <div class="modal-btns">
-      <button class="mbtn-save" id="modal-save">Guardar</button>
-      <button class="mbtn-cancel" id="modal-cancel">Cancelar</button>
+      <button class="mbtn-cancel" id="modal-cancel">Cerrar</button>
     </div>
 
     <div style="border-top:0.5px solid #252523;margin:18px 0 14px"></div>
@@ -905,16 +901,19 @@ const COLS = ['todo','boga','progress','waiting','done'];
 const PRIO = { alta:0, media:1, baja:2, '':3 };
 const BRAND_CLASS = { BYD:'byd', BMW:'bmw', MINI:'mini', MOTORRAD:'motorrad', PERSONAL:'personal', '':'personal' };
 
-const GH = {
-  owner: 'arternauta',
-  repo:  'kanban',
-  path:  'tasks.json',
-  get token() { return localStorage.getItem('gh_token') || ''; },
-  get isPages() { return location.port !== '3000' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1'; }
-};
+firebase.initializeApp({
+  apiKey: "AIzaSyA5wvhWZyiVcPyf4jLrpRxITTTEv-m2XXM",
+  authDomain: "kanbarter-a2951.firebaseapp.com",
+  projectId: "kanbarter-a2951",
+  storageBucket: "kanbarter-a2951.firebasestorage.app",
+  messagingSenderId: "86086247553",
+  appId: "1:86086247553:web:adc809d28c032497d89980"
+});
+const db      = firebase.firestore();
+const storage = firebase.storage();
+const TASKS_DOC = db.collection('kanban').doc('tasks');
 
 let tasks = [], saveTimer = null, showArchived = false, searchQ = '', brandF = '', sortF = '';
-let ghSha = null;
 
 // ── Time tracking ──────────────────────────────────────────────
 
@@ -971,78 +970,13 @@ setInterval(() => {
   }
 }, 1000);
 
-// ── GitHub API ─────────────────────────────────────────────────
-
-function setStatus(state, text) {
-  const dot = document.getElementById('gh-dot');
-  const st  = document.getElementById('save-status');
-  if (dot) { dot.className = 'gh-dot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : ''); }
-  if (st)  { st.textContent = text; st.className = 'save-status' + (state ? ' ' + state : ''); }
-}
-
-async function ghGet() {
-  const r = await fetch(
-    `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${GH.path}`,
-    { headers: { Authorization: `Bearer ${GH.token}`, Accept: 'application/vnd.github+json' } }
-  );
-  if (!r.ok) throw new Error(r.status);
-  const data = await r.json();
-  ghSha = data.sha;
-  return JSON.parse(atob(data.content.replace(/\n/g, '')));
-}
-
-async function ghPut(content) {
-  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
-  const r = await fetch(
-    `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${GH.path}`,
-    {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${GH.token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'Update tasks', content: b64, sha: ghSha })
-    }
-  );
-  if (!r.ok) throw new Error(r.status);
-  const data = await r.json();
-  ghSha = data.content.sha;
-}
-
-async function load() {
-  try {
-    if (GH.token) {
-      tasks = await ghGet();
-      setStatus('ok', '');
-    } else if (!GH.isPages) {
-      const r = await fetch('/api/tasks');
-      tasks = await r.json();
-    } else {
-      tasks = [];
-      setStatus('err', 'sin token');
-    }
-  } catch(e) {
-    tasks = [];
-    setStatus('err', 'error');
-  }
-  render();
-}
+// ── Firebase data layer ────────────────────────────────────────
 
 function save() {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(async () => {
-    try {
-      if (GH.token) {
-        setStatus('', 'guardando...');
-        await ghPut(tasks);
-        setStatus('ok', '');
-      } else if (!GH.isPages) {
-        await fetch('/api/tasks', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(tasks, null, 2) });
-      }
-    } catch(e) {
-      if (String(e).includes('409') || String(e).includes('422')) {
-        try { tasks = await ghGet(); render(); } catch {}
-      }
-      setStatus('err', 'error al guardar');
-    }
-  }, 1200);
+  saveTimer = setTimeout(() => {
+    TASKS_DOC.set({ data: tasks }).catch(() => {});
+  }, 800);
 }
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -1118,7 +1052,7 @@ function card(task) {
     </div>` : '';
 
   const coverHTML = task.cover
-    ? `<img class="card-cover" src="/uploads/${esc(task.cover)}" alt="">` : '';
+    ? `<img class="card-cover" src="${esc(task.cover)}" alt="">` : '';
 
   return `
     <div class="card ${cls}${isDone?' done-card':''}${task.cover?' has-cover':''}"
@@ -1188,13 +1122,10 @@ function render() {
 
 async function uploadImage(file) {
   const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
-  const r = await fetch(`/api/upload?ext=${ext}`, {
-    method: 'POST',
-    headers: { 'Content-Type': file.type },
-    body: file
-  });
-  const data = await r.json();
-  return data.file;
+  const filename = Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+  const ref = storage.ref('uploads/' + filename);
+  await ref.put(file);
+  return await ref.getDownloadURL();
 }
 
 function renderEmGallery() {
@@ -1204,7 +1135,7 @@ function renderEmGallery() {
   const gallery = document.getElementById('em-gallery');
   gallery.innerHTML = images.map((img, idx) => `
     <div class="em-gallery-img" data-img-idx="${idx}">
-      <img src="/uploads/${esc(img)}" alt="">
+      <img src="${esc(img)}" alt="">
       ${idx === 0 && task.cover === img ? '<div style="position:absolute;bottom:2px;left:2px;font-size:8px;background:rgba(0,0,0,0.7);color:#e8e6dc;padding:1px 4px;border-radius:3px">portada</div>' : ''}
       <button class="em-gallery-del" data-del-img="${idx}">×</button>
     </div>`).join('');
@@ -1809,7 +1740,6 @@ document.getElementById('toggle-archived').addEventListener('click', function() 
 // ── Settings modal ─────────────────────────────────────────────
 
 document.getElementById('settings-btn').addEventListener('click', () => {
-  document.getElementById('gh-token').value = GH.token;
   document.getElementById('settings-modal').classList.add('open');
 });
 document.getElementById('modal-cancel').addEventListener('click', () => {
@@ -1817,14 +1747,6 @@ document.getElementById('modal-cancel').addEventListener('click', () => {
 });
 document.getElementById('settings-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
-});
-document.getElementById('modal-save').addEventListener('click', () => {
-  const tok = document.getElementById('gh-token').value.trim();
-  if (tok) localStorage.setItem('gh_token', tok);
-  else localStorage.removeItem('gh_token');
-  document.getElementById('settings-modal').classList.remove('open');
-  ghSha = null;
-  load();
 });
 
 // ── Report modal ───────────────────────────────────────────────
@@ -2093,18 +2015,13 @@ document.getElementById('gcal-save').addEventListener('click', () => {
   }
 });
 
-load();
-
-// ── Live sync via SSE ──────────────────────────────────────────
-if (!GH.isPages) {
-  const sse = new EventSource('/api/events');
-  sse.onmessage = () => {
-    // Don't interrupt if user is actively doing something
-    if (dragId || editingId || addingCol || pauseTaskId) return;
-    load();
-  };
-  sse.onerror = () => sse.close();
-}
+// ── Firebase real-time listener ────────────────────────────────
+TASKS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
+  if (snap.metadata.hasPendingWrites) return;
+  if (dragId || editingId || addingCol || pauseTaskId) return;
+  tasks = snap.data()?.data || [];
+  render();
+});
 </script>
 </body>
 </html>
