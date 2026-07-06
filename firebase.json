@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "server.js",
+      "tasks.json",
+      "migrate.js",
+      "package.json",
+      "package-lock.json",
+      "node_modules/**",
+      ".claude/**"
+    ]
+  }
+}
