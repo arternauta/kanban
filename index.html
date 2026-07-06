@@ -1981,8 +1981,22 @@ async function createCalEvent(session, task) {
 const CAL_BRANDS = ['BYD', 'BMW', 'MINI', 'MOTORRAD', 'TODAS'];
 
 async function syncTaskToCalendar(task) {
-  if (!CAL_BRANDS.includes(task.brand) || !task.timeLog || !localStorage.getItem('gcal_client_id')) return;
-  const pending = task.timeLog.filter(s => s.end && !s.calSynced);
+  if (!CAL_BRANDS.includes(task.brand) || !localStorage.getItem('gcal_client_id')) return;
+
+  let pending = (task.timeLog || []).filter(s => s.end && !s.calSynced);
+
+  // Sin sesiones reales pero tiene tiempo manual → evento sintético
+  let synthetic = null;
+  if (!pending.length) {
+    const totalSecs = getTimeTotal(task);
+    if (totalSecs >= 60) {
+      const end   = task.completedAt || new Date().toISOString();
+      const start = new Date(new Date(end).getTime() - totalSecs * 1000).toISOString();
+      synthetic = { start, end };
+      pending   = [synthetic];
+    }
+  }
+
   if (!pending.length) return;
 
   calDot('syncing');
@@ -1990,7 +2004,7 @@ async function syncTaskToCalendar(task) {
   for (const session of pending) {
     try {
       await createCalEvent(session, task);
-      session.calSynced = true;
+      if (session !== synthetic) session.calSynced = true;
     } catch (e) {
       console.error('Calendar sync error:', e);
       allOk = false;
@@ -2012,6 +2026,7 @@ document.getElementById('gcal-save').addEventListener('click', () => {
   const id = document.getElementById('gcal-client-id').value.trim();
   if (id) {
     localStorage.setItem('gcal_client_id', id);
+    localStorage.removeItem('gcal_consented');
     document.getElementById('settings-modal').classList.remove('open');
     tokenClient = null; calToken = null;
     initGoogleAuth();
