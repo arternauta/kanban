@@ -2089,8 +2089,19 @@ document.getElementById('gcal-save').addEventListener('click', () => {
   if (id) {
     localStorage.setItem('gcal_client_id', id);
     localStorage.removeItem('gcal_consented');
+    db.collection('kanban').doc('settings').set({ gcal_client_id: id }, { merge: true });
     document.getElementById('settings-modal').classList.remove('open');
     tokenClient = null; calToken = null;
+    initGoogleAuth();
+  }
+});
+
+// Sync gcal_client_id desde Firestore a todos los dispositivos
+db.collection('kanban').doc('settings').onSnapshot(snap => {
+  if (!snap.exists) return;
+  const id = snap.data().gcal_client_id;
+  if (id && id !== localStorage.getItem('gcal_client_id')) {
+    localStorage.setItem('gcal_client_id', id);
     initGoogleAuth();
   }
 });
