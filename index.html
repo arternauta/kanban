@@ -138,8 +138,8 @@ header {
   flex: 0;
 }
 .col[data-col="inbox"].collapsed .col-actions-row { flex-direction: column; gap: 6px; }
-.inbox-toggle { background: none; border: none; cursor: pointer; color: #534AB7; font-size: 13px; padding: 0; line-height: 1; }
-.inbox-toggle:hover { color: #9490d0; }
+.inbox-toggle { background: none; border: none; cursor: pointer; color: #534AB7; font-size: 18px; padding: 2px 4px; line-height: 1; border-radius: 4px; transition: background 0.15s; }
+.inbox-toggle:hover { color: #9490d0; background: rgba(83,74,183,0.12); }
 
 /* ── Column ── */
 .col { flex: 1 1 0; min-width: 150px; display: flex; flex-direction: column; }
@@ -959,6 +959,7 @@ firebase.initializeApp({
 });
 const db      = firebase.firestore();
 const storage = firebase.storage();
+db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
 const TASKS_DOC = db.collection('kanban').doc('tasks');
 
 let tasks = [], saveTimer = null, pendingWrite = false, showArchived = false, searchQ = '', brandF = '', sortF = '';
@@ -1027,7 +1028,7 @@ function save() {
     TASKS_DOC.set({ data: tasks })
       .then(() => { pendingWrite = false; })
       .catch(() => { pendingWrite = false; });
-  }, 800);
+  }, 300);
 }
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -1788,11 +1789,11 @@ function setInboxCollapsed(collapsed) {
   inboxCol.classList.toggle('collapsed', collapsed);
   inboxToggle.textContent = collapsed ? '›' : '‹';
   inboxToggle.title = collapsed ? 'expandir' : 'colapsar';
-  localStorage.setItem('inbox_collapsed', collapsed ? '1' : '');
+  localStorage.setItem('inbox_collapsed', collapsed ? '1' : '0');
 }
-setInboxCollapsed(!!localStorage.getItem('inbox_collapsed'));
+setInboxCollapsed(localStorage.getItem('inbox_collapsed') !== '0');
 inboxToggle.addEventListener('click', e => { e.stopPropagation(); setInboxCollapsed(!inboxCol.classList.contains('collapsed')); });
-inboxCol.addEventListener('click', e => { if (inboxCol.classList.contains('collapsed')) setInboxCollapsed(false); });
+inboxCol.addEventListener('dblclick', e => { if (inboxCol.classList.contains('collapsed')) setInboxCollapsed(false); });
 document.getElementById('sort-filter').addEventListener('change', e => { sortF = e.target.value; render(); });
 document.getElementById('toggle-archived').addEventListener('click', function() {
   showArchived = !showArchived;
@@ -2091,6 +2092,14 @@ document.getElementById('gcal-save').addEventListener('click', () => {
     document.getElementById('settings-modal').classList.remove('open');
     tokenClient = null; calToken = null;
     initGoogleAuth();
+  }
+});
+
+// Guardado inmediato al cerrar o cambiar de tab
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && pendingWrite) {
+    clearTimeout(saveTimer);
+    TASKS_DOC.set({ data: tasks }).then(() => { pendingWrite = false; }).catch(() => {});
   }
 });
 
