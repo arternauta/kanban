@@ -106,6 +106,41 @@ header {
   align-items: stretch;
 }
 
+/* ── Inbox column ── */
+.col[data-col="inbox"] {
+  background: rgba(83,74,183,0.04);
+  border: 1px solid rgba(83,74,183,0.12);
+  border-radius: 12px;
+  padding: 14px 8px 14px;
+  flex: 1 1 0;
+  min-width: 150px;
+  transition: flex 0.25s, min-width 0.25s, padding 0.25s;
+}
+.col[data-col="inbox"].collapsed {
+  flex: 0 0 38px !important;
+  min-width: 38px !important;
+  padding: 14px 4px;
+  cursor: pointer;
+}
+.col[data-col="inbox"].collapsed .cards,
+.col[data-col="inbox"].collapsed .col-add-btn,
+.col[data-col="inbox"].collapsed .col-dot { display: none !important; }
+.col[data-col="inbox"].collapsed .col-head {
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 0;
+}
+.col[data-col="inbox"].collapsed .col-name {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  flex: 0;
+}
+.col[data-col="inbox"].collapsed .col-actions-row { flex-direction: column; gap: 6px; }
+.inbox-toggle { background: none; border: none; cursor: pointer; color: #534AB7; font-size: 13px; padding: 0; line-height: 1; }
+.inbox-toggle:hover { color: #9490d0; }
+
 /* ── Column ── */
 .col { flex: 1 1 0; min-width: 150px; display: flex; flex-direction: column; }
 
@@ -831,6 +866,19 @@ header {
 
 <div class="board">
 
+  <div class="col" data-col="inbox">
+    <div class="col-head">
+      <div class="col-dot" style="background:#534AB7"></div>
+      <div class="col-name">💡 ideas</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-count="inbox">0</div>
+        <button class="inbox-toggle" id="inbox-toggle" title="colapsar">‹</button>
+        <button class="col-add-btn" data-target="inbox">+</button>
+      </div>
+    </div>
+    <div class="cards" id="cards-inbox"></div>
+  </div>
+
   <div class="col" data-col="todo">
     <div class="col-head">
       <div class="col-dot" style="background:#185FA5"></div>
@@ -897,7 +945,7 @@ header {
 </div>
 
 <script>
-const COLS = ['todo','boga','progress','waiting','done'];
+const COLS = ['inbox','todo','boga','progress','waiting','done'];
 const PRIO = { alta:0, media:1, baja:2, '':3 };
 const BRAND_CLASS = { BYD:'byd', BMW:'bmw', MINI:'mini', MOTORRAD:'motorrad', PERSONAL:'personal', '':'personal' };
 
@@ -1390,7 +1438,7 @@ document.getElementById('pause-modal').addEventListener('click', e => {
 
 let addingCol = null;
 let amChecklist = [];
-const COL_LABELS = { todo: 'pendientes', boga: 'en boga', progress: 'en progreso', waiting: 'en pausa', done: 'hecho' };
+const COL_LABELS = { inbox: 'ideas', todo: 'pendientes', boga: 'en boga', progress: 'en progreso', waiting: 'en pausa', done: 'hecho' };
 
 function renderAmChecklist() {
   const list = document.getElementById('am-cl-list');
@@ -1732,6 +1780,19 @@ document.addEventListener('keydown', e => {
 
 document.getElementById('search').addEventListener('input', e => { searchQ = e.target.value; render(); });
 document.getElementById('brand-filter').addEventListener('change', e => { brandF = e.target.value; render(); });
+
+// ── Inbox collapse ─────────────────────────────────────────────
+const inboxCol = document.querySelector('.col[data-col="inbox"]');
+const inboxToggle = document.getElementById('inbox-toggle');
+function setInboxCollapsed(collapsed) {
+  inboxCol.classList.toggle('collapsed', collapsed);
+  inboxToggle.textContent = collapsed ? '›' : '‹';
+  inboxToggle.title = collapsed ? 'expandir' : 'colapsar';
+  localStorage.setItem('inbox_collapsed', collapsed ? '1' : '');
+}
+setInboxCollapsed(!!localStorage.getItem('inbox_collapsed'));
+inboxToggle.addEventListener('click', e => { e.stopPropagation(); setInboxCollapsed(!inboxCol.classList.contains('collapsed')); });
+inboxCol.addEventListener('click', e => { if (inboxCol.classList.contains('collapsed')) setInboxCollapsed(false); });
 document.getElementById('sort-filter').addEventListener('change', e => { sortF = e.target.value; render(); });
 document.getElementById('toggle-archived').addEventListener('click', function() {
   showArchived = !showArchived;
