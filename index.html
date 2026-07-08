@@ -962,7 +962,7 @@ const storage = firebase.storage();
 db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
 const TASKS_DOC = db.collection('kanban').doc('tasks');
 
-let tasks = [], saveTimer = null, pendingWrite = false, showArchived = false, searchQ = '', brandF = '', sortF = '';
+let tasks = [], saveTimer = null, writeGen = 0, pendingWrite = false, showArchived = false, searchQ = '', brandF = '', sortF = '';
 
 // ── Time tracking ──────────────────────────────────────────────
 
@@ -1022,12 +1022,13 @@ setInterval(() => {
 // ── Firebase data layer ────────────────────────────────────────
 
 function save() {
+  const gen = ++writeGen;
   pendingWrite = true;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     TASKS_DOC.set({ data: tasks })
-      .then(() => { pendingWrite = false; })
-      .catch(() => { pendingWrite = false; });
+      .then(() => { if (gen === writeGen) pendingWrite = false; })
+      .catch(() => { if (gen === writeGen) pendingWrite = false; });
   }, 300);
 }
 
@@ -1173,11 +1174,17 @@ function render() {
 // ── Image upload ───────────────────────────────────────────────
 
 async function uploadImage(file) {
-  const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
-  const filename = Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
-  const ref = storage.ref('uploads/' + filename);
-  await ref.put(file);
-  return await ref.getDownloadURL();
+  try {
+    const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const filename = Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+    const ref = storage.ref('uploads/' + filename);
+    await ref.put(file);
+    return await ref.getDownloadURL();
+  } catch (e) {
+    console.error('Upload error:', e);
+    alert('Error al subir imagen: ' + (e.message || e.code || e));
+    return null;
+  }
 }
 
 function renderEmGallery() {
@@ -2110,7 +2117,10 @@ db.collection('kanban').doc('settings').onSnapshot(snap => {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && pendingWrite) {
     clearTimeout(saveTimer);
-    TASKS_DOC.set({ data: tasks }).then(() => { pendingWrite = false; }).catch(() => {});
+    const gen = writeGen;
+    TASKS_DOC.set({ data: tasks })
+      .then(() => { if (gen === writeGen) pendingWrite = false; })
+      .catch(() => {});
   }
 });
 
