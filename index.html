@@ -1025,17 +1025,14 @@ function save() {
   const gen = ++writeGen;
   pendingWrite = true;
   try { localStorage.setItem('kb_backup', JSON.stringify({ ts: Date.now(), data: tasks })); } catch(e) {}
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    TASKS_DOC.set({ data: tasks })
-      .then(() => {
-        if (gen === writeGen) {
-          pendingWrite = false;
-          try { localStorage.removeItem('kb_backup'); } catch(e) {}
-        }
-      })
-      .catch(() => { if (gen === writeGen) pendingWrite = false; });
-  }, 300);
+  TASKS_DOC.set({ data: tasks })
+    .then(() => {
+      if (gen === writeGen) {
+        pendingWrite = false;
+        try { localStorage.removeItem('kb_backup'); } catch(e) {}
+      }
+    })
+    .catch(() => { if (gen === writeGen) pendingWrite = false; });
 }
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -2132,20 +2129,17 @@ document.addEventListener('visibilitychange', () => {
 
 // ── Recover from localStorage backup if page was refreshed mid-save ──
 (function() {
-  try {
-    const raw = localStorage.getItem('kb_backup');
-    if (!raw) return;
-    const backup = JSON.parse(raw);
-    if (!backup || !Array.isArray(backup.data)) { localStorage.removeItem('kb_backup'); return; }
-    if (Date.now() - backup.ts > 60000) { localStorage.removeItem('kb_backup'); return; }
-    tasks = backup.data;
-    render();
-    const gen = ++writeGen;
-    pendingWrite = true;
-    TASKS_DOC.set({ data: tasks })
-      .then(() => { if (gen === writeGen) { pendingWrite = false; localStorage.removeItem('kb_backup'); } })
-      .catch(() => { if (gen === writeGen) pendingWrite = false; });
-  } catch(e) { localStorage.removeItem('kb_backup'); }
+  let backup = null;
+  try { backup = JSON.parse(localStorage.getItem('kb_backup') || 'null'); } catch(e) { localStorage.removeItem('kb_backup'); return; }
+  if (!backup || !Array.isArray(backup.data)) { if (backup) localStorage.removeItem('kb_backup'); return; }
+  if (Date.now() - backup.ts > 300000) { localStorage.removeItem('kb_backup'); return; }
+  tasks = backup.data;
+  render();
+  const gen = ++writeGen;
+  pendingWrite = true;
+  TASKS_DOC.set({ data: tasks })
+    .then(() => { if (gen === writeGen) { pendingWrite = false; localStorage.removeItem('kb_backup'); } })
+    .catch(() => { if (gen === writeGen) pendingWrite = false; });
 })();
 
 // ── Firebase real-time listener ────────────────────────────────
