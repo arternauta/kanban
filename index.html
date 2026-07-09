@@ -1025,14 +1025,17 @@ function save() {
   const gen = ++writeGen;
   pendingWrite = true;
   try { localStorage.setItem('kb_backup', JSON.stringify({ ts: Date.now(), data: tasks })); } catch(e) {}
-  TASKS_DOC.set({ data: tasks })
-    .then(() => {
-      if (gen === writeGen) {
-        pendingWrite = false;
-        try { localStorage.removeItem('kb_backup'); } catch(e) {}
-      }
-    })
-    .catch(() => { if (gen === writeGen) pendingWrite = false; });
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    TASKS_DOC.set({ data: tasks })
+      .then(() => {
+        if (gen === writeGen) {
+          pendingWrite = false;
+          try { localStorage.removeItem('kb_backup'); } catch(e) {}
+        }
+      })
+      .catch(() => { if (gen === writeGen) pendingWrite = false; });
+  }, 100);
 }
 
 // ── Helpers ────────────────────────────────────────────────────
