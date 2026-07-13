@@ -2119,7 +2119,7 @@ db.collection('kanban').doc('settings').onSnapshot(snap => {
   }
 });
 
-// Guardado inmediato al cerrar o cambiar de tab
+// Guardado inmediato al cerrar + recarga al recuperar foco
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && pendingWrite) {
     clearTimeout(saveTimer);
@@ -2127,6 +2127,14 @@ document.addEventListener('visibilitychange', () => {
     TASKS_DOC.set({ data: tasks })
       .then(() => { if (gen === writeGen) pendingWrite = false; })
       .catch(() => {});
+  }
+  if (document.visibilityState === 'visible' && !pendingWrite) {
+    // Fuerza lectura del servidor para evitar sobreescribir datos de otro dispositivo
+    TASKS_DOC.get({ source: 'server' }).then(snap => {
+      if (!snap.exists || pendingWrite) return;
+      tasks = snap.data().data || [];
+      render();
+    }).catch(() => {});
   }
 });
 
