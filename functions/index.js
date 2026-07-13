@@ -23,6 +23,20 @@ async function tgSend(token, chatId, text) {
   });
 }
 
+exports.flush = onRequest({ cors: true }, async (req, res) => {
+  if (req.method !== 'POST') { res.status(405).end(); return; }
+  try {
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const data = body?.data;
+    if (!Array.isArray(data)) { res.status(400).end(); return; }
+    await TASKS_REF.set({ data });
+    res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).end();
+  }
+});
+
 exports.telegram = onRequest({ secrets: [TELEGRAM_TOKEN] }, async (req, res) => {
   if (req.method !== 'POST') { res.status(405).end(); return; }
 

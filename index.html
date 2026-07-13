@@ -2130,6 +2130,20 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+// Garantía de escritura al cerrar el browser: keepalive sobrevive al proceso
+window.addEventListener('pagehide', () => {
+  if (!pendingWrite) return;
+  clearTimeout(saveTimer);
+  try {
+    fetch('https://us-central1-kanbarter-a2951.cloudfunctions.net/flush', {
+      method: 'POST',
+      body: JSON.stringify({ data: tasks }),
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true
+    });
+  } catch(e) {}
+});
+
 // ── Recover from localStorage backup if page was refreshed mid-save ──
 (function() {
   let backup = null;
