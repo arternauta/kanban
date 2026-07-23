@@ -185,6 +185,7 @@ header {
 
 /* ── Progress column highlight ── */
 .cbadge.pause-reason { background: rgba(83,74,183,0.18); color: #9490d0; border-color: rgba(83,74,183,0.3); max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+.completion-note { font-size: 9px; color: #5f5e5a; line-height: 1.5; margin-top: 4px; font-style: italic; white-space: pre-wrap; }
 
 .pause-modal-box {
   background: #161614; border: 0.5px solid #2c2c2a;
@@ -810,6 +811,18 @@ body.public-mode .card { cursor: default; }
   </div>
 </div>
 
+<!-- Completion note modal -->
+<div class="modal-overlay" id="done-modal">
+  <div class="pause-modal-box">
+    <div class="pause-modal-title">¿algún comentario sobre la tarea?</div>
+    <textarea id="done-note-text" placeholder="opcional — qué salió bien, qué cambiarías, próximos pasos..." style="width:100%;margin-top:12px;background:#1a1a18;border:0.5px solid #2c2c2a;border-radius:4px;padding:8px 10px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:#d3d1c7;outline:none;resize:vertical;min-height:80px;"></textarea>
+    <div class="pause-modal-btns" style="margin-top:12px;">
+      <button class="edit-modal-save" id="done-note-confirm">guardar</button>
+      <button class="edit-modal-cancel" id="done-note-skip">omitir</button>
+    </div>
+  </div>
+</div>
+
 <!-- Add modal -->
 <div class="modal-overlay" id="add-modal">
   <div class="edit-modal">
@@ -956,7 +969,7 @@ body.public-mode .card { cursor: default; }
   <div class="col" data-col="boga">
     <div class="col-head">
       <div class="col-dot" style="background:#993C1D"></div>
-      <div class="col-name">en boga</div>
+      <div class="col-name">planificado hoy</div>
       <div class="col-actions-row">
         <div class="col-count" data-count="boga">0</div>
         <button class="col-add-btn" data-target="boga">+</button>
@@ -993,7 +1006,7 @@ body.public-mode .card { cursor: default; }
   <div class="col" data-col="done">
     <div class="col-head">
       <div class="col-dot" style="background:#3B6D11"></div>
-      <div class="col-name">hecho</div>
+      <div class="col-name">finalizado</div>
       <div class="col-actions-row">
         <div class="col-count" data-count="done">0</div>
         <button class="col-archive-btn" data-archive-col="done">archivar todo</button>
@@ -1296,6 +1309,7 @@ function card(task) {
       <div class="card-text">${esc(task.text)}</div>
       ${meta}
       ${clHTML}
+      ${task.completionNote ? `<div class="completion-note">${esc(task.completionNote)}</div>` : ''}
       ${IS_PUBLIC ? '' : `<div class="card-btns">
         <button class="cbtn" data-duplicate="${esc(task.id)}" title="duplicar">⧉</button>
         <button class="cbtn" data-archive="${esc(task.id)}" title="${task.archived?'desarchivar':'archivar'}">${task.archived?'↩':'⊘'}</button>
@@ -1587,6 +1601,36 @@ document.getElementById('em-text').addEventListener('keydown', e => {
 });
 
 // ── Pause modal ────────────────────────────────────────────────
+let doneTaskId = null;
+
+function openDoneModal(taskId) {
+  doneTaskId = taskId;
+  document.getElementById('done-note-text').value = '';
+  document.getElementById('done-modal').classList.add('open');
+  setTimeout(() => document.getElementById('done-note-text').focus(), 50);
+}
+
+function closeDoneModal() {
+  document.getElementById('done-modal').classList.remove('open');
+  doneTaskId = null;
+}
+
+document.getElementById('done-note-confirm').addEventListener('click', () => {
+  const note = document.getElementById('done-note-text').value.trim();
+  const t = tasks.find(t => t.id === doneTaskId);
+  if (t) { t.completionNote = note || null; save(); render(); }
+  closeDoneModal();
+});
+
+document.getElementById('done-note-skip').addEventListener('click', () => {
+  closeDoneModal();
+});
+
+document.getElementById('done-note-text').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.metaKey) document.getElementById('done-note-confirm').click();
+  if (e.key === 'Escape') closeDoneModal();
+});
+
 let pauseTaskId = null;
 
 function openPauseModal(taskId) {
@@ -1631,7 +1675,7 @@ document.getElementById('pause-modal').addEventListener('click', e => {
 
 let addingCol = null;
 let amChecklist = [];
-const COL_LABELS = { inbox: 'ideas', todo: 'pendientes', boga: 'en boga', progress: 'en progreso', waiting: 'en pausa', done: 'hecho' };
+const COL_LABELS = { inbox: 'ideas', todo: 'por hacer', boga: 'planificado hoy', progress: 'en progreso', waiting: 'en pausa', done: 'finalizado' };
 
 function renderAmChecklist() {
   const list = document.getElementById('am-cl-list');
@@ -1759,7 +1803,7 @@ function performDrop(id, newCol) {
   if (prevCol === 'progress' && newCol !== 'progress') closeSession(t);
   if (newCol === 'progress' && prevCol !== 'progress') openSession(t);
   if (newCol === 'done' && prevCol !== 'done') { t.completedAt = new Date().toISOString(); syncTaskToCalendar(t); }
-  if (newCol !== 'done' && prevCol === 'done') t.completedAt = null;
+  if (newCol !== 'done' && prevCol === 'done') { t.completedAt = null; t.completionNote = null; }
   if (newCol !== 'waiting') t.pauseReason = null;
   t.col = newCol;
   tasks = tasks.filter(task => task.id !== id);
@@ -1771,6 +1815,7 @@ function performDrop(id, newCol) {
   dragOverCardId = null; dragOverPos = null;
   save(); render();
   if (newCol === 'waiting') openPauseModal(t.id);
+  if (newCol === 'done' && prevCol !== 'done') openDoneModal(t.id);
 }
 
 // ── Mouse drag ──────────────────────────────────────────────────
@@ -2361,7 +2406,7 @@ window.addEventListener('pagehide', () => {
 TASKS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
   if (snap.metadata.hasPendingWrites) return;
   if (pendingWrite) return;
-  if (dragId || editingId || addingCol || pauseTaskId) return;
+  if (dragId || editingId || addingCol || pauseTaskId || doneTaskId) return;
   tasks = snap.data()?.data || [];
   render();
 });
