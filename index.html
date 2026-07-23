@@ -616,6 +616,46 @@ header {
 .save-status.saved { color: #3B6D11; }
 .save-status.error { color: #8B2020; }
 
+/* ── Auth overlay ── */
+#auth-overlay {
+  position: fixed; inset: 0; background: #0e0e0d;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; flex-direction: column;
+}
+#auth-overlay.hidden { display: none; }
+.auth-box {
+  width: 280px; text-align: center;
+}
+.auth-logo { font-size: 22px; font-weight: 700; color: #e8e6dc; margin-bottom: 6px; }
+.auth-logo span { color: #5BA32A; }
+.auth-sub { font-size: 10px; color: #5f5e5a; letter-spacing: 0.12em; margin-bottom: 28px; text-transform: uppercase; }
+#auth-pw, #auth-pw2 {
+  width: 100%; background: #161614; border: 0.5px solid #2c2c2a;
+  border-radius: 4px; padding: 9px 12px; font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace; color: #d3d1c7;
+  outline: none; margin-bottom: 10px; text-align: center;
+}
+#auth-pw:focus, #auth-pw2:focus { border-color: #5f5e5a; }
+#auth-btn {
+  width: 100%; padding: 9px; background: #1e2e14; border: 0.5px solid #3B6D11;
+  border-radius: 4px; color: #8DC96A; font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.1em; cursor: pointer; transition: all 0.12s;
+}
+#auth-btn:hover { background: #253818; }
+#auth-error { font-size: 10px; color: #8B2020; margin-top: 10px; min-height: 16px; }
+
+/* ── Public mode ── */
+body.public-mode .admin-only { display: none !important; }
+body.public-mode .col-add-btn { display: none !important; }
+body.public-mode .col-archive-btn { display: none !important; }
+body.public-mode .inbox-toggle { display: none !important; }
+body.public-mode .card { cursor: default; }
+.public-badge {
+  font-size: 9px; color: #3B6D11; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 3px 8px;
+  border: 0.5px solid #3B6D11; border-radius: 3px;
+}
+
 /* ── Report modal ── */
 .report-modal {
   background: #161614; border: 0.5px solid #2c2c2a;
@@ -670,6 +710,18 @@ header {
 </head>
 <body>
 
+<!-- Auth overlay -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">mis <span>prioridades</span></div>
+    <div class="auth-sub" id="auth-sub">contraseña</div>
+    <input type="password" id="auth-pw" placeholder="••••••••" autocomplete="current-password">
+    <input type="password" id="auth-pw2" placeholder="confirmar contraseña" style="display:none" autocomplete="new-password">
+    <button id="auth-btn">ingresar</button>
+    <div id="auth-error"></div>
+  </div>
+</div>
+
 <header>
   <div class="logo">mis <span>prioridades</span></div>
   <input class="search-box" id="search" type="text" placeholder="buscar...">
@@ -688,14 +740,15 @@ header {
     <option value="priority">por prioridad</option>
   </select>
   <div class="header-right">
-    <div class="cal-dot" id="cal-dot" title="Google Calendar"></div>
-    <div class="save-status" id="save-status"></div>
-    <button class="hbtn" id="toggle-archived">ver archivadas</button>
-    <button class="hbtn" id="fullscreen-btn">⛶</button>
-    <button class="hbtn" id="trash-btn">papelera</button>
-    <button class="hbtn" id="report-btn">reporte</button>
-    <button class="hbtn" id="settings-btn">⚙</button>
-    <div class="summary" id="summary">—</div>
+    <div class="cal-dot admin-only" id="cal-dot" title="Google Calendar"></div>
+    <div class="save-status admin-only" id="save-status"></div>
+    <button class="hbtn admin-only" id="toggle-archived">ver archivadas</button>
+    <button class="hbtn admin-only" id="fullscreen-btn">⛶</button>
+    <button class="hbtn admin-only" id="trash-btn">papelera</button>
+    <button class="hbtn admin-only" id="report-btn">reporte</button>
+    <button class="hbtn admin-only" id="settings-btn">⚙</button>
+    <div class="public-badge" id="public-badge" style="display:none">vista equipo</div>
+    <div class="summary admin-only" id="summary">—</div>
   </div>
 </header>
 
@@ -707,6 +760,15 @@ header {
     <div class="modal-btns">
       <button class="mbtn-cancel" id="modal-cancel">Cerrar</button>
     </div>
+
+    <div style="border-top:0.5px solid #252523;margin:18px 0 14px"></div>
+    <h2>Acceso</h2>
+    <label>Contraseña del kanban</label>
+    <input type="password" id="settings-pw" placeholder="nueva contraseña">
+    <div class="modal-btns" style="margin-bottom:0">
+      <button class="mbtn-save" id="settings-pw-save">Cambiar contraseña</button>
+    </div>
+    <p class="modal-note" style="margin-top:10px">Compartí <strong>?public</strong> al final de la URL con tus compañeros para una vista sin tareas personales.</p>
 
     <div style="border-top:0.5px solid #252523;margin:18px 0 14px"></div>
     <h2>Google Calendar</h2>
@@ -945,6 +1007,105 @@ header {
 </div>
 
 <script>
+// ── Auth & public mode ─────────────────────────────────────────
+const IS_PUBLIC = location.search.includes('public');
+
+async function hashPw(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw + 'kb-kanbarter'));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function hideAuthOverlay() {
+  document.getElementById('auth-overlay').classList.add('hidden');
+}
+
+async function initAuth() {
+  if (IS_PUBLIC) {
+    document.body.classList.add('public-mode');
+    document.getElementById('public-badge').style.display = '';
+    document.querySelector('select#brand-filter').style.display = 'none';
+    document.querySelector('select#sort-filter').style.display = 'none';
+    hideAuthOverlay();
+    return;
+  }
+
+  // Check local auth token vs stored hash in Firestore
+  const localAuth = localStorage.getItem('kb_auth');
+
+  // Try to get hash from Firestore settings
+  let firestoreHash = null;
+  try {
+    const snap = await db.collection('kanban').doc('settings').get();
+    firestoreHash = snap.exists ? (snap.data().pass_hash || null) : null;
+  } catch(e) {}
+
+  if (!firestoreHash) {
+    // First time — setup mode
+    document.getElementById('auth-sub').textContent = 'configurá tu contraseña';
+    document.getElementById('auth-pw').placeholder = 'nueva contraseña';
+    document.getElementById('auth-pw2').style.display = '';
+    document.getElementById('auth-btn').textContent = 'configurar';
+    hideAuthOverlay(); // no hay contraseña aún, dejamos pasar
+    return;
+  }
+
+  if (localAuth && localAuth === firestoreHash) {
+    hideAuthOverlay();
+    return;
+  }
+
+  // Show login
+  document.getElementById('auth-sub').textContent = 'contraseña';
+  document.getElementById('auth-btn').textContent = 'ingresar';
+  // overlay stays visible
+}
+
+document.getElementById('auth-btn').addEventListener('click', async () => {
+  const pw = document.getElementById('auth-pw').value;
+  const pw2 = document.getElementById('auth-pw2').value;
+  const errEl = document.getElementById('auth-error');
+  const btn = document.getElementById('auth-btn');
+  const isSetup = btn.textContent === 'configurar';
+
+  errEl.textContent = '';
+  if (!pw) { errEl.textContent = 'ingresá una contraseña'; return; }
+
+  if (isSetup) {
+    if (pw !== pw2) { errEl.textContent = 'las contraseñas no coinciden'; return; }
+    if (pw.length < 4) { errEl.textContent = 'mínimo 4 caracteres'; return; }
+    const hash = await hashPw(pw);
+    await db.collection('kanban').doc('settings').set({ pass_hash: hash }, { merge: true });
+    localStorage.setItem('kb_auth', hash);
+    hideAuthOverlay();
+    return;
+  }
+
+  // Login
+  const hash = await hashPw(pw);
+  let firestoreHash = null;
+  try {
+    const snap = await db.collection('kanban').doc('settings').get();
+    firestoreHash = snap.exists ? (snap.data().pass_hash || null) : null;
+  } catch(e) {}
+
+  if (hash === firestoreHash) {
+    localStorage.setItem('kb_auth', hash);
+    hideAuthOverlay();
+  } else {
+    errEl.textContent = 'contraseña incorrecta';
+    document.getElementById('auth-pw').value = '';
+    document.getElementById('auth-pw').focus();
+  }
+});
+
+document.getElementById('auth-pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('auth-btn').click();
+});
+document.getElementById('auth-pw2').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('auth-btn').click();
+});
+
+// ──────────────────────────────────────────────────────────────
 const COLS = ['inbox','todo','boga','progress','waiting','done'];
 const PRIO = { alta:0, media:1, baja:2, '':3 };
 const BRAND_CLASS = { BYD:'byd', BMW:'bmw', MINI:'mini', MOTORRAD:'motorrad', PERSONAL:'personal', '':'personal' };
@@ -963,6 +1124,8 @@ db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
 const TASKS_DOC = db.collection('kanban').doc('tasks');
 
 let tasks = [], saveTimer = null, writeGen = 0, pendingWrite = false, showArchived = false, searchQ = '', brandF = '', sortF = '';
+
+initAuth();
 
 // ── Time tracking ──────────────────────────────────────────────
 
@@ -1123,19 +1286,25 @@ function card(task) {
       <div class="card-text">${esc(task.text)}</div>
       ${meta}
       ${clHTML}
-      <div class="card-btns">
+      ${IS_PUBLIC ? '' : `<div class="card-btns">
         <button class="cbtn" data-duplicate="${esc(task.id)}" title="duplicar">⧉</button>
         <button class="cbtn" data-archive="${esc(task.id)}" title="${task.archived?'desarchivar':'archivar'}">${task.archived?'↩':'⊘'}</button>
         <button class="cbtn del" data-delete="${esc(task.id)}" title="eliminar">✕</button>
-      </div>
+      </div>`}
     </div>`;
 }
 
 // ── Render ─────────────────────────────────────────────────────
 
 function render() {
+  // En modo público: ocultar columna inbox y tareas PERSONAL
+  if (IS_PUBLIC) {
+    document.querySelector('.col[data-col="inbox"]').style.display = 'none';
+  }
+
   COLS.forEach(col => {
-    const colTasks = tasks.filter(t => t.col === col);
+    if (IS_PUBLIC && col === 'inbox') return;
+    const colTasks = tasks.filter(t => t.col === col && (!IS_PUBLIC || t.brand !== 'PERSONAL'));
     const visible = colTasks.filter(matches);
 
     if (sortF) {
@@ -2095,6 +2264,17 @@ if (document.readyState === 'loading') {
 } else {
   setTimeout(initGoogleAuth, 500);
 }
+
+// Cambiar contraseña
+document.getElementById('settings-pw-save').addEventListener('click', async () => {
+  const pw = document.getElementById('settings-pw').value.trim();
+  if (!pw || pw.length < 4) { alert('Mínimo 4 caracteres'); return; }
+  const hash = await hashPw(pw);
+  await db.collection('kanban').doc('settings').set({ pass_hash: hash }, { merge: true });
+  localStorage.setItem('kb_auth', hash);
+  document.getElementById('settings-pw').value = '';
+  alert('Contraseña actualizada');
+});
 
 // Google Calendar settings
 document.getElementById('gcal-save').addEventListener('click', () => {
