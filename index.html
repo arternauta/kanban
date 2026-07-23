@@ -1304,7 +1304,7 @@ function render() {
 
   COLS.forEach(col => {
     if (IS_PUBLIC && col === 'inbox') return;
-    const colTasks = tasks.filter(t => t.col === col && (!IS_PUBLIC || t.brand !== 'PERSONAL'));
+    const colTasks = tasks.filter(t => t.col === col && (!IS_PUBLIC || (t.brand && t.brand !== 'PERSONAL')));
     const visible = colTasks.filter(matches);
 
     if (sortF) {
