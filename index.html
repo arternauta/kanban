@@ -1019,6 +1019,8 @@ function hideAuthOverlay() {
   document.getElementById('auth-overlay').classList.add('hidden');
 }
 
+const IS_SETUP = location.search.includes('setup=kb-admin-2024');
+
 async function initAuth() {
   if (IS_PUBLIC) {
     document.body.classList.add('public-mode');
@@ -1029,35 +1031,38 @@ async function initAuth() {
     return;
   }
 
-  // Check local auth token vs stored hash in Firestore
   const localAuth = localStorage.getItem('kb_auth');
 
-  // Try to get hash from Firestore settings
   let firestoreHash = null;
   try {
     const snap = await db.collection('kanban').doc('settings').get();
     firestoreHash = snap.exists ? (snap.data().pass_hash || null) : null;
   } catch(e) {}
 
-  if (!firestoreHash) {
-    // First time — setup mode
-    document.getElementById('auth-sub').textContent = 'configurá tu contraseña';
-    document.getElementById('auth-pw').placeholder = 'nueva contraseña';
-    document.getElementById('auth-pw2').style.display = '';
-    document.getElementById('auth-btn').textContent = 'configurar';
-    hideAuthOverlay(); // no hay contraseña aún, dejamos pasar
-    return;
-  }
-
-  if (localAuth && localAuth === firestoreHash) {
+  // Ya tiene contraseña y el token local es válido → entrar
+  if (firestoreHash && localAuth && localAuth === firestoreHash) {
     hideAuthOverlay();
     return;
   }
 
-  // Show login
+  // Sin contraseña configurada: solo permitir setup con la URL secreta
+  if (!firestoreHash) {
+    if (IS_SETUP) {
+      document.getElementById('auth-sub').textContent = 'configurá tu contraseña';
+      document.getElementById('auth-pw').placeholder = 'nueva contraseña';
+      document.getElementById('auth-pw2').style.display = '';
+      document.getElementById('auth-btn').textContent = 'configurar';
+    } else {
+      document.getElementById('auth-sub').textContent = 'acceso no disponible';
+      document.getElementById('auth-btn').style.display = 'none';
+      document.getElementById('auth-pw').style.display = 'none';
+    }
+    return;
+  }
+
+  // Tiene contraseña → mostrar login
   document.getElementById('auth-sub').textContent = 'contraseña';
   document.getElementById('auth-btn').textContent = 'ingresar';
-  // overlay stays visible
 }
 
 document.getElementById('auth-btn').addEventListener('click', async () => {
