@@ -1078,10 +1078,15 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
   if (isSetup) {
     if (pw !== pw2) { errEl.textContent = 'las contraseñas no coinciden'; return; }
     if (pw.length < 4) { errEl.textContent = 'mínimo 4 caracteres'; return; }
-    const hash = await hashPw(pw);
-    await db.collection('kanban').doc('settings').set({ pass_hash: hash }, { merge: true });
-    localStorage.setItem('kb_auth', hash);
-    location.replace(location.pathname); // saca el ?setup de la URL y carga la app
+    try {
+      const hash = await hashPw(pw);
+      await db.collection('kanban').doc('settings').set({ pass_hash: hash }, { merge: true });
+      localStorage.setItem('kb_auth', hash);
+      history.replaceState(null, '', location.pathname);
+      hideAuthOverlay();
+    } catch(e) {
+      errEl.textContent = 'error al guardar: ' + (e.message || e);
+    }
     return;
   }
 
