@@ -1081,7 +1081,7 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
     const hash = await hashPw(pw);
     await db.collection('kanban').doc('settings').set({ pass_hash: hash }, { merge: true });
     localStorage.setItem('kb_auth', hash);
-    hideAuthOverlay();
+    location.replace(location.pathname); // saca el ?setup de la URL y carga la app
     return;
   }
 
