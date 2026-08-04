@@ -37,6 +37,80 @@ exports.flush = onRequest({ cors: true }, async (req, res) => {
   }
 });
 
+function matchMeta(html, prop) {
+  const patterns = [
+    new RegExp(`<meta[^>]+property=["']${prop}["'][^>]+content=["']([^"']*)["']`, 'i'),
+    new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+property=["']${prop}["']`, 'i')
+  ];
+  for (const re of patterns) {
+    const m = html.match(re);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+// Instagram (y otros sitios) devuelven el content de las meta tags con
+// entidades HTML sin decodificar (ej. "Panam&#xe1;", "&quot;Ahora...&quot;").
+function decodeEntities(str) {
+  if (!str) return str;
+  return str
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+}
+
+// El CDN de Instagram (scontent.cdninstagram.com) bloquea el hotlink directo
+// desde otro origen — bajamos la imagen acá y la re-subimos a Storage, igual
+// que las imágenes que sube el usuario a mano.
+async function cacheImage(url) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const contentType = (resp.headers.get('content-type') || '').split(';')[0];
+    if (!contentType.startsWith('image/')) return null;
+    const buf = Buffer.from(await resp.arrayBuffer());
+    const ext = contentType.split('/')[1].split('+')[0].slice(0, 5) || 'jpg';
+    const filename = `link-thumbs/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(filename);
+    await file.save(buf, { contentType, public: true });
+    return `https://storage.googleapis.com/${bucket.name}/${filename}`;
+  } catch (e) {
+    console.error('cacheImage error', e);
+    return null;
+  }
+}
+
+// Trae og:title / og:image del lado del servidor para links que no tienen
+// oEmbed público (ej. Instagram) — evita el bloqueo de CORS del browser.
+exports.linkPreview = onRequest({ cors: true }, async (req, res) => {
+  const url = req.query.url;
+  if (!url || typeof url !== 'string') { res.status(400).json({ error: 'missing url' }); return; }
+  try {
+    const resp = await fetch(url, {
+      redirect: 'follow',
+      headers: {
+        // UA de crawler de Facebook: Instagram le sirve las meta tags og:*
+        // completas a este UA (es lo que usan las previews de WhatsApp/FB).
+        'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'
+      }
+    });
+    const html = await resp.text();
+    const title = decodeEntities(matchMeta(html, 'og:title') || (html.match(/<title>([^<]*)<\/title>/i) || [])[1] || '');
+    const ogImage = matchMeta(html, 'og:image') || '';
+    const image = ogImage ? (await cacheImage(ogImage)) || '' : '';
+    res.status(200).json({ title, image });
+  } catch (e) {
+    console.error(e);
+    res.status(200).json({ title: '', image: '' });
+  }
+});
+
 exports.telegram = onRequest({ secrets: [TELEGRAM_TOKEN] }, async (req, res) => {
   if (req.method !== 'POST') { res.status(405).end(); return; }
 

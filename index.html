@@ -96,8 +96,31 @@ header {
 .summary { font-size: 10px; color: #2c2c2a; letter-spacing: 0.06em; }
 .summary span { color: #444441; }
 
+/* ── Tabs ── */
+.tab-switch { display: flex; gap: 4px; flex-shrink: 0; }
+.tab-btn {
+  background: transparent;
+  border: 1px solid #2c2c2a;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5f5e5a;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab-btn:hover { color: #aaa8a0; border-color: #444441; }
+.tab-btn.on { color: #9FE1CB; border-color: #1D9E75; background: #0d2820; }
+
+body.showing-refs .tasks-only { display: none !important; }
+body.showing-refs #board { display: none !important; }
+body:not(.showing-refs) #board-refs { display: none !important; }
+body.showing-refs .refs-only { display: inline-flex !important; }
+
 /* ── Board ── */
-.board {
+.board, .board-refs {
   display: flex;
   gap: 12px;
   padding: 20px;
@@ -280,6 +303,37 @@ header {
 }
 .em-img-upload-label:hover, .em-img-upload-label.drag-over { border-color: rgba(255,255,255,0.4); color: #e8e6dc; background: rgba(255,255,255,0.07); }
 .em-img-upload input[type="file"] { display: none; }
+
+/* Video item in gallery (ref modal) */
+.em-gallery-video { position: relative; width: 80px; height: 80px; }
+.em-gallery-video video { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); background: #000; }
+.em-gallery-video::after {
+  content: '▶'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  color: #fff; font-size: 14px; text-shadow: 0 0 4px rgba(0,0,0,0.8); pointer-events: none;
+}
+
+/* Links (ref modal) */
+.refm-link-row { display: flex; gap: 6px; }
+.refm-link-row input { flex: 1; }
+.refm-links { display: flex; flex-direction: column; gap: 6px; }
+.ref-link-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border-radius: 6px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  font-size: 11px; color: #aaa8a0;
+}
+.ref-link-chip img.ref-link-thumb { width: 32px; height: 32px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.ref-link-chip .ref-link-platform { flex-shrink: 0; font-size: 13px; }
+.ref-link-chip .ref-link-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ref-link-chip .em-gallery-del { position: static; flex-shrink: 0; }
+
+/* Ref cards on board */
+.card-media-badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.card-media-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; color: #7c7a72; letter-spacing: 0.04em;
+  background: rgba(255,255,255,0.04); border-radius: 4px; padding: 2px 6px;
+}
 .card:active { cursor: grabbing; }
 .card:hover {
   transform: translateY(-2px);
@@ -725,8 +779,12 @@ body.public-mode .card { cursor: default; }
 
 <header>
   <div class="logo">mis <span>prioridades</span></div>
-  <input class="search-box" id="search" type="text" placeholder="buscar...">
-  <select class="brand-sel" id="brand-filter">
+  <div class="tab-switch">
+    <button class="tab-btn on" id="tab-tasks" data-tab="tasks">prioridades</button>
+    <button class="tab-btn" id="tab-refs" data-tab="refs">referencias</button>
+  </div>
+  <input class="search-box tasks-only" id="search" type="text" placeholder="buscar...">
+  <select class="brand-sel tasks-only" id="brand-filter">
     <option value="">todas las marcas</option>
     <option value="BYD">BYD</option>
     <option value="BMW">BMW</option>
@@ -734,22 +792,22 @@ body.public-mode .card { cursor: default; }
     <option value="MOTORRAD">MOTORRAD</option>
     <option value="PERSONAL">PERSONAL</option>
   </select>
-  <select class="brand-sel" id="sort-filter">
+  <select class="brand-sel tasks-only" id="sort-filter">
     <option value="">sin orden</option>
     <option value="brand">por marca</option>
     <option value="date">por fecha</option>
     <option value="priority">por prioridad</option>
   </select>
   <div class="header-right">
-    <div class="cal-dot admin-only" id="cal-dot" title="Google Calendar"></div>
+    <div class="cal-dot admin-only tasks-only" id="cal-dot" title="Google Calendar"></div>
     <div class="save-status admin-only" id="save-status"></div>
-    <button class="hbtn admin-only" id="toggle-archived">ver archivadas</button>
+    <button class="hbtn admin-only tasks-only" id="toggle-archived">ver archivadas</button>
     <button class="hbtn admin-only" id="fullscreen-btn">⛶</button>
-    <button class="hbtn admin-only" id="trash-btn">papelera</button>
-    <button class="hbtn admin-only" id="report-btn">reporte</button>
+    <button class="hbtn admin-only tasks-only" id="trash-btn">papelera</button>
+    <button class="hbtn admin-only tasks-only" id="report-btn">reporte</button>
     <button class="hbtn admin-only" id="settings-btn">⚙</button>
     <div class="public-badge" id="public-badge" style="display:none">vista equipo</div>
-    <div class="summary admin-only" id="summary">—</div>
+    <div class="summary admin-only tasks-only" id="summary">—</div>
   </div>
 </header>
 
@@ -910,6 +968,35 @@ body.public-mode .card { cursor: default; }
   </div>
 </div>
 
+<!-- Ref modal (add/edit) -->
+<div class="modal-overlay" id="ref-modal">
+  <div class="edit-modal">
+    <div style="font-size:11px;color:#5f5e5a;letter-spacing:0.08em;text-transform:uppercase" id="refm-title">nueva referencia</div>
+    <textarea id="refm-text" rows="3" placeholder="nota, idea, descripción..."></textarea>
+
+    <div class="refm-link-row">
+      <input type="text" id="refm-link-input" placeholder="pegá un link de Instagram / TikTok / YouTube...">
+      <button class="em-img-upload-label" id="refm-link-add" style="cursor:pointer">+ link</button>
+    </div>
+    <div id="refm-links" class="refm-links"></div>
+
+    <div class="em-img-upload">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">fotos y videos</div>
+      <div id="refm-gallery" class="em-gallery"></div>
+      <label class="em-img-upload-label" id="refm-upload-label">
+        + agregar o pegar (⌘V) una imagen/video
+        <input type="file" id="refm-media-input" accept="image/*,video/*" multiple>
+      </label>
+    </div>
+
+    <div class="edit-modal-btns">
+      <button class="edit-modal-save" id="refm-save">guardar</button>
+      <button class="edit-modal-cancel" id="refm-cancel">cancelar</button>
+      <button class="edit-modal-cancel" id="refm-delete" style="display:none;color:#c95c5c">eliminar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Trash modal -->
 <div class="modal-overlay" id="trash-modal">
   <div class="trash-modal">
@@ -939,7 +1026,7 @@ body.public-mode .card { cursor: default; }
   </div>
 </div>
 
-<div class="board">
+<div class="board" id="board">
 
   <div class="col" data-col="inbox">
     <div class="col-head">
@@ -1015,6 +1102,82 @@ body.public-mode .card { cursor: default; }
     </div>
     <div class="col-time-total" id="done-time-total"></div>
     <div class="cards" id="cards-done"></div>
+  </div>
+
+</div>
+
+<div class="board-refs" id="board-refs">
+
+  <div class="col" data-ref-col="ideas">
+    <div class="col-head">
+      <div class="col-dot" style="background:#534AB7"></div>
+      <div class="col-name">💡 ideas</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-ref-count="ideas">0</div>
+        <button class="col-add-btn" data-ref-target="ideas">+</button>
+      </div>
+    </div>
+    <div class="cards" id="refs-ideas"></div>
+  </div>
+
+  <div class="col" data-ref-col="byd">
+    <div class="col-head">
+      <div class="col-dot" style="background:#2DC98F"></div>
+      <div class="col-name">BYD</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-ref-count="byd">0</div>
+        <button class="col-add-btn" data-ref-target="byd">+</button>
+      </div>
+    </div>
+    <div class="cards" id="refs-byd"></div>
+  </div>
+
+  <div class="col" data-ref-col="bmw">
+    <div class="col-head">
+      <div class="col-dot" style="background:#5AAAE8"></div>
+      <div class="col-name">BMW</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-ref-count="bmw">0</div>
+        <button class="col-add-btn" data-ref-target="bmw">+</button>
+      </div>
+    </div>
+    <div class="cards" id="refs-bmw"></div>
+  </div>
+
+  <div class="col" data-ref-col="mini">
+    <div class="col-head">
+      <div class="col-dot" style="background:#D49030"></div>
+      <div class="col-name">MINI</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-ref-count="mini">0</div>
+        <button class="col-add-btn" data-ref-target="mini">+</button>
+      </div>
+    </div>
+    <div class="cards" id="refs-mini"></div>
+  </div>
+
+  <div class="col" data-ref-col="motorrad">
+    <div class="col-head">
+      <div class="col-dot" style="background:#E8754A"></div>
+      <div class="col-name">MOTORRAD</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-ref-count="motorrad">0</div>
+        <button class="col-add-btn" data-ref-target="motorrad">+</button>
+      </div>
+    </div>
+    <div class="cards" id="refs-motorrad"></div>
+  </div>
+
+  <div class="col" data-ref-col="hechas">
+    <div class="col-head">
+      <div class="col-dot" style="background:#3B6D11"></div>
+      <div class="col-name">✅ hechas</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-ref-count="hechas">0</div>
+        <button class="col-add-btn" data-ref-target="hechas">+</button>
+      </div>
+    </div>
+    <div class="cards" id="refs-hechas"></div>
   </div>
 
 </div>
@@ -1840,7 +2003,7 @@ function onCardDragOver(e) {
   this.classList.add(dragOverPos === 'before' ? 'insert-before' : 'insert-after');
 }
 
-document.querySelectorAll('.col').forEach(col => {
+document.querySelectorAll('#board .col').forEach(col => {
   col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
   col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over'); });
   col.addEventListener('drop', e => {
@@ -2244,9 +2407,16 @@ function getCalToken() {
   return new Promise((resolve, reject) => {
     if (calToken && Date.now() < calTokenExpiry) { resolve(calToken); return; }
     if (!tokenClient) { reject('Google Calendar no configurado'); return; }
+    const silent = !!localStorage.getItem('gcal_consented');
     tokenResolve = resolve;
-    tokenReject = reject;
-    tokenClient.requestAccessToken({ prompt: localStorage.getItem('gcal_consented') ? 'none' : 'consent' });
+    tokenReject = silent ? (err) => {
+      // Silent request failed — retry showing consent dialog
+      localStorage.removeItem('gcal_consented');
+      tokenResolve = resolve;
+      tokenReject = reject;
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    } : reject;
+    tokenClient.requestAccessToken({ prompt: silent ? 'none' : 'consent' });
   });
 }
 
@@ -2410,6 +2580,439 @@ TASKS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
   tasks = snap.data()?.data || [];
   render();
 });
+
+// ═══════════════════════════════════════════════════════════════
+// ── Referencias (segundo tablero, independiente del de tareas) ──
+// ═══════════════════════════════════════════════════════════════
+
+const REFS_DOC = db.collection('kanban').doc('refs');
+const REF_COLS = ['ideas','byd','bmw','mini','motorrad','hechas'];
+const REF_COL_LABELS = { ideas:'ideas', byd:'BYD', bmw:'BMW', mini:'MINI', motorrad:'MOTORRAD', hechas:'hechas' };
+const REF_BRAND_CLASS = { ideas:'personal', byd:'byd', bmw:'bmw', mini:'mini', motorrad:'motorrad', hechas:'personal' };
+const PLATFORM_ICON = { instagram:'📸', tiktok:'🎵', youtube:'▶️', other:'🔗' };
+
+let refs = [], refSaveTimer = null, refWriteGen = 0, refPendingWrite = false, refEditingId = null;
+let refDragId = null, refTouchDragEl = null, refTouchGhost = null, refTouchHoldTimer = null;
+
+function saveRefs() {
+  const gen = ++refWriteGen;
+  refPendingWrite = true;
+  try { localStorage.setItem('kb_refs_backup', JSON.stringify({ ts: Date.now(), data: refs })); } catch(e) {}
+  clearTimeout(refSaveTimer);
+  refSaveTimer = setTimeout(() => {
+    REFS_DOC.set({ data: refs })
+      .then(() => { if (gen === refWriteGen) { refPendingWrite = false; try { localStorage.removeItem('kb_refs_backup'); } catch(e) {} } })
+      .catch(() => { if (gen === refWriteGen) refPendingWrite = false; });
+  }, 100);
+}
+
+// ── Links: detección de plataforma + oEmbed best-effort ─────────
+
+function detectPlatform(url) {
+  if (/instagram\.com/i.test(url)) return 'instagram';
+  if (/tiktok\.com/i.test(url)) return 'tiktok';
+  if (/(youtube\.com|youtu\.be)/i.test(url)) return 'youtube';
+  return 'other';
+}
+
+async function fetchOembed(url, platform) {
+  // YouTube y TikTok exponen oEmbed público con CORS habilitado.
+  let endpoint = null;
+  if (platform === 'youtube') endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+  if (platform === 'tiktok')  endpoint = `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`;
+  if (!endpoint) return null;
+  try {
+    const res = await fetch(endpoint);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { title: data.title || '', thumb: data.thumbnail_url || '' };
+  } catch (e) {
+    return null;
+  }
+}
+
+// Fallback para links sin oEmbed público (Instagram, etc.) — Cloud Function
+// que trae og:title/og:image del lado del servidor, sin problema de CORS.
+async function fetchLinkPreview(url) {
+  try {
+    const res = await fetch(`https://us-central1-kanbarter-a2951.cloudfunctions.net/linkPreview?url=${encodeURIComponent(url)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.image && !data.title) return null;
+    return { title: data.title || '', thumb: data.image || '' };
+  } catch (e) {
+    return null;
+  }
+}
+
+// ── Render ─────────────────────────────────────────────────────
+
+function refCard(item) {
+  const cls = REF_BRAND_CLASS[item.col] || 'personal';
+  const media = item.media || [];
+  const images = media.filter(m => m.type === 'image');
+  const videos = media.filter(m => m.type === 'video');
+  const links  = media.filter(m => m.type === 'link');
+  const cover = images[0]?.url;
+
+  const badges = [];
+  if (images.length) badges.push(`<span class="card-media-badge">🖼 ${images.length}</span>`);
+  if (videos.length) badges.push(`<span class="card-media-badge">🎬 ${videos.length}</span>`);
+  links.forEach(l => badges.push(`<span class="card-media-badge">${PLATFORM_ICON[l.platform] || '🔗'} ${esc(l.platform)}</span>`));
+  const badgesHTML = badges.length ? `<div class="card-media-badges">${badges.join('')}</div>` : '';
+
+  return `
+    <div class="card ${cls}${cover ? ' has-cover' : ''}${item.col === 'hechas' ? ' done-card' : ''}"
+         data-ref-id="${esc(item.id)}"
+         data-ref-edit="${esc(item.id)}"
+         draggable="true">
+      ${cover ? `<img class="card-cover" src="${esc(cover)}" alt="">` : ''}
+      <div class="card-text">${esc(item.text || '(sin texto)')}</div>
+      ${badgesHTML}
+      <div class="card-btns">
+        <button class="cbtn del" data-ref-delete="${esc(item.id)}" title="eliminar">✕</button>
+      </div>
+    </div>`;
+}
+
+function renderRefs() {
+  REF_COLS.forEach(col => {
+    const colItems = refs.filter(r => r.col === col);
+    const container = document.getElementById('refs-' + col);
+    container.innerHTML = colItems.length ? colItems.map(refCard).join('') : '<div class="empty">vacío</div>';
+    document.querySelector(`[data-ref-count="${col}"]`).textContent = colItems.length;
+    container.querySelectorAll('.card').forEach(el => {
+      el.addEventListener('dragstart', onRefDragStart);
+      el.addEventListener('dragend', onRefDragEnd);
+    });
+  });
+}
+
+// ── Modal: abrir / guardar / cancelar / eliminar ─────────────────
+
+function openRef(existingId, col) {
+  let item;
+  if (existingId) {
+    item = refs.find(r => r.id === existingId);
+    if (!item) return;
+  } else {
+    item = { id: uid(), col, text: '', media: [], createdAt: new Date().toISOString() };
+    refs.push(item);
+    saveRefs();
+  }
+  refEditingId = item.id;
+  document.getElementById('refm-title').textContent = existingId ? 'referencia' : ('+ ' + (REF_COL_LABELS[col] || col));
+  document.getElementById('refm-text').value = item.text || '';
+  document.getElementById('refm-link-input').value = '';
+  document.getElementById('refm-delete').style.display = existingId ? 'inline-flex' : 'none';
+  renderRefmLinks();
+  renderRefmGallery();
+  document.getElementById('ref-modal').classList.add('open');
+  setTimeout(() => document.getElementById('refm-text').focus(), 50);
+}
+
+function closeRefModalUI() {
+  document.getElementById('ref-modal').classList.remove('open');
+  refEditingId = null;
+  renderRefs();
+}
+
+function saveRefText() {
+  const item = refs.find(r => r.id === refEditingId);
+  if (item) { item.text = document.getElementById('refm-text').value.trim(); saveRefs(); }
+  closeRefModalUI();
+}
+
+function cancelRefModal() {
+  const item = refs.find(r => r.id === refEditingId);
+  if (item && !item.text && !(item.media && item.media.length)) {
+    refs = refs.filter(r => r.id !== item.id);
+    saveRefs();
+  }
+  closeRefModalUI();
+}
+
+document.getElementById('refm-save').addEventListener('click', saveRefText);
+document.getElementById('refm-cancel').addEventListener('click', cancelRefModal);
+document.getElementById('refm-delete').addEventListener('click', () => {
+  if (!refEditingId) return;
+  if (!confirm('¿Eliminar esta referencia?')) return;
+  refs = refs.filter(r => r.id !== refEditingId);
+  saveRefs();
+  closeRefModalUI();
+});
+document.getElementById('ref-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) cancelRefModal();
+});
+document.getElementById('refm-text').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveRefText(); }
+});
+
+// ── Links dentro del modal ───────────────────────────────────────
+
+function renderRefmLinks() {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const links = (item.media || []).filter(m => m.type === 'link');
+  const box = document.getElementById('refm-links');
+  box.innerHTML = links.map((l, idx) => `
+    <div class="ref-link-chip">
+      ${l.thumb ? `<img class="ref-link-thumb" src="${esc(l.thumb)}" alt="">` : `<span class="ref-link-platform">${PLATFORM_ICON[l.platform] || '🔗'}</span>`}
+      <span class="ref-link-text">${esc(l.title || l.url)}</span>
+      <button class="em-gallery-del" data-del-link="${idx}">×</button>
+    </div>`).join('');
+  box.querySelectorAll('[data-del-link]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.delLink);
+      const target = links[idx];
+      item.media = item.media.filter(m => m !== target);
+      saveRefs(); renderRefmLinks(); renderRefs();
+    });
+  });
+}
+
+async function addRefLink() {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const input = document.getElementById('refm-link-input');
+  const url = input.value.trim();
+  if (!url) return;
+  const platform = detectPlatform(url);
+  const linkObj = { type: 'link', url, platform, title: null, thumb: null };
+  if (!item.media) item.media = [];
+  item.media.push(linkObj);
+  input.value = '';
+  saveRefs(); renderRefmLinks(); renderRefs();
+
+  const meta = await fetchOembed(url, platform) || await fetchLinkPreview(url);
+  if (meta) {
+    linkObj.title = meta.title;
+    linkObj.thumb = meta.thumb;
+    saveRefs();
+    if (refEditingId === item.id) renderRefmLinks();
+    renderRefs();
+  }
+}
+
+document.getElementById('refm-link-add').addEventListener('click', e => { e.preventDefault(); addRefLink(); });
+document.getElementById('refm-link-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addRefLink(); }
+});
+
+// ── Fotos y videos dentro del modal (reusa uploadImage) ──────────
+
+function renderRefmGallery() {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const media = (item.media || []).filter(m => m.type !== 'link');
+  const gallery = document.getElementById('refm-gallery');
+  gallery.innerHTML = media.map((m, idx) => m.type === 'video'
+    ? `<div class="em-gallery-video"><video src="${esc(m.url)}" muted></video><button class="em-gallery-del" data-del-media="${idx}">×</button></div>`
+    : `<div class="em-gallery-img"><img src="${esc(m.url)}" alt=""><button class="em-gallery-del" data-del-media="${idx}">×</button></div>`
+  ).join('');
+  gallery.querySelectorAll('[data-del-media]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.delMedia);
+      const target = media[idx];
+      item.media = item.media.filter(m => m !== target);
+      saveRefs(); renderRefmGallery(); renderRefs();
+    });
+  });
+}
+
+async function addRefMediaFile(item, file) {
+  const url = await uploadImage(file);
+  if (!url) return;
+  if (!item.media) item.media = [];
+  item.media.push({ type: file.type.startsWith('video/') ? 'video' : 'image', url });
+  saveRefs(); renderRefmGallery(); renderRefs();
+}
+
+const refmUploadLabel = document.getElementById('refm-upload-label');
+refmUploadLabel.addEventListener('dragover', e => { e.preventDefault(); refmUploadLabel.classList.add('drag-over'); });
+refmUploadLabel.addEventListener('dragleave', () => refmUploadLabel.classList.remove('drag-over'));
+refmUploadLabel.addEventListener('drop', async e => {
+  e.preventDefault();
+  refmUploadLabel.classList.remove('drag-over');
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+  for (const file of files) await addRefMediaFile(item, file);
+});
+document.getElementById('refm-media-input').addEventListener('change', async e => {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const files = Array.from(e.target.files);
+  for (const file of files) await addRefMediaFile(item, file);
+  e.target.value = '';
+});
+
+// Pegar una captura de pantalla (⌘V) mientras el modal está abierto
+document.addEventListener('paste', async e => {
+  if (!document.getElementById('ref-modal').classList.contains('open')) return;
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const clipItems = Array.from(e.clipboardData?.items || []);
+  const imgItem = clipItems.find(it => it.type.startsWith('image/'));
+  if (!imgItem) return;
+  e.preventDefault();
+  const file = imgItem.getAsFile();
+  if (file) await addRefMediaFile(item, file);
+});
+
+// ── Abrir tarjetas / agregar / borrar (delegación) ────────────────
+
+document.addEventListener('click', e => {
+  const el = e.target;
+  const addBtn = el.closest('[data-ref-target]');
+  if (addBtn && el.closest('.col-add-btn')) { openRef(null, addBtn.dataset.refTarget); return; }
+  const delBtn = el.closest('[data-ref-delete]');
+  if (delBtn) {
+    if (confirm('¿Eliminar esta referencia?')) {
+      refs = refs.filter(r => r.id !== delBtn.dataset.refDelete);
+      saveRefs(); renderRefs();
+    }
+    return;
+  }
+});
+
+document.addEventListener('dblclick', e => {
+  if (e.target.closest('button, input, textarea, select, .card-btns')) return;
+  const el = e.target.closest('[data-ref-edit]');
+  if (el) openRef(el.dataset.refEdit, null);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('ref-modal').classList.contains('open')) cancelRefModal();
+});
+
+// ── Drag & drop (mouse) — simplificado a nivel de columna ─────────
+
+function onRefDragStart(e) {
+  refDragId = this.dataset.refId;
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', refDragId);
+}
+function onRefDragEnd() {
+  this.classList.remove('dragging');
+  document.querySelectorAll('#board-refs .col').forEach(c => c.classList.remove('drag-over'));
+  refDragId = null;
+}
+function performRefDrop(id, newCol) {
+  const r = refs.find(r => r.id === id);
+  if (!r) return;
+  r.col = newCol;
+  refs = refs.filter(x => x.id !== id);
+  refs.push(r);
+  saveRefs(); renderRefs();
+}
+
+document.querySelectorAll('#board-refs .col').forEach(col => {
+  col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+  col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over'); });
+  col.addEventListener('drop', e => {
+    e.preventDefault(); col.classList.remove('drag-over');
+    const id = e.dataTransfer.getData('text/plain');
+    if (id) performRefDrop(id, col.dataset.refCol);
+  });
+});
+
+// ── Drag & drop (touch) — mismo patrón simplificado ───────────────
+
+document.addEventListener('touchstart', e => {
+  const card = e.target.closest('.card[data-ref-id]');
+  if (!card) return;
+  if (e.target.closest('button, input, textarea, select, .card-btns')) return;
+  const touch = e.touches[0];
+  const startX = touch.clientX, startY = touch.clientY;
+
+  refTouchHoldTimer = setTimeout(() => {
+    refDragId = card.dataset.refId;
+    refTouchDragEl = card;
+    if (navigator.vibrate) navigator.vibrate(40);
+    card.classList.add('touch-dragging');
+    const rect = card.getBoundingClientRect();
+    refTouchGhost = card.cloneNode(true);
+    refTouchGhost.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;
+      pointer-events:none;z-index:9999;opacity:0.85;transform:scale(1.05) rotate(1.5deg);
+      transition:none;box-shadow:0 16px 48px rgba(0,0,0,0.7);`;
+    document.body.appendChild(refTouchGhost);
+  }, 180);
+
+  const cancel = () => { clearTimeout(refTouchHoldTimer); refTouchHoldTimer = null; };
+  card.addEventListener('touchend', cancel, { once: true });
+  card.addEventListener('touchmove', ev => {
+    const t = ev.touches[0];
+    if (Math.abs(t.clientX - startX) > 8 || Math.abs(t.clientY - startY) > 8) cancel();
+  }, { once: true });
+}, { passive: true });
+
+document.addEventListener('touchmove', e => {
+  if (!refTouchDragEl) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  if (refTouchGhost) {
+    refTouchGhost.style.left = (touch.clientX - refTouchGhost.offsetWidth / 2) + 'px';
+    refTouchGhost.style.top  = (touch.clientY - 40) + 'px';
+    refTouchGhost.style.display = 'none';
+  }
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  if (refTouchGhost) refTouchGhost.style.display = '';
+  document.querySelectorAll('#board-refs .col').forEach(c => c.classList.remove('drag-over'));
+  const col = el?.closest('#board-refs .col');
+  if (col) col.classList.add('drag-over');
+}, { passive: false });
+
+document.addEventListener('touchend', e => {
+  if (!refTouchDragEl) return;
+  const touch = e.changedTouches[0];
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  const col = el?.closest('#board-refs .col');
+  document.querySelectorAll('#board-refs .col').forEach(c => c.classList.remove('drag-over'));
+  if (refTouchGhost) { refTouchGhost.remove(); refTouchGhost = null; }
+  refTouchDragEl.classList.remove('touch-dragging');
+  if (col && refDragId) performRefDrop(refDragId, col.dataset.refCol);
+  refTouchDragEl = null; refDragId = null;
+});
+
+// ── Tabs ───────────────────────────────────────────────────────
+
+function switchTab(tab) {
+  document.body.classList.toggle('showing-refs', tab === 'refs');
+  document.getElementById('tab-tasks').classList.toggle('on', tab === 'tasks');
+  document.getElementById('tab-refs').classList.toggle('on', tab === 'refs');
+}
+document.getElementById('tab-tasks').addEventListener('click', () => switchTab('tasks'));
+document.getElementById('tab-refs').addEventListener('click', () => switchTab('refs'));
+
+// ── Recuperar backup local si la página se refrescó a mitad de un guardado ──
+(function() {
+  let backup = null;
+  try { backup = JSON.parse(localStorage.getItem('kb_refs_backup') || 'null'); } catch(e) { localStorage.removeItem('kb_refs_backup'); return; }
+  if (!backup || !Array.isArray(backup.data)) { if (backup) localStorage.removeItem('kb_refs_backup'); return; }
+  if (Date.now() - backup.ts > 300000) { localStorage.removeItem('kb_refs_backup'); return; }
+  refs = backup.data;
+  renderRefs();
+  const gen = ++refWriteGen;
+  refPendingWrite = true;
+  REFS_DOC.set({ data: refs })
+    .then(() => { if (gen === refWriteGen) { refPendingWrite = false; localStorage.removeItem('kb_refs_backup'); } })
+    .catch(() => { if (gen === refWriteGen) refPendingWrite = false; });
+})();
+
+// ── Firebase real-time listener (refs) ────────────────────────────
+REFS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
+  if (snap.metadata.hasPendingWrites) return;
+  if (refPendingWrite) return;
+  if (refDragId || refEditingId || refTouchDragEl) return;
+  refs = snap.data()?.data || [];
+  renderRefs();
+});
+
+// Placeholders "vacío" desde el arranque, sin esperar a Firestore
+// (por ejemplo si las reglas de seguridad todavía no permiten kanban/refs)
+renderRefs();
 </script>
 </body>
 </html>
