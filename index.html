@@ -329,6 +329,9 @@ body.showing-refs .refs-only { display: inline-flex !important; }
 .ref-link-chip .em-gallery-del { position: static; flex-shrink: 0; }
 
 /* Ref cards on board */
+.card-ig-embed { margin-top: 8px; border-radius: 6px; overflow: hidden; pointer-events: none; }
+.card-ig-embed blockquote { margin: 0 !important; min-width: 0 !important; width: 100% !important; }
+.card-ig-embed iframe { border-radius: 6px; }
 .card-media-badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 .card-media-badge {
   display: inline-flex; align-items: center; gap: 4px;
@@ -2681,12 +2684,23 @@ function refCard(item) {
   const videos = media.filter(m => m.type === 'video');
   const links  = media.filter(m => m.type === 'link');
   const cover = images[0]?.url;
+  const igLinks = links.filter(l => l.platform === 'instagram');
 
   const badges = [];
   if (images.length) badges.push(`<span class="card-media-badge">🖼 ${images.length}</span>`);
   if (videos.length) badges.push(`<span class="card-media-badge">🎬 ${videos.length}</span>`);
-  links.forEach(l => badges.push(`<span class="card-media-badge">${PLATFORM_ICON[l.platform] || '🔗'} ${esc(l.platform)}</span>`));
+  links.filter(l => l.platform !== 'instagram').forEach(l =>
+    badges.push(`<span class="card-media-badge">${PLATFORM_ICON[l.platform] || '🔗'} ${esc(l.platform)}</span>`)
+  );
   const badgesHTML = badges.length ? `<div class="card-media-badges">${badges.join('')}</div>` : '';
+
+  const igEmbeds = igLinks.map(l => `
+    <div class="card-ig-embed" data-ig-lazy="${esc(l.url)}">
+      <blockquote class="instagram-media" data-instgrm-permalink="${esc(l.url)}" data-instgrm-version="14"
+        style="background:#fff;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,.5),0 1px 10px 0 rgba(0,0,0,.15);margin:0;max-width:100%;padding:0;width:100%;">
+        <a href="${esc(l.url)}" target="_blank" rel="noopener">Ver en Instagram</a>
+      </blockquote>
+    </div>`).join('');
 
   return `
     <div class="card ${cls}${cover ? ' has-cover' : ''}${item.col === 'hechas' ? ' done-card' : ''}"
@@ -2696,11 +2710,21 @@ function refCard(item) {
       ${cover ? `<img class="card-cover" src="${esc(cover)}" alt="">` : ''}
       <div class="card-text">${esc(item.text || '(sin texto)')}</div>
       ${badgesHTML}
+      ${igEmbeds}
       <div class="card-btns">
         <button class="cbtn del" data-ref-delete="${esc(item.id)}" title="eliminar">✕</button>
       </div>
     </div>`;
 }
+
+const _igObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    _igObserver.unobserve(entry.target);
+    loadInstagramEmbed();
+    if (window.instgrm) window.instgrm.Embeds.process(entry.target);
+  });
+}, { rootMargin: '200px' });
 
 function renderRefs() {
   REF_COLS.forEach(col => {
@@ -2712,6 +2736,7 @@ function renderRefs() {
       el.addEventListener('dragstart', onRefDragStart);
       el.addEventListener('dragend', onRefDragEnd);
     });
+    container.querySelectorAll('[data-ig-lazy]').forEach(el => _igObserver.observe(el));
   });
 }
 
