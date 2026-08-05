@@ -144,9 +144,6 @@ exports.telegram = onRequest({ secrets: [TELEGRAM_TOKEN] }, async (req, res) => 
   const message = req.body?.message;
   if (!message?.text) { res.status(200).end(); return; }
 
-  // Responder 200 de inmediato para que Telegram no reintente el webhook
-  res.status(200).end();
-
   const chatId    = message.chat.id;
   const messageId = message.message_id;
   const text      = message.text.trim();
@@ -154,15 +151,19 @@ exports.telegram = onRequest({ secrets: [TELEGRAM_TOKEN] }, async (req, res) => 
 
   if (text.startsWith('/')) {
     await tgSend(token, chatId, '✏️ Mandame una tarea corta o una nota larga y la proceso.');
-    return;
+    res.status(200).end(); return;
   }
 
-  // Deduplicar: si ya procesamos este message_id, ignorar
-  const dedupRef = db.collection('kanban').doc('tg_dedup');
-  const dedup    = await dedupRef.get();
-  const seen     = dedup.exists ? (dedup.data().ids || []) : [];
-  if (seen.includes(messageId)) return;
-  await dedupRef.set({ ids: [...seen.slice(-200), messageId] });
+  // Deduplicar con transacción: si ya procesamos este message_id, ignorar
+  const dedupRef  = db.collection('kanban').doc('tg_dedup');
+  let alreadySeen = false;
+  await db.runTransaction(async tx => {
+    const dedup = await tx.get(dedupRef);
+    const seen  = dedup.exists ? (dedup.data().ids || []) : [];
+    if (seen.includes(messageId)) { alreadySeen = true; return; }
+    tx.set(dedupRef, { ids: [...seen.slice(-200), messageId] });
+  });
+  if (alreadySeen) { res.status(200).end(); return; }
 
   // Link de red social → referencia
   const socialMatch = text.match(SOCIAL_RE);
@@ -229,4 +230,6 @@ exports.telegram = onRequest({ secrets: [TELEGRAM_TOKEN] }, async (req, res) => 
     console.error(e);
     await tgSend(token, chatId, '❌ Hubo un error al guardar. Intentá de nuevo.');
   }
+
+  res.status(200).end();
 });
