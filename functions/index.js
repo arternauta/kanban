@@ -10,6 +10,17 @@ setGlobalOptions({ region: 'us-central1' });
 
 const TELEGRAM_TOKEN = defineSecret('TELEGRAM_TOKEN');
 const TASKS_REF = db.collection('kanban').doc('tasks');
+const NOTAS_REF = db.collection('kanban').doc('notas');
+const REFS_REF  = db.collection('kanban').doc('refs');
+
+const SOCIAL_RE = /(https?:\/\/(?:www\.)?(?:instagram\.com\/(?:p|reel)\/[A-Za-z0-9_-]+|tiktok\.com\/@[^/]+\/video\/\d+|youtube\.com\/(?:watch\?v=|shorts\/)[A-Za-z0-9_-]+|youtu\.be\/[A-Za-z0-9_-]+)[^\s]*)/i;
+
+function detectPlatform(url) {
+  if (/instagram\.com/i.test(url)) return 'instagram';
+  if (/tiktok\.com/i.test(url))    return 'tiktok';
+  if (/(youtube\.com|youtu\.be)/i.test(url)) return 'youtube';
+  return 'other';
+}
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -138,35 +149,68 @@ exports.telegram = onRequest({ secrets: [TELEGRAM_TOKEN] }, async (req, res) => 
   const token  = TELEGRAM_TOKEN.value();
 
   if (text.startsWith('/')) {
-    await tgSend(token, chatId, '✏️ Mandame una idea o tarea y la agrego al kanban.');
+    await tgSend(token, chatId, '✏️ Mandame una tarea corta o una nota larga y la proceso.');
     res.status(200).end(); return;
   }
 
+  // Link de red social → referencia
+  const socialMatch = text.match(SOCIAL_RE);
+  const isNota = !socialMatch && (text.length > 200 || text.includes('\n'));
+
   try {
-    const snap  = await TASKS_REF.get();
-    const tasks = snap.exists ? (snap.data().data || []) : [];
-
-    tasks.unshift({
-      id:        uid(),
-      col:       'inbox',
-      text,
-      brand:     '',
-      priority:  '',
-      date:      '',
-      assignee:  '',
-      archived:  false,
-      deleted:   false,
-      timeLog:   [],
-      timeSpent: 0,
-      createdAt: new Date().toISOString(),
-      source:    'telegram'
-    });
-
-    await TASKS_REF.set({ data: tasks });
-    await tgSend(token, chatId, `✅ <b>${text}</b>\n\nAgregada a <i>Por hacer</i> en el kanban.`);
+    if (socialMatch) {
+      const url      = socialMatch[1];
+      const platform = detectPlatform(url);
+      const snap     = await REFS_REF.get();
+      const refItems = snap.exists ? (snap.data().data || []) : [];
+      refItems.unshift({
+        id:        uid(),
+        col:       'ideas',
+        title:     '',
+        text:      '',
+        media:     [{ type: 'link', url, platform, title: null, thumb: null }],
+        createdAt: new Date().toISOString(),
+        source:    'telegram'
+      });
+      await REFS_REF.set({ data: refItems });
+      const platformLabel = { instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube' }[platform] || platform;
+      await tgSend(token, chatId, `🔖 Referencia guardada en <i>Ideas</i>.\n<b>${platformLabel}</b> · ${url}`);
+    } else if (isNota) {
+      const snap  = await NOTAS_REF.get();
+      const notas = snap.exists ? (snap.data().data || []) : [];
+      notas.push({
+        id:        uid(),
+        text,
+        analyzed:  false,
+        createdAt: new Date().toISOString(),
+        source:    'telegram'
+      });
+      await NOTAS_REF.set({ data: notas });
+      await tgSend(token, chatId, `📝 Nota guardada. La analizamos cuando quieras.`);
+    } else {
+      const snap  = await TASKS_REF.get();
+      const tasks = snap.exists ? (snap.data().data || []) : [];
+      tasks.unshift({
+        id:        uid(),
+        col:       'inbox',
+        text,
+        brand:     '',
+        priority:  '',
+        date:      '',
+        assignee:  '',
+        archived:  false,
+        deleted:   false,
+        timeLog:   [],
+        timeSpent: 0,
+        createdAt: new Date().toISOString(),
+        source:    'telegram'
+      });
+      await TASKS_REF.set({ data: tasks });
+      await tgSend(token, chatId, `✅ <b>${text}</b>\n\nAgregada a <i>Por hacer</i> en el kanban.`);
+    }
   } catch (e) {
     console.error(e);
-    await tgSend(token, chatId, '❌ Hubo un error al guardar la tarea. Intentá de nuevo.');
+    await tgSend(token, chatId, '❌ Hubo un error al guardar. Intentá de nuevo.');
   }
 
   res.status(200).end();

@@ -120,8 +120,13 @@ body.showing-refs #board { display: none !important; }
 body:not(.showing-refs) #board-refs { display: none !important; }
 body.showing-refs .refs-only { display: inline-flex !important; }
 
+body.showing-notas .tasks-only { display: none !important; }
+body.showing-notas #board { display: none !important; }
+body.showing-notas #board-refs { display: none !important; }
+body:not(.showing-notas) #board-notas { display: none !important; }
+
 /* ── Board ── */
-.board, .board-refs {
+.board, .board-refs, .board-notas {
   display: flex;
   gap: 12px;
   padding: 20px;
@@ -277,16 +282,52 @@ body.showing-refs .refs-only { display: inline-flex !important; }
   overflow: hidden;
 }
 
-/* Cover image */
-.card-cover {
-  width: calc(100% + 32px);
-  margin: -14px -16px 12px;
-  height: 130px;
-  object-fit: cover;
-  display: block;
-  border-radius: 12px 12px 0 0;
+/* Cover image — hidden when used as background-image on card */
+.card-cover { display: none; }
+
+/* Card with cover: background-image fills it */
+.card.has-cover {
+  padding: 0;
+  min-height: 220px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border: none !important;
 }
-.card.has-cover { padding-top: 0; }
+/* Glass panel con fade hacia arriba */
+.card-glass {
+  position: relative; z-index: 2; padding: 28px 14px 14px;
+  background: rgba(10,10,10,0.38);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 55%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 55%);
+}
+.card-glass .card-brand     { color: rgba(255,255,255,0.55); margin-bottom: 2px; }
+.card-glass .card-text      { font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 4px;
+                               display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.card-glass .card-ref-title { color: #fff; margin-bottom: 2px; }
+.card-glass .card-ref-desc  { color: rgba(255,255,255,0.60); margin-bottom: 0; }
+.card-glass .card-meta      { margin-top: 4px; }
+
+/* Ref card title + description hierarchy */
+.card-ref-title {
+  font-size: 15px; font-weight: 600; color: #e8e6dc; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.card-ref-desc {
+  font-size: 12px; color: #aaa8a0; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  margin-bottom: 6px;
+}
+.card.has-cover .card-ref-title { font-size: 15px; font-weight: 600; color: #fff; }
+.card.has-cover .card-ref-desc  { font-size: 12px; color: rgba(255,255,255,0.70); margin-bottom: 6px; }
+.card-ref-link { display: inline-block; margin-top: 6px; font-size: 10px; color: rgba(255,255,255,0.60); text-decoration: none; padding: 2px 8px; border: 1px solid rgba(255,255,255,0.20); border-radius: 10px; transition: background 0.15s; }
+.card-ref-link:hover { background: rgba(255,255,255,0.10); color: #fff; }
+.card:not(.has-cover) .card-ref-link { color: rgba(180,178,170,0.80); border-color: rgba(180,178,170,0.25); }
 
 /* Image gallery in edit modal */
 .em-gallery { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -361,6 +402,21 @@ body.showing-refs .refs-only { display: inline-flex !important; }
 .card.motorrad { border-top: 2px solid #D85A30; }
 .card.motorrad:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 28px rgba(216,90,48,0.18); }
 .card.personal { border-top: 2px solid #5f5e5a; }
+
+/* Colored band at top for cards without cover image */
+.card:not(.has-cover)::before {
+  content: '';
+  display: block;
+  height: 44px;
+  width: calc(100% + 32px);
+  margin: -14px -16px 12px;
+  border-radius: 10px 10px 0 0;
+}
+.card.byd:not(.has-cover)::before      { background: linear-gradient(135deg, rgba(29,158,117,0.55) 0%, rgba(29,158,117,0.10) 100%); }
+.card.bmw:not(.has-cover)::before      { background: linear-gradient(135deg, rgba(55,138,221,0.55) 0%, rgba(55,138,221,0.10) 100%); }
+.card.mini:not(.has-cover)::before     { background: linear-gradient(135deg, rgba(186,117,23,0.55) 0%, rgba(186,117,23,0.10) 100%); }
+.card.motorrad:not(.has-cover)::before { background: linear-gradient(135deg, rgba(216,90,48,0.55) 0%, rgba(216,90,48,0.10) 100%); }
+.card.personal:not(.has-cover)::before { background: linear-gradient(135deg, rgba(95,94,90,0.35) 0%, rgba(95,94,90,0.06) 100%); }
 
 /* Card content */
 .card-brand {
@@ -517,6 +573,7 @@ body.showing-refs .refs-only { display: inline-flex !important; }
   background: #161614; border: 0.5px solid #2c2c2a;
   border-radius: 12px; padding: 22px;
   width: min(500px, 95vw);
+  max-height: 90vh; overflow-y: auto;
   display: flex; flex-direction: column; gap: 12px;
   font-family: 'IBM Plex Mono', monospace;
 }
@@ -765,6 +822,263 @@ body.public-mode .card { cursor: default; }
   letter-spacing: 0.06em;
 }
 .report-empty { font-size: 10px; color: #333331; text-align: center; padding: 30px 0; }
+
+/* ── Collapsible col ───────────────────────────────────────────── */
+.col-collapsible .cards { overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 2000px; opacity: 1; }
+.col-collapsible.collapsed { flex: 0 0 38px !important; min-width: 38px !important; max-width: 38px !important; overflow: hidden; }
+.col-collapsible.collapsed .cards { max-height: 0; opacity: 0; pointer-events: none; }
+.col-collapsible.collapsed .col-head { flex-direction: column; align-items: center; gap: 8px; padding: 0; overflow: hidden; }
+.col-collapsible.collapsed .col-name { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; overflow: hidden; max-height: 140px; font-size: 10px; }
+.col-collapsible.collapsed .col-count { display: none; }
+.col-collapse-icon { font-size: 14px; color: #5f5e5a; transition: transform 0.25s; display: inline-block; }
+.col-collapsible.collapsed .col-collapse-icon { transform: rotate(0deg); }
+.col-collapsible:not(.collapsed) .col-collapse-icon { transform: rotate(90deg); }
+
+/* ── Fixed-width centered boards (refs / notas) ─────────────────── */
+@media (min-width: 681px) {
+  .board-refs, .board-notas { justify-content: center; }
+  .board-refs .col, .board-notas .col { flex: 0 0 380px; max-width: 380px; min-width: 0; }
+  .board-refs .col-collapsible.collapsed,
+  .board-notas .col-collapsible.collapsed { flex: 0 0 38px !important; max-width: 38px !important; }
+}
+
+/* ── Refs toolbar ──────────────────────────────────────────────── */
+.refs-toolbar {
+  padding: 8px 20px; display: flex; align-items: center; gap: 6px;
+  border-bottom: 0.5px solid #1e1e1c; flex-wrap: wrap;
+}
+.refs-filter-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #444441; margin-right: 4px; }
+.ref-filter-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+  color: #5f5e5a; font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+  padding: 3px 10px; cursor: pointer; transition: all 0.15s;
+}
+.ref-filter-btn:hover { color: #aaa8a0; border-color: rgba(255,255,255,0.18); }
+.ref-filter-btn.on { color: #e8e6dc; border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.05); }
+.ref-filter-btn[data-status-filter="aprobada"].on  { color: #2DC98F; border-color: #1D9E75; background: rgba(29,158,117,0.08); }
+.ref-filter-btn[data-status-filter="rechazada"].on { color: #FF8A8A; border-color: #c95c5c; background: rgba(201,92,92,0.08); }
+.ref-brand-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+  color: #5f5e5a; font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+  padding: 3px 10px; cursor: pointer; transition: all 0.15s;
+}
+.ref-brand-btn:hover { color: #aaa8a0; border-color: rgba(255,255,255,0.18); }
+.ref-brand-btn.on { color: #e8e6dc; border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.05); }
+.ref-brand-btn[data-brand-filter="byd"].on      { color: #2DC98F; border-color: #1D9E75; background: rgba(29,158,117,0.08); }
+.ref-brand-btn[data-brand-filter="bmw"].on      { color: #5AAAE8; border-color: #378ADD; background: rgba(55,138,221,0.08); }
+.ref-brand-btn[data-brand-filter="mini"].on     { color: #D49030; border-color: #BA7517; background: rgba(186,117,23,0.08); }
+.ref-brand-btn[data-brand-filter="motorrad"].on { color: #E8754A; border-color: #D85A30; background: rgba(216,90,48,0.08); }
+
+/* Ref card cover — gradient overlay, no glassmorphism */
+.ref-card.has-cover::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(to bottom, transparent 15%, rgba(0,0,0,0.78) 100%);
+  z-index: 1;
+}
+.card-ref-cover-content {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+  padding: 12px 14px 42px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.card-ref-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 6px; margin-top: 4px;
+}
+/* Badges row */
+.card-ref-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+.card:not(.has-cover) .card-ref-badges { margin-bottom: 6px; }
+
+/* Status badge on card */
+.card-ref-status {
+  display: inline-block; font-size: 9px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 10px; margin-bottom: 6px;
+}
+.card-ref-status.pendiente  { color: #888780; background: #1e1e1c; }
+.card-ref-status.aprobada   { color: #0c0c0a; background: #2DC98F; }
+.card-ref-status.rechazada  { color: #fff;    background: #c95c5c; }
+.card-ref-status.sin-marca  { color: #555350; background: #181816; }
+.card-ref-status.personal   { color: #c8c6bc; background: #2e2d2b; }
+.card-ref-status.byd        { color: #0c0c0a; background: #2DC98F; }
+.card-ref-status.bmw        { color: #fff;    background: #2b6cb8; }
+.card-ref-status.mini       { color: #0c0c0a; background: #D49030; }
+.card-ref-status.motorrad   { color: #fff;    background: #c75a30; }
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 680px) {
+  header { padding: 10px 14px; gap: 8px; }
+  .logo { display: none; }
+  .search-box { max-width: none; }
+  .hbtn { padding: 6px 10px; font-size: 11px; }
+
+  .board, .board-refs, .board-notas {
+    padding: 12px 0 12px 12px;
+    gap: 10px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .board::-webkit-scrollbar,
+  .board-refs::-webkit-scrollbar,
+  .board-notas::-webkit-scrollbar { display: none; }
+
+  .col {
+    flex: 0 0 85vw;
+    min-width: 0;
+    scroll-snap-align: start;
+    border-radius: 10px;
+  }
+  .col:last-child { margin-right: 12px; }
+
+  .col[data-col="inbox"].collapsed {
+    flex: 0 0 38px !important;
+    min-width: 0 !important;
+  }
+
+  .card.has-cover { min-height: 180px; }
+
+  .rp-hero { min-height: 40vh; max-height: 55vh; }
+  .rp-body { padding: 0 0 60px; }
+  .rp-hero-content, .rp-header-no-cover { padding-left: 18px; padding-right: 18px; }
+  .rp-section { padding: 32px 18px 0; }
+  .rp-sb-frame { width: 180px; }
+  .rp-moodboard-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+/* ── Ref Preview Panel ─────────────────────────────────────────── */
+.rp-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: #0c0c0a;
+  overflow-y: auto; overflow-x: hidden;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex; flex-direction: column;
+}
+.rp-overlay.open { transform: translateX(0); }
+
+.rp-topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px;
+  background: rgba(12,12,10,0.85);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.rp-back {
+  background: none; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+  color: rgba(220,218,210,0.7); font-size: 12px; padding: 5px 12px;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+}
+.rp-back:hover { color: #e8e6dc; border-color: rgba(255,255,255,0.3); }
+.rp-topbar-title {
+  flex: 1; font-size: 13px; font-weight: 600;
+  color: rgba(220,218,210,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rp-export-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+  color: rgba(220,218,210,0.55); font-size: 11px; padding: 5px 12px;
+  cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+}
+.rp-export-btn:hover { color: #e8e6dc; border-color: rgba(255,255,255,0.3); }
+
+.rp-body { flex: 1; max-width: 860px; width: 100%; margin: 0 auto; padding: 0 0 80px; }
+
+/* Hero */
+.rp-hero {
+  width: 100%; min-height: 56vh; max-height: 70vh;
+  background-size: cover; background-position: center;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  position: relative; overflow: hidden;
+}
+.rp-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(12,12,10,0) 30%, rgba(12,12,10,0.92) 100%);
+}
+.rp-hero-content {
+  position: relative; z-index: 2;
+  padding: 0 28px 36px;
+}
+.rp-header-no-cover { padding: 40px 28px 8px; }
+
+.rp-title {
+  font-size: clamp(22px, 4vw, 36px); font-weight: 700;
+  color: #f0ede4; margin: 0 0 8px; line-height: 1.2;
+}
+.rp-desc {
+  font-size: 15px; color: rgba(220,218,210,0.65);
+  margin: 0 0 16px; line-height: 1.6; max-width: 640px;
+}
+.rp-link-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: rgba(220,218,210,0.8);
+  text-decoration: none; padding: 6px 14px;
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 20px;
+  background: rgba(255,255,255,0.05);
+  transition: all 0.15s;
+}
+.rp-link-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+/* Sections */
+.rp-section {
+  padding: 40px 28px 0;
+  opacity: 0; transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.rp-section.visible { opacity: 1; transform: translateY(0); }
+.rp-section-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: rgba(220,218,210,0.35);
+  margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
+}
+.rp-section-label::after {
+  content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07);
+}
+
+/* Storyboard */
+.rp-storyboard-strip {
+  display: flex; gap: 12px; overflow-x: auto;
+  padding-bottom: 8px; scroll-snap-type: x mandatory;
+}
+.rp-storyboard-strip::-webkit-scrollbar { height: 3px; }
+.rp-storyboard-strip::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 2px; }
+.rp-storyboard-strip::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 2px; }
+.rp-sb-frame {
+  flex-shrink: 0; width: 220px; position: relative;
+  scroll-snap-align: start; border-radius: 10px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.rp-sb-frame img { width: 100%; height: 140px; object-fit: cover; display: block; }
+.rp-sb-num {
+  position: absolute; bottom: 6px; left: 8px;
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5);
+  background: rgba(0,0,0,0.5); padding: 1px 6px; border-radius: 4px;
+}
+
+/* Moodboard */
+.rp-moodboard-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+.rp-mb-img { border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+.rp-mb-img img { width: 100%; height: 180px; object-fit: cover; display: block; transition: transform 0.3s ease; }
+.rp-mb-img:hover img { transform: scale(1.04); }
+
+/* Checklist */
+.rp-checklist { display: flex; flex-direction: column; gap: 2px; }
+.rp-cl-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  transition: background 0.15s;
+}
+.rp-cl-item:hover { background: rgba(255,255,255,0.05); }
+.rp-cl-item.done .rp-cl-text { text-decoration: line-through; opacity: 0.35; }
+.rp-cl-icon { font-size: 13px; color: rgba(220,218,210,0.3); flex-shrink: 0; width: 16px; text-align: center; }
+.rp-cl-item.done .rp-cl-icon { color: #2DC98F; }
+.rp-cl-text { font-size: 14px; color: rgba(220,218,210,0.85); line-height: 1.4; }
+
+/* Card preview/edit buttons */
+.cbtn.preview { font-size: 13px; }
 </style>
 </head>
 <body>
@@ -786,6 +1100,7 @@ body.public-mode .card { cursor: default; }
   <div class="tab-switch">
     <button class="tab-btn on" id="tab-tasks" data-tab="tasks">prioridades</button>
     <button class="tab-btn" id="tab-refs" data-tab="refs">referencias</button>
+    <button class="tab-btn" id="tab-notas" data-tab="notas">notas</button>
   </div>
   <input class="search-box tasks-only" id="search" type="text" placeholder="buscar...">
   <select class="brand-sel tasks-only" id="brand-filter">
@@ -976,10 +1291,27 @@ body.public-mode .card { cursor: default; }
 <div class="modal-overlay" id="ref-modal">
   <div class="edit-modal">
     <div style="font-size:11px;color:#5f5e5a;letter-spacing:0.08em;text-transform:uppercase" id="refm-title">nueva referencia</div>
-    <textarea id="refm-text" rows="3" placeholder="nota, idea, descripción..."></textarea>
+    <input type="text" id="refm-title-input" placeholder="título...">
+    <textarea id="refm-text" rows="3" placeholder="descripción..."></textarea>
+
+    <div class="edit-modal-row">
+      <select id="refm-brand" style="flex:1">
+        <option value="">— marca —</option>
+        <option value="byd">BYD</option>
+        <option value="bmw">BMW</option>
+        <option value="mini">MINI</option>
+        <option value="motorrad">MOTORRAD</option>
+        <option value="personal">Personal</option>
+      </select>
+      <select id="refm-status" style="flex:1">
+        <option value="pendiente">pendiente</option>
+        <option value="aprobada">aprobada</option>
+        <option value="rechazada">rechazada</option>
+      </select>
+    </div>
 
     <div class="refm-link-row">
-      <input type="text" id="refm-link-input" placeholder="pegá un link de Instagram / TikTok / YouTube...">
+      <input type="text" id="refm-link-input" placeholder="link de referencia (uno por card)...">
       <button class="em-img-upload-label" id="refm-link-add" style="cursor:pointer">+ link</button>
     </div>
     <div id="refm-links" class="refm-links"></div>
@@ -993,12 +1325,49 @@ body.public-mode .card { cursor: default; }
       </label>
     </div>
 
+    <div class="em-img-upload">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">storyboard</div>
+      <div id="refm-storyboard" class="em-gallery"></div>
+      <label class="em-img-upload-label" id="refm-storyboard-label">
+        + frames del storyboard
+        <input type="file" id="refm-storyboard-input" accept="image/*" multiple>
+      </label>
+    </div>
+
+    <div class="em-img-upload">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">moodboard</div>
+      <div id="refm-moodboard" class="em-gallery"></div>
+      <label class="em-img-upload-label" id="refm-moodboard-label">
+        + imágenes de referencia visual
+        <input type="file" id="refm-moodboard-input" accept="image/*" multiple>
+      </label>
+    </div>
+
+    <div>
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px">checklist</div>
+      <div id="refm-checklist"></div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <input type="text" id="refm-cl-input" placeholder="agregar ítem..." style="flex:1">
+        <button class="em-img-upload-label" id="refm-cl-add" style="cursor:pointer">+</button>
+      </div>
+    </div>
+
     <div class="edit-modal-btns">
       <button class="edit-modal-save" id="refm-save">guardar</button>
       <button class="edit-modal-cancel" id="refm-cancel">cancelar</button>
       <button class="edit-modal-cancel" id="refm-delete" style="display:none;color:#c95c5c">eliminar</button>
     </div>
   </div>
+</div>
+
+<!-- Ref Preview Panel -->
+<div class="rp-overlay" id="ref-preview">
+  <div class="rp-topbar">
+    <button class="rp-back" id="rp-close">← volver</button>
+    <span class="rp-topbar-title" id="rp-topbar-title"></span>
+    <button class="rp-export-btn" id="rp-export">↓ exportar</button>
+  </div>
+  <div class="rp-body" id="rp-body"></div>
 </div>
 
 <!-- Trash modal -->
@@ -1110,6 +1479,22 @@ body.public-mode .card { cursor: default; }
 
 </div>
 
+<div class="refs-toolbar refs-only" id="refs-toolbar" style="display:none">
+  <span class="refs-filter-label">estado</span>
+  <button class="ref-filter-btn on" data-status-filter="all">todos</button>
+  <button class="ref-filter-btn" data-status-filter="pendiente">pendiente</button>
+  <button class="ref-filter-btn" data-status-filter="aprobada">aprobada</button>
+  <button class="ref-filter-btn" data-status-filter="rechazada">rechazada</button>
+  <span class="refs-filter-label" style="margin-left:10px">marca</span>
+  <button class="ref-brand-btn on" data-brand-filter="all">todas</button>
+  <button class="ref-brand-btn" data-brand-filter="byd">BYD</button>
+  <button class="ref-brand-btn" data-brand-filter="bmw">BMW</button>
+  <button class="ref-brand-btn" data-brand-filter="mini">MINI</button>
+  <button class="ref-brand-btn" data-brand-filter="motorrad">MOTORRAD</button>
+  <button class="ref-brand-btn" data-brand-filter="">Sin marca</button>
+  <button class="ref-brand-btn" data-brand-filter="personal">Personal</button>
+</div>
+
 <div class="board-refs" id="board-refs">
 
   <div class="col" data-ref-col="ideas">
@@ -1124,66 +1509,108 @@ body.public-mode .card { cursor: default; }
     <div class="cards" id="refs-ideas"></div>
   </div>
 
-  <div class="col" data-ref-col="byd">
-    <div class="col-head">
-      <div class="col-dot" style="background:#2DC98F"></div>
-      <div class="col-name">BYD</div>
-      <div class="col-actions-row">
-        <div class="col-count" data-ref-count="byd">0</div>
-        <button class="col-add-btn" data-ref-target="byd">+</button>
-      </div>
-    </div>
-    <div class="cards" id="refs-byd"></div>
-  </div>
-
-  <div class="col" data-ref-col="bmw">
-    <div class="col-head">
-      <div class="col-dot" style="background:#5AAAE8"></div>
-      <div class="col-name">BMW</div>
-      <div class="col-actions-row">
-        <div class="col-count" data-ref-count="bmw">0</div>
-        <button class="col-add-btn" data-ref-target="bmw">+</button>
-      </div>
-    </div>
-    <div class="cards" id="refs-bmw"></div>
-  </div>
-
-  <div class="col" data-ref-col="mini">
+  <div class="col" data-ref-col="para-producir">
     <div class="col-head">
       <div class="col-dot" style="background:#D49030"></div>
-      <div class="col-name">MINI</div>
+      <div class="col-name">⚡ para producir</div>
       <div class="col-actions-row">
-        <div class="col-count" data-ref-count="mini">0</div>
-        <button class="col-add-btn" data-ref-target="mini">+</button>
+        <div class="col-count" data-ref-count="para-producir">0</div>
+        <button class="col-add-btn" data-ref-target="para-producir">+</button>
       </div>
     </div>
-    <div class="cards" id="refs-mini"></div>
+    <div class="cards" id="refs-para-producir"></div>
   </div>
 
-  <div class="col" data-ref-col="motorrad">
-    <div class="col-head">
-      <div class="col-dot" style="background:#E8754A"></div>
-      <div class="col-name">MOTORRAD</div>
-      <div class="col-actions-row">
-        <div class="col-count" data-ref-count="motorrad">0</div>
-        <button class="col-add-btn" data-ref-target="motorrad">+</button>
-      </div>
-    </div>
-    <div class="cards" id="refs-motorrad"></div>
-  </div>
-
-  <div class="col" data-ref-col="hechas">
-    <div class="col-head">
+  <div class="col col-collapsible collapsed" data-ref-col="finalizadas" id="col-finalizadas">
+    <div class="col-head" style="cursor:pointer" data-toggle-col="finalizadas">
       <div class="col-dot" style="background:#3B6D11"></div>
-      <div class="col-name">✅ hechas</div>
+      <div class="col-name">✅ finalizadas</div>
       <div class="col-actions-row">
-        <div class="col-count" data-ref-count="hechas">0</div>
-        <button class="col-add-btn" data-ref-target="hechas">+</button>
+        <div class="col-count" data-ref-count="finalizadas">0</div>
+        <span class="col-collapse-icon">›</span>
       </div>
     </div>
-    <div class="cards" id="refs-hechas"></div>
+    <div class="cards" id="refs-finalizadas"></div>
   </div>
 
+</div>
+
+<!-- Nota modal -->
+<div class="modal-overlay" id="nota-modal">
+  <div class="edit-modal">
+    <div style="font-size:11px;color:#5f5e5a;letter-spacing:0.08em;text-transform:uppercase" id="notam-label">nota</div>
+    <input type="text" id="notam-title" placeholder="título...">
+    <textarea id="notam-text" rows="6" placeholder="contenido..."></textarea>
+
+    <select id="notam-brand">
+      <option value="personal">Personal</option>
+      <option value="byd">BYD</option>
+      <option value="bmw">BMW</option>
+      <option value="mini">MINI</option>
+      <option value="motorrad">MOTORRAD</option>
+    </select>
+
+    <div class="em-img-upload">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">imágenes</div>
+      <div id="notam-gallery" class="em-gallery"></div>
+      <label class="em-img-upload-label" id="notam-upload-label">
+        + agregar imagen
+        <input type="file" id="notam-img-input" accept="image/*" multiple>
+      </label>
+    </div>
+
+    <div class="em-checklist-section" id="notam-checklist-wrap">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px">checklist</div>
+      <div id="notam-checklist"></div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <input type="text" id="notam-cl-input" placeholder="agregar ítem..." style="flex:1">
+        <button class="em-img-upload-label" id="notam-cl-add" style="cursor:pointer">+</button>
+      </div>
+    </div>
+
+    <div class="edit-modal-btns">
+      <button class="edit-modal-save" id="notam-save">guardar</button>
+      <button class="edit-modal-cancel" id="notam-cancel">cancelar</button>
+      <button class="edit-modal-cancel" id="notam-delete" style="display:none;color:#c95c5c">eliminar</button>
+      <button class="edit-modal-cancel" id="notam-obsidian" style="display:none;color:#9b8fff;border-color:#9b8fff" title="Enviar a Obsidian">obsidian ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notas toolbar -->
+<div class="refs-toolbar" id="notas-toolbar" style="display:none">
+  <span class="refs-filter-label">marca</span>
+  <button class="ref-brand-btn on" data-nota-brand="all">todas</button>
+  <button class="ref-brand-btn" data-nota-brand="personal">Personal</button>
+  <button class="ref-brand-btn" data-nota-brand="byd">BYD</button>
+  <button class="ref-brand-btn" data-nota-brand="bmw">BMW</button>
+  <button class="ref-brand-btn" data-nota-brand="mini">MINI</button>
+  <button class="ref-brand-btn" data-nota-brand="motorrad">MOTORRAD</button>
+</div>
+
+<!-- Notas board -->
+<div class="board-notas" id="board-notas">
+  <div class="col">
+    <div class="col-head">
+      <div class="col-dot" style="background:#5f5e5a"></div>
+      <div class="col-name">pendientes</div>
+      <div class="col-actions-row">
+        <div class="col-count" id="notas-count-pending">0</div>
+        <button class="col-add-btn" id="nota-add-btn">+</button>
+      </div>
+    </div>
+    <div class="cards" id="notas-pending"></div>
+  </div>
+  <div class="col">
+    <div class="col-head">
+      <div class="col-dot" style="background:#2DC98F"></div>
+      <div class="col-name">analizadas</div>
+      <div class="col-actions-row">
+        <div class="col-count" id="notas-count-analyzed">0</div>
+      </div>
+    </div>
+    <div class="cards" id="notas-analyzed"></div>
+  </div>
 </div>
 
 <script>
@@ -1464,20 +1891,22 @@ function card(task) {
         </div>`).join('')}
     </div>` : '';
 
-  const coverHTML = task.cover
-    ? `<img class="card-cover" src="${esc(task.cover)}" alt="">` : '';
+  const coverSrc = task.cover || (task.images && task.images[0]) || '';
 
-  return `
-    <div class="card ${cls}${isDone?' done-card':''}${task.cover?' has-cover':''}"
-         data-id="${esc(task.id)}"
-         data-edit="${esc(task.id)}"
-         draggable="${task.archived?'false':'true'}">
-      ${coverHTML}
+  const innerContent = `
       ${brandLabel ? `<div class="card-brand">${esc(brandLabel)}</div>` : ''}
       <div class="card-text">${esc(task.text)}</div>
       ${meta}
       ${clHTML}
-      ${task.completionNote ? `<div class="completion-note">${esc(task.completionNote)}</div>` : ''}
+      ${task.completionNote ? `<div class="completion-note">${esc(task.completionNote)}</div>` : ''}`;
+
+  return `
+    <div class="card ${cls}${isDone?' done-card':''}${coverSrc?' has-cover':''}"
+         data-id="${esc(task.id)}"
+         data-edit="${esc(task.id)}"
+         draggable="${task.archived?'false':'true'}"
+         ${coverSrc ? `style="background-image:url('${esc(coverSrc)}')"` : ''}>
+      ${coverSrc ? `<div class="card-glass">${innerContent}</div>` : innerContent}
       ${IS_PUBLIC ? '' : `<div class="card-btns">
         <button class="cbtn" data-duplicate="${esc(task.id)}" title="duplicar">⧉</button>
         <button class="cbtn" data-archive="${esc(task.id)}" title="${task.archived?'desarchivar':'archivar'}">${task.archived?'↩':'⊘'}</button>
@@ -2590,10 +3019,30 @@ TASKS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
 // ── Referencias (segundo tablero, independiente del de tareas) ──
 // ═══════════════════════════════════════════════════════════════
 
-const REFS_DOC = db.collection('kanban').doc('refs');
-const REF_COLS = ['ideas','byd','bmw','mini','motorrad','hechas'];
-const REF_COL_LABELS = { ideas:'ideas', byd:'BYD', bmw:'BMW', mini:'MINI', motorrad:'MOTORRAD', hechas:'hechas' };
-const REF_BRAND_CLASS = { ideas:'personal', byd:'byd', bmw:'bmw', mini:'mini', motorrad:'motorrad', hechas:'personal' };
+const REFS_DOC  = db.collection('kanban').doc('refs');
+const NOTAS_DOC = db.collection('kanban').doc('notas');
+const REF_COLS = ['ideas','para-producir','finalizadas'];
+const REF_COL_LABELS = { ideas:'ideas', 'para-producir':'para producir', finalizadas:'finalizadas' };
+const REF_BRAND_CLASS = { byd:'byd', bmw:'bmw', mini:'mini', motorrad:'motorrad', personal:'personal' };
+const REF_BRAND_LABEL = { '':'sin marca', byd:'BYD', bmw:'BMW', mini:'MINI', motorrad:'MOTORRAD', personal:'Personal' };
+const OLD_BRAND_COLS = ['byd','bmw','mini','motorrad'];
+
+let refStatusFilter = 'all';
+let refBrandFilter  = 'all';
+
+function migrateRefItem(item) {
+  if (OLD_BRAND_COLS.includes(item.col)) {
+    item.brand = item.col;
+    item.col   = 'ideas';
+  }
+  if (item.col === 'hechas')    item.col = 'finalizadas';
+  if (item.col === 'estado')    item.col = 'para-producir';
+  if (item.col === 'por-usar')  item.col = 'ideas';
+  if (!REF_COLS.includes(item.col)) item.col = 'ideas';
+  if (!item.status) item.status = 'pendiente';
+  if (item.brand === undefined) item.brand = '';
+  return item;
+}
 const PLATFORM_ICON = { instagram:'📸', tiktok:'🎵', youtube:'▶️', other:'🔗' };
 
 let refs = [], refSaveTimer = null, refWriteGen = 0, refPendingWrite = false, refEditingId = null;
@@ -2675,42 +3124,42 @@ async function fetchLinkPreview(url) {
 // ── Render ─────────────────────────────────────────────────────
 
 function refCard(item) {
-  const cls = REF_BRAND_CLASS[item.col] || 'personal';
+  const cls = REF_BRAND_CLASS[item.brand] || '';
   const media = item.media || [];
   const images = media.filter(m => m.type === 'image');
-  const videos = media.filter(m => m.type === 'video');
   const links  = media.filter(m => m.type === 'link');
-  const cover = images[0]?.url;
-  const igLinks = links.filter(l => l.platform === 'instagram');
+  const cover  = links.find(l => l.thumb)?.thumb || images[0]?.url;
+  const firstLink = links[0];
+  const statusLabel = { pendiente:'pendiente', aprobada:'aprobada', rechazada:'rechazada' }[item.status] || '';
 
-  const badges = [];
-  if (images.length) badges.push(`<span class="card-media-badge">🖼 ${images.length}</span>`);
-  if (videos.length) badges.push(`<span class="card-media-badge">🎬 ${videos.length}</span>`);
-  links.filter(l => l.platform !== 'instagram').forEach(l =>
-    badges.push(`<span class="card-media-badge">${PLATFORM_ICON[l.platform] || '🔗'} ${esc(l.platform)}</span>`)
-  );
-  const badgesHTML = badges.length ? `<div class="card-media-badges">${badges.join('')}</div>` : '';
+  const brandLabel = REF_BRAND_LABEL[item.brand] ?? 'sin marca';
+  const brandCls   = item.brand || 'sin-marca';
+  const badges = `<div class="card-ref-badges">
+        <div class="card-ref-status ${brandCls}">${brandLabel}</div>
+        ${statusLabel ? `<div class="card-ref-status ${item.status}">${statusLabel}</div>` : ''}
+      </div>`;
+  const linkBtn = firstLink
+    ? `<a class="card-ref-link" href="${esc(firstLink.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🔗 ver ref</a>`
+    : '';
+  const titleHtml  = (item.title || item.text) ? `<div class="card-ref-title">${esc(item.title || item.text)}</div>` : '';
+  const descHtml   = (item.title && item.text)  ? `<div class="card-ref-desc">${esc(item.text)}</div>` : '';
 
-  const igEmbeds = igLinks.map(l => l.thumb
-    ? `<div class="card-ig-embed"><img src="${esc(l.thumb)}" alt="Instagram" style="width:100%;border-radius:6px;display:block;"></div>`
-    : `<div class="card-ig-embed" data-ig-lazy="${esc(l.url)}">
-        <blockquote class="instagram-media" data-instgrm-permalink="${esc(l.url)}" data-instgrm-version="14"
-          style="background:#fff;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,.5),0 1px 10px 0 rgba(0,0,0,.15);margin:0;max-width:100%;padding:0;width:100%;">
-          <a href="${esc(l.url)}" target="_blank" rel="noopener">Ver en Instagram</a>
-        </blockquote>
+  const innerHtml = cover
+    ? `<div class="card-ref-cover-content">
+        ${titleHtml}
+        <div class="card-ref-footer">${badges}${linkBtn}</div>
       </div>`
-  ).join('');
+    : `${badges}${titleHtml}${descHtml}${linkBtn ? `<div style="margin-top:8px">${linkBtn}</div>` : ''}`;
 
   return `
-    <div class="card ${cls}${cover ? ' has-cover' : ''}${item.col === 'hechas' ? ' done-card' : ''}"
+    <div class="card ref-card ${cls}${cover ? ' has-cover' : ''}${item.col === 'finalizadas' ? ' done-card' : ''}"
          data-ref-id="${esc(item.id)}"
          data-ref-edit="${esc(item.id)}"
-         draggable="true">
-      ${cover ? `<img class="card-cover" src="${esc(cover)}" alt="">` : ''}
-      <div class="card-text">${esc(item.text || '(sin texto)')}</div>
-      ${badgesHTML}
-      ${igEmbeds}
+         draggable="true"
+         ${cover ? `style="background-image:url('${esc(cover)}')"` : ''}>
+      ${innerHtml}
       <div class="card-btns">
+        <button class="cbtn" data-ref-edit-btn="${esc(item.id)}" title="editar">✏</button>
         <button class="cbtn del" data-ref-delete="${esc(item.id)}" title="eliminar">✕</button>
       </div>
     </div>`;
@@ -2726,8 +3175,11 @@ const _igObserver = new IntersectionObserver(entries => {
 }, { rootMargin: '200px' });
 
 function renderRefs() {
+  refs.forEach(migrateRefItem);
   REF_COLS.forEach(col => {
-    const colItems = refs.filter(r => r.col === col);
+    let colItems = refs.filter(r => r.col === col);
+    if (refStatusFilter !== 'all') colItems = colItems.filter(r => r.status === refStatusFilter);
+    if (refBrandFilter  !== 'all') colItems = colItems.filter(r => r.brand  === refBrandFilter);
     const container = document.getElementById('refs-' + col);
     container.innerHTML = colItems.length ? colItems.map(refCard).join('') : '<div class="empty">vacío</div>';
     document.querySelector(`[data-ref-count="${col}"]`).textContent = colItems.length;
@@ -2735,7 +3187,6 @@ function renderRefs() {
       el.addEventListener('dragstart', onRefDragStart);
       el.addEventListener('dragend', onRefDragEnd);
     });
-    container.querySelectorAll('[data-ig-lazy]').forEach(el => _igObserver.observe(el));
   });
 }
 
@@ -2753,13 +3204,19 @@ function openRef(existingId, col) {
   }
   refEditingId = item.id;
   document.getElementById('refm-title').textContent = existingId ? 'referencia' : ('+ ' + (REF_COL_LABELS[col] || col));
+  document.getElementById('refm-title-input').value = item.title || '';
   document.getElementById('refm-text').value = item.text || '';
+  document.getElementById('refm-brand').value = item.brand || '';
+  document.getElementById('refm-status').value = item.status || 'pendiente';
   document.getElementById('refm-link-input').value = '';
   document.getElementById('refm-delete').style.display = existingId ? 'inline-flex' : 'none';
   renderRefmLinks();
   renderRefmGallery();
+  renderRefmStoryboard();
+  renderRefmMoodboard();
+  renderRefmChecklist();
   document.getElementById('ref-modal').classList.add('open');
-  setTimeout(() => document.getElementById('refm-text').focus(), 50);
+  setTimeout(() => document.getElementById('refm-title-input').focus(), 50);
 }
 
 function closeRefModalUI() {
@@ -2770,13 +3227,21 @@ function closeRefModalUI() {
 
 function saveRefText() {
   const item = refs.find(r => r.id === refEditingId);
-  if (item) { item.text = document.getElementById('refm-text').value.trim(); saveRefs(); }
+  if (item) {
+    item.title  = document.getElementById('refm-title-input').value.trim();
+    item.text   = document.getElementById('refm-text').value.trim();
+    item.brand  = document.getElementById('refm-brand').value;
+    item.status = document.getElementById('refm-status').value || 'pendiente';
+    if (item.status === 'rechazada') item.col = 'finalizadas';
+    if (item.status === 'aprobada')  item.col = 'para-producir';
+    saveRefs();
+  }
   closeRefModalUI();
 }
 
 function cancelRefModal() {
   const item = refs.find(r => r.id === refEditingId);
-  if (item && !item.text && !(item.media && item.media.length)) {
+  if (item && !item.title && !item.text && !(item.media && item.media.length)) {
     refs = refs.filter(r => r.id !== item.id);
     saveRefs();
   }
@@ -2840,6 +3305,7 @@ async function addRefLink() {
   const platform = detectPlatform(url);
   const linkObj = { type: 'link', url, platform, title: null, thumb: null };
   if (!item.media) item.media = [];
+  item.media = item.media.filter(m => m.type !== 'link');
   item.media.push(linkObj);
   input.value = '';
   saveRefs(); renderRefmLinks(); renderRefs();
@@ -2920,6 +3386,138 @@ document.addEventListener('paste', async e => {
   if (file) await addRefMediaFile(item, file);
 });
 
+// ── Storyboard dentro del modal ─────────────────────────────────
+function renderRefmStoryboard() {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const frames = item.storyboard || [];
+  const box = document.getElementById('refm-storyboard');
+  box.innerHTML = frames.map((f, idx) =>
+    `<div class="em-gallery-img"><img src="${esc(f.url)}" alt=""><button class="em-gallery-del" data-del-sb="${idx}">×</button></div>`
+  ).join('');
+  box.querySelectorAll('[data-del-sb]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      item.storyboard = (item.storyboard || []).filter((_, i) => i !== parseInt(btn.dataset.delSb));
+      saveRefs(); renderRefmStoryboard(); renderRefs();
+    });
+  });
+}
+
+document.getElementById('refm-storyboard-input').addEventListener('change', async e => {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  if (!item.storyboard) item.storyboard = [];
+  for (const file of Array.from(e.target.files)) {
+    const url = await uploadImage(file);
+    if (url) item.storyboard.push({ url });
+  }
+  saveRefs(); renderRefmStoryboard(); renderRefs();
+  e.target.value = '';
+});
+
+const refmSbLabel = document.getElementById('refm-storyboard-label');
+refmSbLabel.addEventListener('dragover', e => { e.preventDefault(); refmSbLabel.classList.add('drag-over'); });
+refmSbLabel.addEventListener('dragleave', () => refmSbLabel.classList.remove('drag-over'));
+refmSbLabel.addEventListener('drop', async e => {
+  e.preventDefault();
+  refmSbLabel.classList.remove('drag-over');
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  if (!item.storyboard) item.storyboard = [];
+  for (const file of Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))) {
+    const url = await uploadImage(file);
+    if (url) item.storyboard.push({ url });
+  }
+  saveRefs(); renderRefmStoryboard(); renderRefs();
+});
+
+// ── Moodboard dentro del modal ───────────────────────────────────
+function renderRefmMoodboard() {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const imgs = item.moodboard || [];
+  const box = document.getElementById('refm-moodboard');
+  box.innerHTML = imgs.map((f, idx) =>
+    `<div class="em-gallery-img"><img src="${esc(f.url)}" alt=""><button class="em-gallery-del" data-del-mb="${idx}">×</button></div>`
+  ).join('');
+  box.querySelectorAll('[data-del-mb]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      item.moodboard = (item.moodboard || []).filter((_, i) => i !== parseInt(btn.dataset.delMb));
+      saveRefs(); renderRefmMoodboard(); renderRefs();
+    });
+  });
+}
+
+document.getElementById('refm-moodboard-input').addEventListener('change', async e => {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  if (!item.moodboard) item.moodboard = [];
+  for (const file of Array.from(e.target.files)) {
+    const url = await uploadImage(file);
+    if (url) item.moodboard.push({ url });
+  }
+  saveRefs(); renderRefmMoodboard(); renderRefs();
+  e.target.value = '';
+});
+
+const refmMbLabel = document.getElementById('refm-moodboard-label');
+refmMbLabel.addEventListener('dragover', e => { e.preventDefault(); refmMbLabel.classList.add('drag-over'); });
+refmMbLabel.addEventListener('dragleave', () => refmMbLabel.classList.remove('drag-over'));
+refmMbLabel.addEventListener('drop', async e => {
+  e.preventDefault();
+  refmMbLabel.classList.remove('drag-over');
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  if (!item.moodboard) item.moodboard = [];
+  for (const file of Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))) {
+    const url = await uploadImage(file);
+    if (url) item.moodboard.push({ url });
+  }
+  saveRefs(); renderRefmMoodboard(); renderRefs();
+});
+
+// ── Checklist dentro del modal ───────────────────────────────────
+function renderRefmChecklist() {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const cl = item.refChecklist || [];
+  const box = document.getElementById('refm-checklist');
+  box.innerHTML = cl.map((c, idx) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <input type="checkbox" ${c.done ? 'checked' : ''} data-cl-toggle="${idx}" style="cursor:pointer;flex-shrink:0">
+      <span style="flex:1;font-size:13px;${c.done ? 'text-decoration:line-through;opacity:0.45' : ''}">${esc(c.text)}</span>
+      <button class="em-gallery-del" style="position:static" data-cl-del="${idx}">×</button>
+    </div>`
+  ).join('');
+  box.querySelectorAll('[data-cl-toggle]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      item.refChecklist[parseInt(cb.dataset.clToggle)].done = cb.checked;
+      saveRefs(); renderRefmChecklist(); renderRefs();
+    });
+  });
+  box.querySelectorAll('[data-cl-del]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      item.refChecklist = (item.refChecklist || []).filter((_, i) => i !== parseInt(btn.dataset.clDel));
+      saveRefs(); renderRefmChecklist(); renderRefs();
+    });
+  });
+}
+
+document.getElementById('refm-cl-add').addEventListener('click', () => {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const input = document.getElementById('refm-cl-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!item.refChecklist) item.refChecklist = [];
+  item.refChecklist.push({ id: uid(), text, done: false });
+  input.value = '';
+  saveRefs(); renderRefmChecklist(); renderRefs();
+});
+document.getElementById('refm-cl-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('refm-cl-add').click(); }
+});
+
 // ── Abrir tarjetas / agregar / borrar (delegación) ────────────────
 
 document.addEventListener('click', e => {
@@ -2934,17 +3532,252 @@ document.addEventListener('click', e => {
     }
     return;
   }
-});
-
-document.addEventListener('dblclick', e => {
-  if (e.target.closest('button, input, textarea, select, .card-btns')) return;
-  const el = e.target.closest('[data-ref-edit]');
-  if (el) openRef(el.dataset.refEdit, null);
+  const editBtn = el.closest('[data-ref-edit-btn]');
+  if (editBtn) { openRef(editBtn.dataset.refEditBtn, null); return; }
+  const previewBtn = el.closest('[data-ref-preview]');
+  if (previewBtn) { openRefPreview(previewBtn.dataset.refPreview); return; }
+  // click en el cuerpo de la card (fuera de botones) → preview
+  if (!el.closest('button, input, textarea, select, a, .card-btns')) {
+    const cardEl = el.closest('[data-ref-edit]');
+    if (cardEl) { openRefPreview(cardEl.dataset.refEdit); return; }
+  }
 });
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('ref-modal').classList.contains('open')) cancelRefModal();
+  if (e.key === 'Escape') {
+    if (document.getElementById('ref-preview').classList.contains('open')) { closeRefPreview(); return; }
+    if (document.getElementById('ref-modal').classList.contains('open')) cancelRefModal();
+  }
 });
+
+// ── Ref Preview Panel ────────────────────────────────────────────
+
+function openRefPreview(id) {
+  const item = refs.find(r => r.id === id);
+  if (!item) return;
+
+  const links  = (item.media || []).filter(m => m.type === 'link');
+  const images = (item.media || []).filter(m => m.type === 'image');
+  const cover  = links.find(l => l.thumb)?.thumb || images[0]?.url;
+  const firstLink = links[0];
+  const cl = item.refChecklist || [];
+  const sb = item.storyboard  || [];
+  const mb = item.moodboard   || [];
+
+  document.getElementById('rp-topbar-title').textContent = item.title || item.text || 'referencia';
+
+  const body = document.getElementById('rp-body');
+  body.innerHTML = `
+    ${cover ? `
+    <div class="rp-hero" style="background-image:url('${esc(cover)}')">
+      <div class="rp-hero-content">
+        ${item.title ? `<h1 class="rp-title">${esc(item.title)}</h1>` : ''}
+        ${item.text  ? `<p  class="rp-desc">${esc(item.text)}</p>`   : ''}
+        ${firstLink  ? `<a  class="rp-link-btn" href="${esc(firstLink.url)}" target="_blank" rel="noopener noreferrer">🔗 ver referencia</a>` : ''}
+      </div>
+    </div>` : `
+    <div class="rp-header-no-cover rp-section">
+      ${item.title ? `<h1 class="rp-title">${esc(item.title)}</h1>` : ''}
+      ${item.text  ? `<p  class="rp-desc">${esc(item.text)}</p>`    : ''}
+      ${firstLink  ? `<a  class="rp-link-btn" href="${esc(firstLink.url)}" target="_blank" rel="noopener noreferrer">🔗 ver referencia</a>` : ''}
+    </div>`}
+
+    ${sb.length ? `
+    <div class="rp-section">
+      <div class="rp-section-label">storyboard <span>${sb.length} ${sb.length === 1 ? 'frame' : 'frames'}</span></div>
+      <div class="rp-storyboard-strip">
+        ${sb.map((f, i) => `
+          <div class="rp-sb-frame">
+            <img src="${esc(f.url)}" alt="frame ${i+1}" loading="lazy">
+            <div class="rp-sb-num">${i+1}</div>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    ${mb.length ? `
+    <div class="rp-section">
+      <div class="rp-section-label">moodboard <span>${mb.length} ${mb.length === 1 ? 'imagen' : 'imágenes'}</span></div>
+      <div class="rp-moodboard-grid">
+        ${mb.map(f => `<div class="rp-mb-img"><img src="${esc(f.url)}" alt="" loading="lazy"></div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    ${cl.length ? `
+    <div class="rp-section">
+      <div class="rp-section-label">checklist <span>${cl.filter(i => i.done).length}/${cl.length}</span></div>
+      <div class="rp-checklist">
+        ${cl.map((c, idx) => `
+          <label class="rp-cl-item${c.done ? ' done' : ''}" data-rp-cl="${idx}">
+            <input type="checkbox" ${c.done ? 'checked' : ''} style="cursor:pointer;flex-shrink:0;accent-color:#2DC98F">
+            <span class="rp-cl-text">${esc(c.text)}</span>
+          </label>`).join('')}
+      </div>
+    </div>` : ''}
+  `;
+
+  const overlay = document.getElementById('ref-preview');
+  overlay.dataset.refId = id;
+  overlay.scrollTop = 0;
+  overlay.classList.add('open');
+
+  // Checklist toggle desde el preview
+  body.querySelectorAll('[data-rp-cl]').forEach(label => {
+    label.querySelector('input[type="checkbox"]').addEventListener('change', e => {
+      const idx = parseInt(label.dataset.rpCl);
+      const refItem = refs.find(r => r.id === id);
+      if (!refItem?.refChecklist?.[idx]) return;
+      refItem.refChecklist[idx].done = e.target.checked;
+      label.classList.toggle('done', e.target.checked);
+      saveRefs(); renderRefs();
+    });
+  });
+
+  // Scroll-reveal: observa cada .rp-section en el contexto del overlay
+  requestAnimationFrame(() => {
+    const sections = body.querySelectorAll('.rp-section');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visible'); obs.unobserve(en.target); } });
+    }, { threshold: 0.08, root: overlay });
+    sections.forEach(s => obs.observe(s));
+  });
+}
+
+function closeRefPreview() {
+  document.getElementById('ref-preview').classList.remove('open');
+}
+
+document.getElementById('rp-close').addEventListener('click', closeRefPreview);
+document.getElementById('rp-export').addEventListener('click', () => {
+  const id = document.getElementById('ref-preview').dataset.refId;
+  if (id) exportRefBrief(id);
+});
+
+function exportRefBrief(id) {
+  const item = refs.find(r => r.id === id);
+  if (!item) return;
+
+  const links  = (item.media || []).filter(m => m.type === 'link');
+  const images = (item.media || []).filter(m => m.type === 'image');
+  const cover  = links.find(l => l.thumb)?.thumb || images[0]?.url;
+  const firstLink = links[0];
+  const sb = item.storyboard  || [];
+  const mb = item.moodboard   || [];
+  const cl = item.refChecklist || [];
+
+  const imgTag = (url, style = '') =>
+    `<img src="${url}" style="display:block;${style}" crossorigin="anonymous">`;
+
+  const sbHTML = sb.length ? `
+    <section>
+      <h2>STORYBOARD</h2>
+      <div class="strip">
+        ${sb.map((f, i) => `
+          <div class="frame">
+            ${imgTag(f.url, 'width:100%;height:160px;object-fit:cover;border-radius:8px;')}
+            <div class="frame-num">${i + 1}</div>
+          </div>`).join('')}
+      </div>
+    </section>` : '';
+
+  const mbHTML = mb.length ? `
+    <section>
+      <h2>MOODBOARD</h2>
+      <div class="grid">
+        ${mb.map(f => `<div class="grid-item">${imgTag(f.url, 'width:100%;height:200px;object-fit:cover;border-radius:8px;')}</div>`).join('')}
+      </div>
+    </section>` : '';
+
+  const clHTML = cl.length ? `
+    <section>
+      <h2>CHECKLIST</h2>
+      <ul>
+        ${cl.map(c => `<li class="${c.done ? 'done' : ''}">${c.done ? '✓' : '○'} ${c.text}</li>`).join('')}
+      </ul>
+    </section>` : '';
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${item.title || item.text || 'referencia'}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0c0c0a; color: #e8e6dc;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    max-width: 1100px; margin: 0 auto; padding: 48px 40px 80px;
+  }
+  .hero {
+    display: flex; gap: 28px; align-items: flex-start;
+    padding-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 48px;
+  }
+  .hero-text { flex: 1; }
+  .hero-cover {
+    flex-shrink: 0; width: 140px; height: 140px;
+    border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);
+  }
+  .hero-cover img { width: 100%; height: 100%; object-fit: cover; }
+  h1 { font-size: 36px; font-weight: 700; color: #f0ede4; margin-bottom: 10px; line-height: 1.2; }
+  .desc { font-size: 16px; color: rgba(220,218,210,0.65); line-height: 1.65; margin-bottom: 18px; }
+  .link-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: rgba(220,218,210,0.7);
+    text-decoration: none; padding: 6px 14px;
+    border: 1px solid rgba(255,255,255,0.18); border-radius: 20px;
+  }
+  section { margin-bottom: 52px; }
+  h2 {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: rgba(220,218,210,0.3);
+    margin-bottom: 20px; padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; }
+  .strip::-webkit-scrollbar { height: 3px; }
+  .strip::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius:2px; }
+  .frame { flex-shrink: 0; width: 240px; position: relative; }
+  .frame-num {
+    position: absolute; bottom: 6px; left: 8px;
+    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.55); padding: 1px 7px; border-radius: 4px;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .grid-item { border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); }
+  ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  li {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-radius: 8px;
+    background: rgba(255,255,255,0.03); font-size: 15px;
+  }
+  li.done { text-decoration: line-through; opacity: 0.4; }
+  @media print {
+    body { padding: 20px; }
+    .strip { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-text">
+      ${item.title ? `<h1>${item.title}</h1>` : ''}
+      ${item.text  ? `<p class="desc">${item.text}</p>` : ''}
+      ${firstLink  ? `<a class="link-chip" href="${firstLink.url}" target="_blank">🔗 ver referencia</a>` : ''}
+    </div>
+    ${cover ? `<div class="hero-cover"><img src="${cover}" alt="cover" crossorigin="anonymous"></div>` : ''}
+  </div>
+  ${sbHTML}
+  ${mbHTML}
+  ${clHTML}
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const win  = window.open(url, '_blank');
+  if (win) setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
 
 // ── Drag & drop (mouse) — simplificado a nivel de columna ─────────
 
@@ -3061,6 +3894,23 @@ document.getElementById('tab-refs').addEventListener('click', () => switchTab('r
     .catch(() => { if (gen === refWriteGen) refPendingWrite = false; });
 })();
 
+// ── Backfill thumbnails para links de Instagram sin caché ────────
+async function backfillIgThumbs() {
+  let changed = false;
+  for (const item of refs) {
+    const links = (item.media || []).filter(m => m.type === 'link' && m.platform === 'instagram' && !m.thumb);
+    for (const link of links) {
+      const meta = await fetchLinkPreview(link.url);
+      if (meta?.thumb) {
+        link.thumb = meta.thumb;
+        if (!link.title) link.title = meta.title;
+        changed = true;
+      }
+    }
+  }
+  if (changed) { saveRefs(); renderRefs(); }
+}
+
 // ── Firebase real-time listener (refs) ────────────────────────────
 REFS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
   if (snap.metadata.hasPendingWrites) return;
@@ -3068,11 +3918,265 @@ REFS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
   if (refDragId || refEditingId || refTouchDragEl) return;
   refs = snap.data()?.data || [];
   renderRefs();
+  backfillIgThumbs();
 });
 
 // Placeholders "vacío" desde el arranque, sin esperar a Firestore
 // (por ejemplo si las reglas de seguridad todavía no permiten kanban/refs)
 renderRefs();
+
+// ── NOTAS ────────────────────────────────────────────────────────
+
+let notas = [], notaEditingId = null, notaSaveTimer = null, notaWriteGen = 0, notaPendingWrite = false, notaBrandFilter = 'all';
+
+function saveNotas() {
+  const gen = ++notaWriteGen;
+  notaPendingWrite = true;
+  clearTimeout(notaSaveTimer);
+  notaSaveTimer = setTimeout(() => {
+    NOTAS_DOC.set({ data: notas })
+      .then(() => { if (gen === notaWriteGen) notaPendingWrite = false; })
+      .catch(() => { if (gen === notaWriteGen) notaPendingWrite = false; });
+  }, 100);
+}
+
+const NOTA_BRAND_LABEL = { byd:'BYD', bmw:'BMW', mini:'MINI', motorrad:'MOTORRAD', personal:'Personal' };
+
+function notaCard(nota) {
+  const cover  = nota.images && nota.images[0];
+  const brand  = nota.brand || 'personal';
+  const cls    = brand !== 'personal' ? brand : 'personal';
+  const cl     = nota.checklist || [];
+  const clDone = cl.filter(i => i.done).length;
+  const clBadge      = cl.length ? `<span class="cbadge cl-prog${clDone===cl.length?' done':''}">${clDone}/${cl.length}</span>` : '';
+  const analyzedBadge = nota.analyzed ? `<span class="cbadge" style="color:#2DC98F;border-color:#1D9E75">analizada</span>` : '';
+  const date          = nota.createdAt ? `<span style="font-size:10px;color:#5f5e5a">${new Date(nota.createdAt).toLocaleDateString('es-AR',{day:'2-digit',month:'short'})}</span>` : '';
+  const brandBadge    = `<div class="card-ref-status ${brand}" style="margin-bottom:4px">${NOTA_BRAND_LABEL[brand] || brand}</div>`;
+
+  const inner = `
+    ${brandBadge}
+    ${nota.title ? `<div class="card-ref-title">${esc(nota.title)}</div>` : ''}
+    ${nota.text  ? `<div class="card-ref-desc" style="-webkit-line-clamp:3">${esc(nota.text)}</div>` : ''}
+    ${(clBadge||analyzedBadge||date) ? `<div class="card-meta" style="margin-top:6px">${clBadge}${analyzedBadge}${date}</div>` : ''}`;
+
+  return `
+    <div class="card ${cls}${cover?' has-cover':''}"
+         data-nota-id="${esc(nota.id)}"
+         data-nota-edit="${esc(nota.id)}"
+         ${cover?`style="background-image:url('${esc(cover)}')"`:''}>
+      ${cover ? `<div class="card-glass">${inner}</div>` : inner}
+      <div class="card-btns">
+        <button class="cbtn del" data-nota-delete="${esc(nota.id)}" title="eliminar">✕</button>
+      </div>
+    </div>`;
+}
+
+function renderNotas() {
+  const brandFilter = n => notaBrandFilter === 'all' || (n.brand || 'personal') === notaBrandFilter;
+  const pending  = notas.filter(n => !n.analyzed && !n.archivedNote && brandFilter(n));
+  const analyzed = notas.filter(n =>  n.analyzed && !n.archivedNote && brandFilter(n));
+  document.getElementById('notas-pending').innerHTML  = pending.length  ? pending.map(notaCard).join('')  : '<div class="empty">vacío</div>';
+  document.getElementById('notas-analyzed').innerHTML = analyzed.length ? analyzed.map(notaCard).join('') : '<div class="empty">vacío</div>';
+  document.getElementById('notas-count-pending').textContent  = pending.length;
+  document.getElementById('notas-count-analyzed').textContent = analyzed.length;
+}
+
+function renderNotamGallery() {
+  const nota = notas.find(n => n.id === notaEditingId);
+  if (!nota) return;
+  const gallery = document.getElementById('notam-gallery');
+  gallery.innerHTML = (nota.images||[]).map((img,idx) => `
+    <div class="em-gallery-img">
+      <img src="${esc(img)}" alt="">
+      <button class="em-gallery-del" data-notam-del-img="${idx}">×</button>
+    </div>`).join('');
+  gallery.querySelectorAll('[data-notam-del-img]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      nota.images.splice(parseInt(btn.dataset.notamDelImg), 1);
+      saveNotas(); renderNotamGallery(); renderNotas();
+    });
+  });
+}
+
+function renderNotamChecklist() {
+  const nota = notas.find(n => n.id === notaEditingId);
+  if (!nota) return;
+  const cl = nota.checklist || [];
+  document.getElementById('notam-checklist').innerHTML = cl.map((item,idx) => `
+    <div class="cl-item">
+      <input type="checkbox" class="cl-check" ${item.done?'checked':''} data-notam-cl="${idx}">
+      <span class="cl-text${item.done?' done':''}">${esc(item.text)}</span>
+      <button class="em-gallery-del" data-notam-cl-del="${idx}" style="position:static;margin-left:auto">×</button>
+    </div>`).join('');
+  document.querySelectorAll('[data-notam-cl]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      nota.checklist[parseInt(cb.dataset.notamCl)].done = cb.checked;
+      saveNotas(); renderNotamChecklist(); renderNotas();
+    });
+  });
+  document.querySelectorAll('[data-notam-cl-del]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      nota.checklist.splice(parseInt(btn.dataset.notamClDel), 1);
+      saveNotas(); renderNotamChecklist(); renderNotas();
+    });
+  });
+}
+
+function openNota(id) {
+  let nota;
+  if (id) {
+    nota = notas.find(n => n.id === id);
+    if (!nota) return;
+  } else {
+    nota = { id: uid(), title: '', text: '', images: [], checklist: [], analyzed: false, createdAt: new Date().toISOString(), source: 'manual' };
+    notas.unshift(nota);
+    saveNotas();
+  }
+  notaEditingId = nota.id;
+  document.getElementById('notam-label').textContent = id ? 'nota' : 'nueva nota';
+  document.getElementById('notam-title').value  = nota.title  || '';
+  document.getElementById('notam-text').value   = nota.text   || '';
+  document.getElementById('notam-brand').value  = nota.brand  || 'personal';
+  document.getElementById('notam-delete').style.display = id ? 'inline-flex' : 'none';
+  document.getElementById('notam-obsidian').style.display = id ? 'inline-flex' : 'none';
+  renderNotamGallery();
+  renderNotamChecklist();
+  document.getElementById('nota-modal').classList.add('open');
+  setTimeout(() => document.getElementById('notam-title').focus(), 50);
+}
+
+function saveNotaModal() {
+  const nota = notas.find(n => n.id === notaEditingId);
+  if (nota) {
+    nota.title = document.getElementById('notam-title').value.trim();
+    nota.text  = document.getElementById('notam-text').value.trim();
+    nota.brand = document.getElementById('notam-brand').value || 'personal';
+    saveNotas();
+  }
+  document.getElementById('nota-modal').classList.remove('open');
+  notaEditingId = null;
+  renderNotas();
+}
+
+function cancelNotaModal() {
+  const nota = notas.find(n => n.id === notaEditingId);
+  if (nota && !nota.title && !nota.text && !(nota.images&&nota.images.length) && !(nota.checklist&&nota.checklist.length)) {
+    notas = notas.filter(n => n.id !== nota.id);
+    saveNotas();
+  }
+  document.getElementById('nota-modal').classList.remove('open');
+  notaEditingId = null;
+  renderNotas();
+}
+
+document.getElementById('notam-save').addEventListener('click', saveNotaModal);
+document.getElementById('notam-cancel').addEventListener('click', cancelNotaModal);
+document.getElementById('notam-delete').addEventListener('click', () => {
+  notas = notas.filter(n => n.id !== notaEditingId);
+  saveNotas();
+  document.getElementById('nota-modal').classList.remove('open');
+  notaEditingId = null;
+  renderNotas();
+});
+document.getElementById('notam-obsidian').addEventListener('click', () => {
+  alert('Integración con Obsidian próximamente.');
+});
+document.getElementById('nota-add-btn').addEventListener('click', () => openNota(null));
+
+// Image upload for notas
+document.getElementById('notam-img-input').addEventListener('change', async e => {
+  const nota = notas.find(n => n.id === notaEditingId);
+  if (!nota) return;
+  for (const file of e.target.files) {
+    const url = await uploadImage(file);
+    if (url) { if (!nota.images) nota.images = []; nota.images.push(url); }
+  }
+  e.target.value = '';
+  saveNotas(); renderNotamGallery(); renderNotas();
+});
+
+// Checklist add
+document.getElementById('notam-cl-add').addEventListener('click', () => {
+  const nota = notas.find(n => n.id === notaEditingId);
+  const input = document.getElementById('notam-cl-input');
+  if (!nota || !input.value.trim()) return;
+  if (!nota.checklist) nota.checklist = [];
+  nota.checklist.push({ id: uid(), text: input.value.trim(), done: false });
+  input.value = '';
+  saveNotas(); renderNotamChecklist(); renderNotas();
+});
+document.getElementById('notam-cl-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('notam-cl-add').click(); }
+});
+
+// Click on nota card to open
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-nota-edit]');
+  if (el && !e.target.closest('[data-nota-delete]')) openNota(el.dataset.notaEdit);
+  const del = e.target.closest('[data-nota-delete]');
+  if (del) {
+    notas = notas.filter(n => n.id !== del.dataset.notaDelete);
+    saveNotas(); renderNotas();
+  }
+});
+
+// switchTab update
+const _origSwitchTab = switchTab;
+function switchTab(tab) {
+  document.body.classList.toggle('showing-refs',   tab === 'refs');
+  document.body.classList.toggle('showing-notas',  tab === 'notas');
+  document.getElementById('tab-tasks').classList.toggle('on', tab === 'tasks');
+  document.getElementById('tab-refs').classList.toggle('on',  tab === 'refs');
+  document.getElementById('tab-notas').classList.toggle('on', tab === 'notas');
+  document.getElementById('refs-toolbar').style.display  = tab === 'refs'  ? 'flex' : 'none';
+  document.getElementById('notas-toolbar').style.display = tab === 'notas' ? 'flex' : 'none';
+}
+
+document.querySelectorAll('.ref-filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    refStatusFilter = btn.dataset.statusFilter;
+    document.querySelectorAll('.ref-filter-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    renderRefs();
+  });
+});
+
+document.querySelectorAll('[data-brand-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    refBrandFilter = btn.dataset.brandFilter;
+    document.querySelectorAll('[data-brand-filter]').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    renderRefs();
+  });
+});
+
+document.querySelectorAll('[data-nota-brand]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    notaBrandFilter = btn.dataset.notaBrand;
+    document.querySelectorAll('[data-nota-brand]').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    renderNotas();
+  });
+});
+document.getElementById('tab-notas').addEventListener('click', () => switchTab('notas'));
+
+document.querySelectorAll('[data-toggle-col]').forEach(head => {
+  head.addEventListener('click', e => {
+    if (e.target.closest('button')) return;
+    const col = document.getElementById('col-' + head.dataset.toggleCol);
+    if (col) col.classList.toggle('collapsed');
+  });
+});
+
+// Firestore listener for notas
+NOTAS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
+  if (snap.metadata.hasPendingWrites) return;
+  if (notaPendingWrite) return;
+  notas = snap.data()?.data || [];
+  renderNotas();
+});
+
+renderNotas();
 </script>
 </body>
 </html>
