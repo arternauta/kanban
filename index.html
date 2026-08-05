@@ -14,6 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <style>
@@ -1306,6 +1307,7 @@ firebase.initializeApp({
 });
 const db      = firebase.firestore();
 const storage = firebase.storage();
+firebase.auth().signInAnonymously().catch(() => {});
 db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
 const TASKS_DOC = db.collection('kanban').doc('tasks');
 
