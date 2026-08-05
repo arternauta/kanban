@@ -92,13 +92,29 @@ exports.linkPreview = onRequest({ cors: true }, async (req, res) => {
   const url = req.query.url;
   if (!url || typeof url !== 'string') { res.status(400).json({ error: 'missing url' }); return; }
   try {
+    const igMatch = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+    if (igMatch) {
+      // Endpoint no documentado de Instagram que redirige a la imagen del post
+      const mediaResp = await fetch(`https://www.instagram.com/p/${igMatch[1]}/media/?size=l`, {
+        redirect: 'follow',
+        headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36' }
+      });
+      if (mediaResp.ok && mediaResp.headers.get('content-type')?.startsWith('image/')) {
+        const buf = Buffer.from(await mediaResp.arrayBuffer());
+        const ext = (mediaResp.headers.get('content-type') || 'image/jpeg').split('/')[1].split(';')[0] || 'jpg';
+        const filename = `link-thumbs/ig_${igMatch[1]}.${ext}`;
+        const bucket = admin.storage().bucket();
+        const file = bucket.file(filename);
+        await file.save(buf, { contentType: mediaResp.headers.get('content-type'), public: true });
+        const imageUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
+        res.status(200).json({ title: 'Instagram', image: imageUrl });
+        return;
+      }
+    }
+    // Fallback genérico para otros dominios
     const resp = await fetch(url, {
       redirect: 'follow',
-      headers: {
-        // UA de crawler de Facebook: Instagram le sirve las meta tags og:*
-        // completas a este UA (es lo que usan las previews de WhatsApp/FB).
-        'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'
-      }
+      headers: { 'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)' }
     });
     const html = await resp.text();
     const title = decodeEntities(matchMeta(html, 'og:title') || (html.match(/<title>([^<]*)<\/title>/i) || [])[1] || '');

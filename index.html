@@ -2641,11 +2641,8 @@ function loadInstagramEmbed() {
 }
 
 async function fetchOembed(url, platform) {
-  // Instagram: no se puede scrapear server-side — usamos embed nativo del browser.
-  if (platform === 'instagram') {
-    const parsed = parseInstagramUrl(url);
-    return { title: parsed.label, thumb: null };
-  }
+  // Instagram se maneja por fetchLinkPreview (Cloud Function con caché en Storage)
+  if (platform === 'instagram') return null;
   // YouTube y TikTok exponen oEmbed público con CORS habilitado.
   let endpoint = null;
   if (platform === 'youtube') endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
@@ -2694,13 +2691,15 @@ function refCard(item) {
   );
   const badgesHTML = badges.length ? `<div class="card-media-badges">${badges.join('')}</div>` : '';
 
-  const igEmbeds = igLinks.map(l => `
-    <div class="card-ig-embed" data-ig-lazy="${esc(l.url)}">
-      <blockquote class="instagram-media" data-instgrm-permalink="${esc(l.url)}" data-instgrm-version="14"
-        style="background:#fff;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,.5),0 1px 10px 0 rgba(0,0,0,.15);margin:0;max-width:100%;padding:0;width:100%;">
-        <a href="${esc(l.url)}" target="_blank" rel="noopener">Ver en Instagram</a>
-      </blockquote>
-    </div>`).join('');
+  const igEmbeds = igLinks.map(l => l.thumb
+    ? `<div class="card-ig-embed"><img src="${esc(l.thumb)}" alt="Instagram" style="width:100%;border-radius:6px;display:block;"></div>`
+    : `<div class="card-ig-embed" data-ig-lazy="${esc(l.url)}">
+        <blockquote class="instagram-media" data-instgrm-permalink="${esc(l.url)}" data-instgrm-version="14"
+          style="background:#fff;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,.5),0 1px 10px 0 rgba(0,0,0,.15);margin:0;max-width:100%;padding:0;width:100%;">
+          <a href="${esc(l.url)}" target="_blank" rel="noopener">Ver en Instagram</a>
+        </blockquote>
+      </div>`
+  ).join('');
 
   return `
     <div class="card ${cls}${cover ? ' has-cover' : ''}${item.col === 'hechas' ? ' done-card' : ''}"
@@ -2808,18 +2807,18 @@ function renderRefmLinks() {
   const links = (item.media || []).filter(m => m.type === 'link');
   const box = document.getElementById('refm-links');
   box.innerHTML = links.map((l, idx) => {
+    const igPreview = l.platform === 'instagram' && !l.thumb ? `
+      <blockquote class="instagram-media" data-instgrm-permalink="${esc(l.url)}" data-instgrm-version="14"
+        style="background:#fff;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,.5),0 1px 10px 0 rgba(0,0,0,.15);margin:4px 0 8px;max-width:100%;min-width:326px;padding:0;width:calc(100% - 2px);">
+        <a href="${esc(l.url)}" target="_blank" rel="noopener">Ver en Instagram</a>
+      </blockquote>` : '';
     const chip = `
       <div class="ref-link-chip">
         ${l.thumb ? `<img class="ref-link-thumb" src="${esc(l.thumb)}" alt="">` : `<span class="ref-link-platform">${PLATFORM_ICON[l.platform] || '🔗'}</span>`}
         <span class="ref-link-text">${esc(l.title || l.url)}</span>
         <button class="em-gallery-del" data-del-link="${idx}">×</button>
       </div>`;
-    const embed = l.platform === 'instagram' ? `
-      <blockquote class="instagram-media" data-instgrm-permalink="${esc(l.url)}" data-instgrm-version="14"
-        style="background:#fff;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,.5),0 1px 10px 0 rgba(0,0,0,.15);margin:4px 0 8px;max-width:100%;min-width:326px;padding:0;width:calc(100% - 2px);">
-        <a href="${esc(l.url)}" target="_blank" rel="noopener">Ver en Instagram</a>
-      </blockquote>` : '';
-    return chip + embed;
+    return chip + igPreview;
   }).join('');
   box.querySelectorAll('[data-del-link]').forEach(btn => {
     btn.addEventListener('click', () => {
