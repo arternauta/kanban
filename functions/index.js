@@ -172,51 +172,57 @@ exports.telegram = onRequest({ secrets: [TELEGRAM_TOKEN] }, async (req, res) => 
     if (socialMatch) {
       const url      = socialMatch[1];
       const platform = detectPlatform(url);
-      const snap     = await REFS_REF.get();
-      const refItems = snap.exists ? (snap.data().data || []) : [];
-      refItems.unshift({
-        id:        uid(),
-        col:       'ideas',
-        title:     '',
-        text:      '',
-        media:     [{ type: 'link', url, platform, title: null, thumb: null }],
-        createdAt: new Date().toISOString(),
-        source:    'telegram'
+      await db.runTransaction(async tx => {
+        const snap     = await tx.get(REFS_REF);
+        const refItems = snap.exists ? (snap.data().data || []) : [];
+        refItems.unshift({
+          id:        uid(),
+          col:       'ideas',
+          title:     '',
+          text:      '',
+          media:     [{ type: 'link', url, platform, title: null, thumb: null }],
+          createdAt: new Date().toISOString(),
+          source:    'telegram'
+        });
+        tx.set(REFS_REF, { data: refItems });
       });
-      await REFS_REF.set({ data: refItems });
       const platformLabel = { instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube' }[platform] || platform;
       await tgSend(token, chatId, `🔖 Referencia guardada en <i>Ideas</i>.\n<b>${platformLabel}</b> · ${url}`);
     } else if (isNota) {
-      const snap  = await NOTAS_REF.get();
-      const notas = snap.exists ? (snap.data().data || []) : [];
-      notas.push({
-        id:        uid(),
-        text,
-        analyzed:  false,
-        createdAt: new Date().toISOString(),
-        source:    'telegram'
+      await db.runTransaction(async tx => {
+        const snap  = await tx.get(NOTAS_REF);
+        const notas = snap.exists ? (snap.data().data || []) : [];
+        notas.push({
+          id:        uid(),
+          text,
+          analyzed:  false,
+          createdAt: new Date().toISOString(),
+          source:    'telegram'
+        });
+        tx.set(NOTAS_REF, { data: notas });
       });
-      await NOTAS_REF.set({ data: notas });
       await tgSend(token, chatId, `📝 Nota guardada. La analizamos cuando quieras.`);
     } else {
-      const snap  = await TASKS_REF.get();
-      const tasks = snap.exists ? (snap.data().data || []) : [];
-      tasks.unshift({
-        id:        uid(),
-        col:       'inbox',
-        text,
-        brand:     '',
-        priority:  '',
-        date:      '',
-        assignee:  '',
-        archived:  false,
-        deleted:   false,
-        timeLog:   [],
-        timeSpent: 0,
-        createdAt: new Date().toISOString(),
-        source:    'telegram'
+      await db.runTransaction(async tx => {
+        const snap  = await tx.get(TASKS_REF);
+        const tasks = snap.exists ? (snap.data().data || []) : [];
+        tasks.unshift({
+          id:        uid(),
+          col:       'inbox',
+          text,
+          brand:     '',
+          priority:  '',
+          date:      '',
+          assignee:  '',
+          archived:  false,
+          deleted:   false,
+          timeLog:   [],
+          timeSpent: 0,
+          createdAt: new Date().toISOString(),
+          source:    'telegram'
+        });
+        tx.set(TASKS_REF, { data: tasks });
       });
-      await TASKS_REF.set({ data: tasks });
       await tgSend(token, chatId, `✅ <b>${text}</b>\n\nAgregada a <i>Por hacer</i> en el kanban.`);
     }
   } catch (e) {
