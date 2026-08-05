@@ -2615,7 +2615,32 @@ function detectPlatform(url) {
   return 'other';
 }
 
+function parseInstagramUrl(url) {
+  const postM  = url.match(/instagram\.com\/p\/([A-Za-z0-9_-]+)/);
+  const reelM  = url.match(/instagram\.com\/reel\/([A-Za-z0-9_-]+)/);
+  const userM  = url.match(/instagram\.com\/([A-Za-z0-9_.]+)\/?$/);
+  if (postM)  return { label: 'Post · ' + postM[1],  shortcode: postM[1] };
+  if (reelM)  return { label: 'Reel · ' + reelM[1],  shortcode: reelM[1] };
+  if (userM)  return { label: '@' + userM[1],          shortcode: null };
+  return { label: 'Instagram', shortcode: null };
+}
+
+function loadInstagramEmbed() {
+  if (window.instgrm) { window.instgrm.Embeds.process(); return; }
+  if (document.getElementById('ig-embed-js')) return;
+  const s = document.createElement('script');
+  s.id  = 'ig-embed-js';
+  s.src = 'https://www.instagram.com/embed.js';
+  s.async = true;
+  document.body.appendChild(s);
+}
+
 async function fetchOembed(url, platform) {
+  // Instagram: no se puede scrapear server-side — usamos embed nativo del browser.
+  if (platform === 'instagram') {
+    const parsed = parseInstagramUrl(url);
+    return { title: parsed.label, thumb: null };
+  }
   // YouTube y TikTok exponen oEmbed público con CORS habilitado.
   let endpoint = null;
   if (platform === 'youtube') endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
@@ -2755,12 +2780,20 @@ function renderRefmLinks() {
   if (!item) return;
   const links = (item.media || []).filter(m => m.type === 'link');
   const box = document.getElementById('refm-links');
-  box.innerHTML = links.map((l, idx) => `
-    <div class="ref-link-chip">
-      ${l.thumb ? `<img class="ref-link-thumb" src="${esc(l.thumb)}" alt="">` : `<span class="ref-link-platform">${PLATFORM_ICON[l.platform] || '🔗'}</span>`}
-      <span class="ref-link-text">${esc(l.title || l.url)}</span>
-      <button class="em-gallery-del" data-del-link="${idx}">×</button>
-    </div>`).join('');
+  box.innerHTML = links.map((l, idx) => {
+    const chip = `
+      <div class="ref-link-chip">
+        ${l.thumb ? `<img class="ref-link-thumb" src="${esc(l.thumb)}" alt="">` : `<span class="ref-link-platform">${PLATFORM_ICON[l.platform] || '🔗'}</span>`}
+        <span class="ref-link-text">${esc(l.title || l.url)}</span>
+        <button class="em-gallery-del" data-del-link="${idx}">×</button>
+      </div>`;
+    const embed = l.platform === 'instagram' ? `
+      <blockquote class="instagram-media" data-instgrm-permalink="${esc(l.url)}" data-instgrm-version="14"
+        style="background:#fff;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,.5),0 1px 10px 0 rgba(0,0,0,.15);margin:4px 0 8px;max-width:100%;min-width:326px;padding:0;width:calc(100% - 2px);">
+        <a href="${esc(l.url)}" target="_blank" rel="noopener">Ver en Instagram</a>
+      </blockquote>` : '';
+    return chip + embed;
+  }).join('');
   box.querySelectorAll('[data-del-link]').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = parseInt(btn.dataset.delLink);
@@ -2769,6 +2802,7 @@ function renderRefmLinks() {
       saveRefs(); renderRefmLinks(); renderRefs();
     });
   });
+  if (links.some(l => l.platform === 'instagram')) loadInstagramEmbed();
 }
 
 async function addRefLink() {
