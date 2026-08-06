@@ -296,6 +296,10 @@ body:not(.showing-notas) #board-notas { display: none !important; }
   justify-content: flex-end;
   border: none !important;
 }
+/* Ref cards más chicas que las de tareas — tablero de Referencias más denso */
+.ref-card.has-cover { min-height: 130px; }
+.ref-card.has-cover .card-ref-title { font-size: 13px; }
+.ref-card.has-cover .card-ref-desc  { font-size: 11px; -webkit-line-clamp: 1; margin-bottom: 3px; }
 /* Glass panel con fade hacia arriba */
 .card-glass {
   position: relative; z-index: 2; padding: 28px 14px 14px;
@@ -877,8 +881,8 @@ body.public-mode .card { cursor: default; }
 }
 .card-ref-cover-content {
   position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
-  padding: 12px 14px 42px;
-  display: flex; flex-direction: column; gap: 5px;
+  padding: 10px 12px 30px;
+  display: flex; flex-direction: column; gap: 4px;
 }
 .card-ref-footer {
   display: flex; align-items: center; justify-content: space-between;
@@ -936,6 +940,7 @@ body.public-mode .card { cursor: default; }
   }
 
   .card.has-cover { min-height: 180px; }
+  .ref-card.has-cover { min-height: 120px; }
 
   .rp-hero { min-height: 40vh; max-height: 55vh; }
   .rp-body { padding: 0 0 60px; }
@@ -1034,17 +1039,13 @@ body.public-mode .card { cursor: default; }
   content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07);
 }
 
-/* Storyboard */
+/* Storyboard — grid que wrappea (no scroll horizontal, así entra completo en una captura/export) */
 .rp-storyboard-strip {
-  display: flex; gap: 12px; overflow-x: auto;
-  padding-bottom: 8px; scroll-snap-type: x mandatory;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
 }
-.rp-storyboard-strip::-webkit-scrollbar { height: 3px; }
-.rp-storyboard-strip::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 2px; }
-.rp-storyboard-strip::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 2px; }
 .rp-sb-frame {
-  flex-shrink: 0; width: 220px; position: relative;
-  scroll-snap-align: start; border-radius: 10px; overflow: hidden;
+  position: relative; border-radius: 10px; overflow: hidden;
   border: 1px solid rgba(255,255,255,0.08);
 }
 .rp-sb-frame img { width: 100%; height: 140px; object-fit: cover; display: block; }
@@ -1808,11 +1809,24 @@ function save() {
   try { localStorage.setItem('kb_backup', JSON.stringify({ ts: Date.now(), data: tasks })); } catch(e) {}
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    TASKS_DOC.set({ data: tasks })
-      .then(() => {
+    // Transacción en vez de .set() ciego: si esta pestaña quedó desincronizada
+    // (ej. la compu se durmió) y mientras tanto se agregó algo desde otra
+    // sesión o Telegram, esa tarea NO estaba en `tasks` local — sin esto,
+    // guardar la borraría. Acá se recupera antes de escribir.
+    db.runTransaction(async tx => {
+      const snap = await tx.get(TASKS_DOC);
+      const serverTasks = snap.exists ? (snap.data().data || []) : [];
+      const localIds = new Set(tasks.map(t => t.id));
+      const missing = serverTasks.filter(t => !localIds.has(t.id));
+      const merged = missing.length ? [...tasks, ...missing] : tasks;
+      tx.set(TASKS_DOC, { data: merged });
+      return merged;
+    })
+      .then(merged => {
         if (gen === writeGen) {
           pendingWrite = false;
           try { localStorage.removeItem('kb_backup'); } catch(e) {}
+          if (merged.length !== tasks.length) { tasks = merged; render(); }
         }
       })
       .catch(() => { if (gen === writeGen) pendingWrite = false; });
@@ -3734,10 +3748,8 @@ function exportRefBrief(id) {
     margin-bottom: 20px; padding-bottom: 10px;
     border-bottom: 1px solid rgba(255,255,255,0.07);
   }
-  .strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; }
-  .strip::-webkit-scrollbar { height: 3px; }
-  .strip::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius:2px; }
-  .frame { flex-shrink: 0; width: 240px; position: relative; }
+  .strip { display: flex; flex-wrap: wrap; gap: 12px; }
+  .frame { flex: 0 1 240px; position: relative; }
   .frame-num {
     position: absolute; bottom: 6px; left: 8px;
     font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5);
@@ -3754,7 +3766,6 @@ function exportRefBrief(id) {
   li.done { text-decoration: line-through; opacity: 0.4; }
   @media print {
     body { padding: 20px; }
-    .strip { flex-wrap: wrap; }
   }
 </style>
 </head>

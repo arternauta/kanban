@@ -13,7 +13,7 @@ const TASKS_REF = db.collection('kanban').doc('tasks');
 const NOTAS_REF = db.collection('kanban').doc('notas');
 const REFS_REF  = db.collection('kanban').doc('refs');
 
-const SOCIAL_RE = /(https?:\/\/(?:www\.)?(?:instagram\.com\/(?:p|reel)\/[A-Za-z0-9_-]+|tiktok\.com\/@[^/]+\/video\/\d+|youtube\.com\/(?:watch\?v=|shorts\/)[A-Za-z0-9_-]+|youtu\.be\/[A-Za-z0-9_-]+)[^\s]*)/i;
+const SOCIAL_RE = /(https?:\/\/(?:www\.)?(?:instagram\.com\/(?:p|reel|reels)\/[A-Za-z0-9_-]+|tiktok\.com\/@[^/]+\/video\/\d+|(?:vm\.)?tiktok\.com\/(?:t\/)?[A-Za-z0-9]+|youtube\.com\/(?:watch\?v=|shorts\/)[A-Za-z0-9_-]+|youtu\.be\/[A-Za-z0-9_-]+)[^\s]*)/i;
 
 function detectPlatform(url) {
   if (/instagram\.com/i.test(url)) return 'instagram';
@@ -40,7 +40,17 @@ exports.flush = onRequest({ cors: true }, async (req, res) => {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const data = body?.data;
     if (!Array.isArray(data)) { res.status(400).end(); return; }
-    await TASKS_REF.set({ data });
+    // Igual que save() del cliente: si el payload que llega al cerrar la
+    // pestaña/laptop viene de una copia desincronizada, no debe borrar tareas
+    // que ya existen en el servidor y no están en ese payload — se recuperan.
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(TASKS_REF);
+      const serverTasks = snap.exists ? (snap.data().data || []) : [];
+      const localIds = new Set(data.map(t => t.id));
+      const missing = serverTasks.filter(t => !localIds.has(t.id));
+      const merged = missing.length ? [...data, ...missing] : data;
+      tx.set(TASKS_REF, { data: merged });
+    });
     res.status(200).json({ ok: true });
   } catch (e) {
     console.error(e);
