@@ -4079,7 +4079,18 @@ document.getElementById('notam-delete').addEventListener('click', () => {
   renderNotas();
 });
 document.getElementById('notam-obsidian').addEventListener('click', () => {
-  alert('Integración con Obsidian próximamente.');
+  const nota = notas.find(n => n.id === notaEditingId);
+  if (!nota) return;
+  const dateStr = nota.createdAt
+    ? new Date(nota.createdAt).toLocaleDateString('es-AR', { year:'numeric', month:'2-digit', day:'2-digit' }).replace(/\//g, '-')
+    : new Date().toLocaleDateString('es-AR', { year:'numeric', month:'2-digit', day:'2-digit' }).replace(/\//g, '-');
+  const filename = nota.title ? nota.title.slice(0, 60) : dateStr;
+  const mdContent = [
+    nota.title ? `# ${nota.title}\n` : `# Página matutina ${dateStr}\n`,
+    nota.text  || ''
+  ].join('\n');
+  const uri = `obsidian://new?vault=${encodeURIComponent('CerebroV2')}&file=${encodeURIComponent('04_ARCHIVO/PAGINAS MATUTINAS/' + filename)}&content=${encodeURIComponent(mdContent)}`;
+  window.open(uri);
 });
 document.getElementById('nota-add-btn').addEventListener('click', () => openNota(null));
 
