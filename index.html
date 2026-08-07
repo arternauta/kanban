@@ -1546,6 +1546,18 @@ body.public-refs #col-notas-semillas { display: none !important; }
 
 <div class="board-refs" id="board-refs">
 
+  <div class="col col-collapsible collapsed" data-ref-col="inspiracion" id="col-inspiracion">
+    <div class="col-head" style="cursor:pointer" data-toggle-col="inspiracion">
+      <div class="col-dot" style="background:#9C4F96"></div>
+      <div class="col-name">💡 inspiración</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-ref-count="inspiracion">0</div>
+        <span class="col-collapse-icon">›</span>
+      </div>
+    </div>
+    <div class="cards" id="refs-inspiracion"></div>
+  </div>
+
   <div class="col" data-ref-col="inbox">
     <div class="col-head">
       <div class="col-dot" style="background:#534AB7"></div>
@@ -3165,8 +3177,8 @@ TASKS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
 const REFS_DOC     = db.collection('kanban').doc('refs');
 const NOTAS_DOC    = db.collection('kanban').doc('notas');
 const SEMILLAS_DOC = db.collection('kanban').doc('semillas');
-const REF_COLS = ['inbox','ideas','para-producir','finalizadas'];
-const REF_COL_LABELS = { inbox:'inbox', ideas:'análisis de equipo', 'para-producir':'para producir', finalizadas:'finalizadas' };
+const REF_COLS = ['inspiracion','inbox','ideas','para-producir','finalizadas'];
+const REF_COL_LABELS = { inspiracion:'inspiración', inbox:'inbox', ideas:'análisis de equipo', 'para-producir':'para producir', finalizadas:'finalizadas' };
 const REF_BRAND_CLASS = { byd:'byd', bmw:'bmw', mini:'mini', motorrad:'motorrad', personal:'personal' };
 const REF_BRAND_LABEL = { '':'sin marca', byd:'BYD', bmw:'BMW', mini:'MINI', motorrad:'MOTORRAD', personal:'Personal' };
 const REF_FORMAT_LABEL = { reel:'Reel', story:'Story', tiktok:'TikTok', post:'Post', carrusel:'Carrusel' };
@@ -3188,6 +3200,8 @@ function migrateRefItem(item) {
   if (!REF_COLS.includes(item.col)) { item.col = 'ideas'; changed = true; }
   if (!item.status) { item.status = 'pendiente'; changed = true; }
   if (item.brand === undefined) { item.brand = ''; changed = true; }
+  // Rechazadas vivían mezcladas en "finalizadas" — ahora tienen su propia columna.
+  if (item.status === 'rechazada' && item.col === 'finalizadas') { item.col = 'inspiracion'; changed = true; }
   // "Fotos y videos" se fusionó con "moodboard" — mover lo viejo que haya quedado en item.media.
   if (item.media && item.media.some(m => m.type !== 'link')) {
     if (!item.moodboard) item.moodboard = [];
@@ -3392,7 +3406,7 @@ function saveRefText() {
     item.status = document.getElementById('refm-status').value || 'pendiente';
     item.format = document.getElementById('refm-format').value;
     item.script = document.getElementById('refm-script').value.trim();
-    if (item.status === 'rechazada') item.col = 'finalizadas';
+    if (item.status === 'rechazada') item.col = 'inspiracion';
     if (item.status === 'aprobada')  item.col = 'para-producir';
     saveRefs();
   }
