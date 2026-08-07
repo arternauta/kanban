@@ -1334,6 +1334,11 @@ body.public-refs #col-notas-semillas { display: none !important; }
     <input type="text" id="refm-title-input" placeholder="título...">
     <textarea id="refm-text" rows="3" placeholder="descripción..."></textarea>
 
+    <div class="em-img-upload">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">portada</div>
+      <div id="refm-cover"></div>
+    </div>
+
     <div class="edit-modal-row">
       <select id="refm-brand" style="flex:1">
         <option value="">— marca —</option>
@@ -3363,6 +3368,7 @@ function openRef(existingId, col) {
   document.getElementById('refm-script').value = item.script || '';
   document.getElementById('refm-link-input').value = '';
   document.getElementById('refm-delete').style.display = existingId ? 'inline-flex' : 'none';
+  renderRefmCover();
   renderRefmLinks();
   renderRefmStoryboard();
   renderRefmMoodboard();
@@ -3541,6 +3547,37 @@ refmSbLabel.addEventListener('drop', async e => {
   saveRefs(); renderRefmStoryboard(); renderRefs();
 });
 
+// ── Portada dentro del modal (independiente del moodboard) ───────
+function renderRefmCover() {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const box = document.getElementById('refm-cover');
+  if (item.cover) {
+    box.innerHTML = `<div class="em-gallery-img" style="cursor:default">
+      <img src="${esc(item.cover)}" alt="">
+      <button class="em-gallery-del" data-clear-cover="1">×</button>
+    </div>`;
+    box.querySelector('[data-clear-cover]').addEventListener('click', () => {
+      item.cover = null;
+      saveRefs(); renderRefmCover(); renderRefmMoodboard(); renderRefs();
+    });
+  } else {
+    box.innerHTML = `<label class="em-img-upload-label" id="refm-cover-label">
+      + elegir portada
+      <input type="file" id="refm-cover-input" accept="image/*">
+    </label>`;
+    document.getElementById('refm-cover-input').addEventListener('change', async e => {
+      const file = e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      const url = await uploadImage(file);
+      if (!url) return;
+      item.cover = url;
+      saveRefs(); renderRefmCover(); renderRefmMoodboard(); renderRefs();
+    });
+  }
+}
+
 // ── Moodboard dentro del modal (fotos, videos y capturas pegadas) ─
 function renderRefmMoodboard() {
   const item = refs.find(r => r.id === refEditingId);
@@ -3562,14 +3599,14 @@ function renderRefmMoodboard() {
       const target = imgs[idx];
       if (target && item.cover === target.url) item.cover = null;
       item.moodboard = (item.moodboard || []).filter((_, i) => i !== idx);
-      saveRefs(); renderRefmMoodboard(); renderRefs();
+      saveRefs(); renderRefmMoodboard(); renderRefmCover(); renderRefs();
     });
   });
   box.querySelectorAll('[data-set-cover]').forEach(el => {
     el.addEventListener('click', () => {
       const idx = parseInt(el.dataset.setCover);
       item.cover = imgs[idx]?.url || null;
-      saveRefs(); renderRefmMoodboard(); renderRefs();
+      saveRefs(); renderRefmMoodboard(); renderRefmCover(); renderRefs();
     });
   });
 }
