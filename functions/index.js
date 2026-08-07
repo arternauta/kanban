@@ -188,7 +188,7 @@ exports.telegram = onRequest({ secrets: [TELEGRAM_TOKEN] }, async (req, res) => 
         const refItems = snap.exists ? (snap.data().data || []) : [];
         refItems.unshift({
           id:        uid(),
-          col:       'ideas',
+          col:       'inbox',
           title:     '',
           text:      '',
           media:     [{ type: 'link', url, platform, title: null, thumb: null }],
@@ -198,7 +198,7 @@ exports.telegram = onRequest({ secrets: [TELEGRAM_TOKEN] }, async (req, res) => 
         tx.set(REFS_REF, { data: refItems });
       });
       const platformLabel = { instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube' }[platform] || platform;
-      await tgSend(token, chatId, `🔖 Referencia guardada en <i>Ideas</i>.\n<b>${platformLabel}</b> · ${url}`);
+      await tgSend(token, chatId, `🔖 Referencia guardada en <i>Inbox</i>.\n<b>${platformLabel}</b> · ${url}`);
     } else if (isNota) {
       await db.runTransaction(async tx => {
         const snap  = await tx.get(NOTAS_REF);

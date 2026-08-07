@@ -1070,6 +1070,7 @@ body.public-refs #col-notas-semillas { display: none !important; }
 }
 .rp-mb-img { border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
 .rp-mb-img img { width: 100%; height: 180px; object-fit: cover; display: block; transition: transform 0.3s ease; }
+.rp-mb-img video { width: 100%; height: 180px; object-fit: cover; display: block; background: #000; }
 .rp-mb-img:hover img { transform: scale(1.04); }
 
 /* Checklist */
@@ -1330,15 +1331,6 @@ body.public-refs #col-notas-semillas { display: none !important; }
     <div id="refm-links" class="refm-links"></div>
 
     <div class="em-img-upload">
-      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">fotos y videos</div>
-      <div id="refm-gallery" class="em-gallery"></div>
-      <label class="em-img-upload-label" id="refm-upload-label">
-        + agregar o pegar (⌘V) una imagen/video
-        <input type="file" id="refm-media-input" accept="image/*,video/*" multiple>
-      </label>
-    </div>
-
-    <div class="em-img-upload">
       <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">storyboard</div>
       <div id="refm-storyboard" class="em-gallery"></div>
       <label class="em-img-upload-label" id="refm-storyboard-label">
@@ -1351,8 +1343,8 @@ body.public-refs #col-notas-semillas { display: none !important; }
       <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">moodboard</div>
       <div id="refm-moodboard" class="em-gallery"></div>
       <label class="em-img-upload-label" id="refm-moodboard-label">
-        + imágenes de referencia visual
-        <input type="file" id="refm-moodboard-input" accept="image/*" multiple>
+        + agregar o pegar (⌘V) una imagen/video
+        <input type="file" id="refm-moodboard-input" accept="image/*,video/*" multiple>
       </label>
     </div>
 
@@ -1510,10 +1502,22 @@ body.public-refs #col-notas-semillas { display: none !important; }
 
 <div class="board-refs" id="board-refs">
 
-  <div class="col" data-ref-col="ideas">
+  <div class="col" data-ref-col="inbox">
     <div class="col-head">
       <div class="col-dot" style="background:#534AB7"></div>
-      <div class="col-name">💡 ideas</div>
+      <div class="col-name">📥 inbox</div>
+      <div class="col-actions-row">
+        <div class="col-count" data-ref-count="inbox">0</div>
+        <button class="col-add-btn" data-ref-target="inbox">+</button>
+      </div>
+    </div>
+    <div class="cards" id="refs-inbox"></div>
+  </div>
+
+  <div class="col" data-ref-col="ideas">
+    <div class="col-head">
+      <div class="col-dot" style="background:#185FA5"></div>
+      <div class="col-name">🔍 análisis de equipo</div>
       <div class="col-actions-row">
         <div class="col-count" data-ref-count="ideas">0</div>
         <button class="col-add-btn" data-ref-target="ideas">+</button>
@@ -3117,8 +3121,8 @@ TASKS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
 const REFS_DOC     = db.collection('kanban').doc('refs');
 const NOTAS_DOC    = db.collection('kanban').doc('notas');
 const SEMILLAS_DOC = db.collection('kanban').doc('semillas');
-const REF_COLS = ['ideas','para-producir','finalizadas'];
-const REF_COL_LABELS = { ideas:'ideas', 'para-producir':'para producir', finalizadas:'finalizadas' };
+const REF_COLS = ['inbox','ideas','para-producir','finalizadas'];
+const REF_COL_LABELS = { inbox:'inbox', ideas:'análisis de equipo', 'para-producir':'para producir', finalizadas:'finalizadas' };
 const REF_BRAND_CLASS = { byd:'byd', bmw:'bmw', mini:'mini', motorrad:'motorrad', personal:'personal' };
 const REF_BRAND_LABEL = { '':'sin marca', byd:'BYD', bmw:'BMW', mini:'MINI', motorrad:'MOTORRAD', personal:'Personal' };
 const OLD_BRAND_COLS = ['byd','bmw','mini','motorrad'];
@@ -3127,17 +3131,26 @@ let refStatusFilter = 'all';
 let refBrandFilter  = 'all';
 
 function migrateRefItem(item) {
+  let changed = false;
   if (OLD_BRAND_COLS.includes(item.col)) {
     item.brand = item.col;
     item.col   = 'ideas';
+    changed = true;
   }
-  if (item.col === 'hechas')    item.col = 'finalizadas';
-  if (item.col === 'estado')    item.col = 'para-producir';
-  if (item.col === 'por-usar')  item.col = 'ideas';
-  if (!REF_COLS.includes(item.col)) item.col = 'ideas';
-  if (!item.status) item.status = 'pendiente';
-  if (item.brand === undefined) item.brand = '';
-  return item;
+  if (item.col === 'hechas')    { item.col = 'finalizadas';   changed = true; }
+  if (item.col === 'estado')    { item.col = 'para-producir'; changed = true; }
+  if (item.col === 'por-usar')  { item.col = 'ideas';         changed = true; }
+  if (!REF_COLS.includes(item.col)) { item.col = 'ideas'; changed = true; }
+  if (!item.status) { item.status = 'pendiente'; changed = true; }
+  if (item.brand === undefined) { item.brand = ''; changed = true; }
+  // "Fotos y videos" se fusionó con "moodboard" — mover lo viejo que haya quedado en item.media.
+  if (item.media && item.media.some(m => m.type !== 'link')) {
+    if (!item.moodboard) item.moodboard = [];
+    item.moodboard.push(...item.media.filter(m => m.type !== 'link'));
+    item.media = item.media.filter(m => m.type === 'link');
+    changed = true;
+  }
+  return changed;
 }
 const PLATFORM_ICON = { instagram:'📸', tiktok:'🎵', youtube:'▶️', other:'🔗' };
 
@@ -3221,10 +3234,9 @@ async function fetchLinkPreview(url) {
 
 function refCard(item) {
   const cls = REF_BRAND_CLASS[item.brand] || '';
-  const media = item.media || [];
-  const images = media.filter(m => m.type === 'image');
-  const links  = media.filter(m => m.type === 'link');
-  const cover  = links.find(l => l.thumb)?.thumb || images[0]?.url;
+  const links = (item.media || []).filter(m => m.type === 'link');
+  const moodboardImg = (item.moodboard || []).find(m => m.type !== 'video');
+  const cover  = links.find(l => l.thumb)?.thumb || moodboardImg?.url;
   const firstLink = links[0];
   const statusLabel = { pendiente:'pendiente', aprobada:'aprobada', rechazada:'rechazada' }[item.status] || '';
 
@@ -3271,7 +3283,8 @@ const _igObserver = new IntersectionObserver(entries => {
 }, { rootMargin: '200px' });
 
 function renderRefs() {
-  refs.forEach(migrateRefItem);
+  const anyMigrated = refs.map(migrateRefItem).some(Boolean);
+  if (anyMigrated) saveRefs();
   REF_COLS.forEach(col => {
     let colItems = refs.filter(r => r.col === col);
     if (refStatusFilter !== 'all') colItems = colItems.filter(r => r.status === refStatusFilter);
@@ -3307,7 +3320,6 @@ function openRef(existingId, col) {
   document.getElementById('refm-link-input').value = '';
   document.getElementById('refm-delete').style.display = existingId ? 'inline-flex' : 'none';
   renderRefmLinks();
-  renderRefmGallery();
   renderRefmStoryboard();
   renderRefmMoodboard();
   renderRefmChecklist();
@@ -3337,7 +3349,11 @@ function saveRefText() {
 
 function cancelRefModal() {
   const item = refs.find(r => r.id === refEditingId);
-  if (item && !item.title && !item.text && !(item.media && item.media.length)) {
+  const isEmpty = item && !item.title && !item.text
+    && !(item.media && item.media.length)
+    && !(item.moodboard && item.moodboard.length)
+    && !(item.storyboard && item.storyboard.length);
+  if (isEmpty) {
     refs = refs.filter(r => r.id !== item.id);
     saveRefs();
   }
@@ -3421,67 +3437,6 @@ document.getElementById('refm-link-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); addRefLink(); }
 });
 
-// ── Fotos y videos dentro del modal (reusa uploadImage) ──────────
-
-function renderRefmGallery() {
-  const item = refs.find(r => r.id === refEditingId);
-  if (!item) return;
-  const media = (item.media || []).filter(m => m.type !== 'link');
-  const gallery = document.getElementById('refm-gallery');
-  gallery.innerHTML = media.map((m, idx) => m.type === 'video'
-    ? `<div class="em-gallery-video"><video src="${esc(m.url)}" muted></video><button class="em-gallery-del" data-del-media="${idx}">×</button></div>`
-    : `<div class="em-gallery-img"><img src="${esc(m.url)}" alt=""><button class="em-gallery-del" data-del-media="${idx}">×</button></div>`
-  ).join('');
-  gallery.querySelectorAll('[data-del-media]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.delMedia);
-      const target = media[idx];
-      item.media = item.media.filter(m => m !== target);
-      saveRefs(); renderRefmGallery(); renderRefs();
-    });
-  });
-}
-
-async function addRefMediaFile(item, file) {
-  const url = await uploadImage(file);
-  if (!url) return;
-  if (!item.media) item.media = [];
-  item.media.push({ type: file.type.startsWith('video/') ? 'video' : 'image', url });
-  saveRefs(); renderRefmGallery(); renderRefs();
-}
-
-const refmUploadLabel = document.getElementById('refm-upload-label');
-refmUploadLabel.addEventListener('dragover', e => { e.preventDefault(); refmUploadLabel.classList.add('drag-over'); });
-refmUploadLabel.addEventListener('dragleave', () => refmUploadLabel.classList.remove('drag-over'));
-refmUploadLabel.addEventListener('drop', async e => {
-  e.preventDefault();
-  refmUploadLabel.classList.remove('drag-over');
-  const item = refs.find(r => r.id === refEditingId);
-  if (!item) return;
-  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
-  for (const file of files) await addRefMediaFile(item, file);
-});
-document.getElementById('refm-media-input').addEventListener('change', async e => {
-  const item = refs.find(r => r.id === refEditingId);
-  if (!item) return;
-  const files = Array.from(e.target.files);
-  for (const file of files) await addRefMediaFile(item, file);
-  e.target.value = '';
-});
-
-// Pegar una captura de pantalla (⌘V) mientras el modal está abierto
-document.addEventListener('paste', async e => {
-  if (!document.getElementById('ref-modal').classList.contains('open')) return;
-  const item = refs.find(r => r.id === refEditingId);
-  if (!item) return;
-  const clipItems = Array.from(e.clipboardData?.items || []);
-  const imgItem = clipItems.find(it => it.type.startsWith('image/'));
-  if (!imgItem) return;
-  e.preventDefault();
-  const file = imgItem.getAsFile();
-  if (file) await addRefMediaFile(item, file);
-});
-
 // ── Storyboard dentro del modal ─────────────────────────────────
 function renderRefmStoryboard() {
   const item = refs.find(r => r.id === refEditingId);
@@ -3527,14 +3482,15 @@ refmSbLabel.addEventListener('drop', async e => {
   saveRefs(); renderRefmStoryboard(); renderRefs();
 });
 
-// ── Moodboard dentro del modal ───────────────────────────────────
+// ── Moodboard dentro del modal (fotos, videos y capturas pegadas) ─
 function renderRefmMoodboard() {
   const item = refs.find(r => r.id === refEditingId);
   if (!item) return;
   const imgs = item.moodboard || [];
   const box = document.getElementById('refm-moodboard');
-  box.innerHTML = imgs.map((f, idx) =>
-    `<div class="em-gallery-img"><img src="${esc(f.url)}" alt=""><button class="em-gallery-del" data-del-mb="${idx}">×</button></div>`
+  box.innerHTML = imgs.map((f, idx) => f.type === 'video'
+    ? `<div class="em-gallery-video"><video src="${esc(f.url)}" muted></video><button class="em-gallery-del" data-del-mb="${idx}">×</button></div>`
+    : `<div class="em-gallery-img"><img src="${esc(f.url)}" alt=""><button class="em-gallery-del" data-del-mb="${idx}">×</button></div>`
   ).join('');
   box.querySelectorAll('[data-del-mb]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -3544,15 +3500,18 @@ function renderRefmMoodboard() {
   });
 }
 
+async function addRefMoodboardFile(item, file) {
+  const url = await uploadImage(file);
+  if (!url) return;
+  if (!item.moodboard) item.moodboard = [];
+  item.moodboard.push({ type: file.type.startsWith('video/') ? 'video' : 'image', url });
+  saveRefs(); renderRefmMoodboard(); renderRefs();
+}
+
 document.getElementById('refm-moodboard-input').addEventListener('change', async e => {
   const item = refs.find(r => r.id === refEditingId);
   if (!item) return;
-  if (!item.moodboard) item.moodboard = [];
-  for (const file of Array.from(e.target.files)) {
-    const url = await uploadImage(file);
-    if (url) item.moodboard.push({ url });
-  }
-  saveRefs(); renderRefmMoodboard(); renderRefs();
+  for (const file of Array.from(e.target.files)) await addRefMoodboardFile(item, file);
   e.target.value = '';
 });
 
@@ -3564,12 +3523,21 @@ refmMbLabel.addEventListener('drop', async e => {
   refmMbLabel.classList.remove('drag-over');
   const item = refs.find(r => r.id === refEditingId);
   if (!item) return;
-  if (!item.moodboard) item.moodboard = [];
-  for (const file of Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))) {
-    const url = await uploadImage(file);
-    if (url) item.moodboard.push({ url });
-  }
-  saveRefs(); renderRefmMoodboard(); renderRefs();
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+  for (const file of files) await addRefMoodboardFile(item, file);
+});
+
+// Pegar una captura de pantalla (⌘V) mientras el modal está abierto
+document.addEventListener('paste', async e => {
+  if (!document.getElementById('ref-modal').classList.contains('open')) return;
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const clipItems = Array.from(e.clipboardData?.items || []);
+  const imgItem = clipItems.find(it => it.type.startsWith('image/'));
+  if (!imgItem) return;
+  e.preventDefault();
+  const file = imgItem.getAsFile();
+  if (file) await addRefMoodboardFile(item, file);
 });
 
 // ── Checklist dentro del modal ───────────────────────────────────
@@ -3652,13 +3620,12 @@ function openRefPreview(id) {
   const item = refs.find(r => r.id === id);
   if (!item) return;
 
-  const links  = (item.media || []).filter(m => m.type === 'link');
-  const images = (item.media || []).filter(m => m.type === 'image');
-  const cover  = links.find(l => l.thumb)?.thumb || images[0]?.url;
-  const firstLink = links[0];
+  const links = (item.media || []).filter(m => m.type === 'link');
   const cl = item.refChecklist || [];
   const sb = item.storyboard  || [];
   const mb = item.moodboard   || [];
+  const cover  = links.find(l => l.thumb)?.thumb || mb.find(m => m.type !== 'video')?.url;
+  const firstLink = links[0];
 
   document.getElementById('rp-topbar-title').textContent = item.title || item.text || 'referencia';
 
@@ -3694,7 +3661,10 @@ function openRefPreview(id) {
     <div class="rp-section">
       <div class="rp-section-label">moodboard <span>${mb.length} ${mb.length === 1 ? 'imagen' : 'imágenes'}</span></div>
       <div class="rp-moodboard-grid">
-        ${mb.map(f => `<div class="rp-mb-img"><img src="${esc(f.url)}" alt="" loading="lazy"></div>`).join('')}
+        ${mb.map(f => f.type === 'video'
+          ? `<div class="rp-mb-img"><video src="${esc(f.url)}" muted controls></video></div>`
+          : `<div class="rp-mb-img"><img src="${esc(f.url)}" alt="" loading="lazy"></div>`
+        ).join('')}
       </div>
     </div>` : ''}
 
@@ -3752,13 +3722,12 @@ function exportRefBrief(id) {
   const item = refs.find(r => r.id === id);
   if (!item) return;
 
-  const links  = (item.media || []).filter(m => m.type === 'link');
-  const images = (item.media || []).filter(m => m.type === 'image');
-  const cover  = links.find(l => l.thumb)?.thumb || images[0]?.url;
-  const firstLink = links[0];
+  const links = (item.media || []).filter(m => m.type === 'link');
   const sb = item.storyboard  || [];
   const mb = item.moodboard   || [];
   const cl = item.refChecklist || [];
+  const cover  = links.find(l => l.thumb)?.thumb || mb.find(m => m.type !== 'video')?.url;
+  const firstLink = links[0];
 
   const imgTag = (url, style = '') =>
     `<img src="${url}" style="display:block;${style}" crossorigin="anonymous">`;
@@ -3779,7 +3748,9 @@ function exportRefBrief(id) {
     <section>
       <h2>MOODBOARD</h2>
       <div class="grid">
-        ${mb.map(f => `<div class="grid-item">${imgTag(f.url, 'width:100%;height:200px;object-fit:cover;border-radius:8px;')}</div>`).join('')}
+        ${mb.map(f => `<div class="grid-item">${f.type === 'video'
+          ? `<video src="${f.url}" style="display:block;width:100%;height:200px;object-fit:cover;border-radius:8px;" muted controls></video>`
+          : imgTag(f.url, 'width:100%;height:200px;object-fit:cover;border-radius:8px;')}</div>`).join('')}
       </div>
     </section>` : '';
 
@@ -4416,14 +4387,14 @@ function semillaToIdeas(id) {
   const s = semillas.find(x => x.id === id);
   if (!s) return;
   const newRef = {
-    id: uid(), col: 'ideas',
+    id: uid(), col: 'inbox',
     title: s.title || '',
     text:  s.text,
     brand: s.brand || 'personal',
     status: 'pendiente',
     createdAt: new Date().toISOString()
   };
-  if (s.images && s.images.length) newRef.media = s.images.map(url => ({ type:'image', url }));
+  if (s.images && s.images.length) newRef.moodboard = s.images.map(url => ({ type:'image', url }));
   refs.unshift(newRef);
   REFS_DOC.set({ data: refs });
   semillas = semillas.filter(x => x.id !== id);
