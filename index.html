@@ -356,6 +356,14 @@ body:not(.showing-notas) #board-notas { display: none !important; }
 .em-img-upload-label:hover, .em-img-upload-label.drag-over { border-color: rgba(255,255,255,0.4); color: #e8e6dc; background: rgba(255,255,255,0.07); }
 .em-img-upload input[type="file"] { display: none; }
 
+/* Preview de portada + ajuste de posición (modal de referencia) */
+.refm-cover-preview {
+  position: relative; width: 100%; height: 140px; border-radius: 8px;
+  background-size: cover; border: 1px solid rgba(255,255,255,0.08);
+}
+.refm-cover-preview .em-gallery-del { top: 6px; right: 6px; }
+.refm-cover-pos { display: flex; gap: 6px; margin-top: 6px; }
+
 /* Shotlist (storyboard + texto por toma) */
 .sb-shotlist { display: flex; flex-direction: column; gap: 6px; }
 .sb-shot-row { display: flex; align-items: center; gap: 8px; }
@@ -1944,34 +1952,36 @@ setInterval(() => {
 
 // ── Firebase data layer ────────────────────────────────────────
 
+// Transacción en vez de .set() ciego: si esta pestaña quedó desincronizada
+// (ej. la compu se durmió) y mientras tanto se agregó algo desde otra
+// sesión o Telegram, esa tarea NO estaba en `tasks` local — sin esto,
+// guardar la borraría. Acá se recupera antes de escribir.
+function writeTasksTransactional(gen) {
+  return db.runTransaction(async tx => {
+    const snap = await tx.get(TASKS_DOC);
+    const serverTasks = snap.exists ? (snap.data().data || []) : [];
+    const localIds = new Set(tasks.map(t => t.id));
+    const missing = serverTasks.filter(t => !localIds.has(t.id));
+    const merged = missing.length ? [...tasks, ...missing] : tasks;
+    tx.set(TASKS_DOC, { data: merged });
+    return merged;
+  })
+    .then(merged => {
+      if (gen === writeGen) {
+        pendingWrite = false;
+        try { localStorage.removeItem('kb_backup'); } catch(e) {}
+        if (merged.length !== tasks.length) { tasks = merged; render(); }
+      }
+    })
+    .catch(() => { if (gen === writeGen) pendingWrite = false; });
+}
+
 function save() {
   const gen = ++writeGen;
   pendingWrite = true;
   try { localStorage.setItem('kb_backup', JSON.stringify({ ts: Date.now(), data: tasks })); } catch(e) {}
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    // Transacción en vez de .set() ciego: si esta pestaña quedó desincronizada
-    // (ej. la compu se durmió) y mientras tanto se agregó algo desde otra
-    // sesión o Telegram, esa tarea NO estaba en `tasks` local — sin esto,
-    // guardar la borraría. Acá se recupera antes de escribir.
-    db.runTransaction(async tx => {
-      const snap = await tx.get(TASKS_DOC);
-      const serverTasks = snap.exists ? (snap.data().data || []) : [];
-      const localIds = new Set(tasks.map(t => t.id));
-      const missing = serverTasks.filter(t => !localIds.has(t.id));
-      const merged = missing.length ? [...tasks, ...missing] : tasks;
-      tx.set(TASKS_DOC, { data: merged });
-      return merged;
-    })
-      .then(merged => {
-        if (gen === writeGen) {
-          pendingWrite = false;
-          try { localStorage.removeItem('kb_backup'); } catch(e) {}
-          if (merged.length !== tasks.length) { tasks = merged; render(); }
-        }
-      })
-      .catch(() => { if (gen === writeGen) pendingWrite = false; });
-  }, 100);
+  saveTimer = setTimeout(() => { writeTasksTransactional(gen); }, 100);
 }
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -3117,10 +3127,7 @@ db.collection('kanban').doc('settings').onSnapshot(snap => {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && pendingWrite) {
     clearTimeout(saveTimer);
-    const gen = writeGen;
-    TASKS_DOC.set({ data: tasks })
-      .then(() => { if (gen === writeGen) pendingWrite = false; })
-      .catch(() => {});
+    writeTasksTransactional(writeGen);
   }
   if (document.visibilityState === 'visible' && !pendingWrite) {
     // Fuerza lectura del servidor para evitar sobreescribir datos de otro dispositivo
@@ -3154,11 +3161,8 @@ window.addEventListener('pagehide', () => {
   if (Date.now() - backup.ts > 300000) { localStorage.removeItem('kb_backup'); return; }
   tasks = backup.data;
   render();
-  const gen = ++writeGen;
   pendingWrite = true;
-  TASKS_DOC.set({ data: tasks })
-    .then(() => { if (gen === writeGen) { pendingWrite = false; localStorage.removeItem('kb_backup'); } })
-    .catch(() => { if (gen === writeGen) pendingWrite = false; });
+  writeTasksTransactional(++writeGen);
 })();
 
 // ── Firebase real-time listener ────────────────────────────────
@@ -3222,8 +3226,25 @@ function saveRefs() {
   try { localStorage.setItem('kb_refs_backup', JSON.stringify({ ts: Date.now(), data: refs })); } catch(e) {}
   clearTimeout(refSaveTimer);
   refSaveTimer = setTimeout(() => {
-    REFS_DOC.set({ data: refs })
-      .then(() => { if (gen === refWriteGen) { refPendingWrite = false; try { localStorage.removeItem('kb_refs_backup'); } catch(e) {} } })
+    // Transacción en vez de .set() ciego — mismo fix que save() de tareas:
+    // si esta pestaña quedó desincronizada, recupera antes de escribir
+    // cualquier referencia que exista en el servidor y no en la copia local.
+    db.runTransaction(async tx => {
+      const snap = await tx.get(REFS_DOC);
+      const serverRefs = snap.exists ? (snap.data().data || []) : [];
+      const localIds = new Set(refs.map(r => r.id));
+      const missing = serverRefs.filter(r => !localIds.has(r.id));
+      const merged = missing.length ? [...refs, ...missing] : refs;
+      tx.set(REFS_DOC, { data: merged });
+      return merged;
+    })
+      .then(merged => {
+        if (gen === refWriteGen) {
+          refPendingWrite = false;
+          try { localStorage.removeItem('kb_refs_backup'); } catch(e) {}
+          if (merged.length !== refs.length) { refs = merged; renderRefs(); }
+        }
+      })
       .catch(() => { if (gen === refWriteGen) refPendingWrite = false; });
   }, 100);
 }
@@ -3325,7 +3346,7 @@ function refCard(item) {
          data-ref-id="${esc(item.id)}"
          data-ref-edit="${esc(item.id)}"
          draggable="true"
-         ${cover ? `style="background-image:url('${esc(cover)}')"` : ''}>
+         ${cover ? `style="background-image:url('${esc(cover)}');background-position:${COVER_POS_CSS[item.coverPosition] || 'center'}"` : ''}>
       ${innerHtml}
       <div class="card-btns">
         <button class="cbtn" data-ref-edit-btn="${esc(item.id)}" title="editar">✏</button>
@@ -3562,18 +3583,33 @@ refmSbLabel.addEventListener('drop', async e => {
 });
 
 // ── Portada dentro del modal (independiente del moodboard) ───────
+const COVER_POS_CSS = { top: 'center top', center: 'center center', bottom: 'center bottom' };
+
 function renderRefmCover() {
   const item = refs.find(r => r.id === refEditingId);
   if (!item) return;
   const box = document.getElementById('refm-cover');
   if (item.cover) {
-    box.innerHTML = `<div class="em-gallery-img" style="cursor:default">
-      <img src="${esc(item.cover)}" alt="">
-      <button class="em-gallery-del" data-clear-cover="1">×</button>
-    </div>`;
+    const pos = item.coverPosition || 'center';
+    box.innerHTML = `
+      <div class="refm-cover-preview" style="background-image:url('${esc(item.cover)}');background-position:${COVER_POS_CSS[pos]}">
+        <button class="em-gallery-del" data-clear-cover="1">×</button>
+      </div>
+      <div class="refm-cover-pos">
+        <button class="ref-brand-btn${pos === 'top' ? ' on' : ''}" data-cover-pos="top">arriba</button>
+        <button class="ref-brand-btn${pos === 'center' ? ' on' : ''}" data-cover-pos="center">centro</button>
+        <button class="ref-brand-btn${pos === 'bottom' ? ' on' : ''}" data-cover-pos="bottom">abajo</button>
+      </div>`;
     box.querySelector('[data-clear-cover]').addEventListener('click', () => {
       item.cover = null;
+      item.coverPosition = null;
       saveRefs(); renderRefmCover(); renderRefmMoodboard(); renderRefs();
+    });
+    box.querySelectorAll('[data-cover-pos]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        item.coverPosition = btn.dataset.coverPos;
+        saveRefs(); renderRefmCover(); renderRefs();
+      });
     });
   } else {
     box.innerHTML = `<label class="em-img-upload-label" id="refm-cover-label">
@@ -3620,6 +3656,7 @@ function renderRefmMoodboard() {
     el.addEventListener('click', () => {
       const idx = parseInt(el.dataset.setCover);
       item.cover = imgs[idx]?.url || null;
+      item.coverPosition = null;
       saveRefs(); renderRefmMoodboard(); renderRefmCover(); renderRefs();
     });
   });
@@ -3757,7 +3794,7 @@ function openRefPreview(id) {
   const body = document.getElementById('rp-body');
   body.innerHTML = `
     ${cover ? `
-    <div class="rp-hero" style="background-image:url('${esc(cover)}')">
+    <div class="rp-hero" style="background-image:url('${esc(cover)}');background-position:${COVER_POS_CSS[item.coverPosition] || 'center'}">
       <div class="rp-hero-content">
         ${item.title ? `<h1 class="rp-title">${esc(item.title)}</h1>` : ''}
         ${item.text  ? `<p  class="rp-desc">${esc(item.text)}</p>`   : ''}
@@ -4005,7 +4042,7 @@ function exportRefBrief(id) {
       ${item.text  ? `<p class="desc">${esc(item.text)}</p>` : ''}
       ${firstLink  ? `<a class="link-chip" href="${esc(firstLink.url)}" target="_blank">🔗 ver referencia</a>` : ''}
     </div>
-    ${cover ? `<div class="hero-cover"><img src="${esc(cover)}" alt="cover"></div>` : ''}
+    ${cover ? `<div class="hero-cover"><img src="${esc(cover)}" alt="cover" style="object-position:${COVER_POS_CSS[item.coverPosition] || 'center'}"></div>` : ''}
   </div>
   ${scriptHTML}
   ${sbHTML}
@@ -4128,11 +4165,7 @@ document.getElementById('tab-refs').addEventListener('click', () => switchTab('r
   if (Date.now() - backup.ts > 300000) { localStorage.removeItem('kb_refs_backup'); return; }
   refs = backup.data;
   renderRefs();
-  const gen = ++refWriteGen;
-  refPendingWrite = true;
-  REFS_DOC.set({ data: refs })
-    .then(() => { if (gen === refWriteGen) { refPendingWrite = false; localStorage.removeItem('kb_refs_backup'); } })
-    .catch(() => { if (gen === refWriteGen) refPendingWrite = false; });
+  saveRefs();
 })();
 
 // ── Backfill thumbnails para links de Instagram sin caché ────────
@@ -4175,8 +4208,23 @@ function saveNotas() {
   notaPendingWrite = true;
   clearTimeout(notaSaveTimer);
   notaSaveTimer = setTimeout(() => {
-    NOTAS_DOC.set({ data: notas })
-      .then(() => { if (gen === notaWriteGen) notaPendingWrite = false; })
+    // Misma protección que save()/saveRefs(): recupera notas que existan en
+    // el servidor (agregadas por Telegram u otra pestaña) y no localmente.
+    db.runTransaction(async tx => {
+      const snap = await tx.get(NOTAS_DOC);
+      const serverNotas = snap.exists ? (snap.data().data || []) : [];
+      const localIds = new Set(notas.map(n => n.id));
+      const missing = serverNotas.filter(n => !localIds.has(n.id));
+      const merged = missing.length ? [...notas, ...missing] : notas;
+      tx.set(NOTAS_DOC, { data: merged });
+      return merged;
+    })
+      .then(merged => {
+        if (gen === notaWriteGen) {
+          notaPendingWrite = false;
+          if (merged.length !== notas.length) { notas = merged; renderNotas(); }
+        }
+      })
       .catch(() => { if (gen === notaWriteGen) notaPendingWrite = false; });
   }, 100);
 }
@@ -4457,8 +4505,21 @@ let semillas = [], semillasPendingWrite = false, semillaEditingId = null;
 
 function saveSemillas() {
   semillasPendingWrite = true;
-  SEMILLAS_DOC.set({ data: semillas })
-    .then(() => { semillasPendingWrite = false; })
+  // Misma protección que save()/saveRefs()/saveNotas(): recupera semillas
+  // que existan en el servidor y no localmente antes de escribir.
+  db.runTransaction(async tx => {
+    const snap = await tx.get(SEMILLAS_DOC);
+    const serverSemillas = snap.exists ? (snap.data().data || []) : [];
+    const localIds = new Set(semillas.map(s => s.id));
+    const missing = serverSemillas.filter(s => !localIds.has(s.id));
+    const merged = missing.length ? [...semillas, ...missing] : semillas;
+    tx.set(SEMILLAS_DOC, { data: merged });
+    return merged;
+  })
+    .then(merged => {
+      semillasPendingWrite = false;
+      if (merged.length !== semillas.length) { semillas = merged; renderSemillas(); }
+    })
     .catch(() => { semillasPendingWrite = false; });
 }
 
@@ -4573,7 +4634,7 @@ function semillaToIdeas(id) {
   };
   if (s.images && s.images.length) newRef.moodboard = s.images.map(url => ({ type:'image', url }));
   refs.unshift(newRef);
-  REFS_DOC.set({ data: refs });
+  saveRefs(); renderRefs();
   semillas = semillas.filter(x => x.id !== id);
   saveSemillas(); renderSemillas();
 }
