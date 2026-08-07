@@ -335,8 +335,14 @@ body:not(.showing-notas) #board-notas { display: none !important; }
 
 /* Image gallery in edit modal */
 .em-gallery { display: flex; flex-wrap: wrap; gap: 8px; }
-.em-gallery-img { position: relative; width: 80px; height: 80px; }
+.em-gallery-img { position: relative; width: 80px; height: 80px; cursor: pointer; }
 .em-gallery-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); }
+.em-gallery-img.is-cover img { border-color: #2DC98F; }
+.em-cover-badge {
+  position: absolute; bottom: 2px; left: 2px; font-size: 8px;
+  background: rgba(0,0,0,0.7); color: #9FE1CB; padding: 1px 4px; border-radius: 3px;
+  pointer-events: none;
+}
 .em-gallery-del { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: #1a1a18; border: 1px solid #444441; border-radius: 50%; color: #888780; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
 .em-gallery-del:hover { color: #e8e6dc; border-color: #888780; }
 .em-img-upload { display: flex; flex-direction: column; gap: 6px; }
@@ -3270,7 +3276,7 @@ function refCard(item) {
   const cls = REF_BRAND_CLASS[item.brand] || '';
   const links = (item.media || []).filter(m => m.type === 'link');
   const moodboardImg = (item.moodboard || []).find(m => m.type !== 'video');
-  const cover  = links.find(l => l.thumb)?.thumb || moodboardImg?.url;
+  const cover  = item.cover || links.find(l => l.thumb)?.thumb || moodboardImg?.url;
   const firstLink = links[0];
   const statusLabel = { pendiente:'pendiente', aprobada:'aprobada', rechazada:'rechazada' }[item.status] || '';
 
@@ -3543,11 +3549,26 @@ function renderRefmMoodboard() {
   const box = document.getElementById('refm-moodboard');
   box.innerHTML = imgs.map((f, idx) => f.type === 'video'
     ? `<div class="em-gallery-video"><video src="${esc(f.url)}" muted></video><button class="em-gallery-del" data-del-mb="${idx}">×</button></div>`
-    : `<div class="em-gallery-img"><img src="${esc(f.url)}" alt=""><button class="em-gallery-del" data-del-mb="${idx}">×</button></div>`
+    : `<div class="em-gallery-img${item.cover === f.url ? ' is-cover' : ''}" data-set-cover="${idx}" title="tocar para usar como portada">
+         <img src="${esc(f.url)}" alt="">
+         ${item.cover === f.url ? '<div class="em-cover-badge">portada</div>' : ''}
+         <button class="em-gallery-del" data-del-mb="${idx}">×</button>
+       </div>`
   ).join('');
   box.querySelectorAll('[data-del-mb]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      item.moodboard = (item.moodboard || []).filter((_, i) => i !== parseInt(btn.dataset.delMb));
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.delMb);
+      const target = imgs[idx];
+      if (target && item.cover === target.url) item.cover = null;
+      item.moodboard = (item.moodboard || []).filter((_, i) => i !== idx);
+      saveRefs(); renderRefmMoodboard(); renderRefs();
+    });
+  });
+  box.querySelectorAll('[data-set-cover]').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.setCover);
+      item.cover = imgs[idx]?.url || null;
       saveRefs(); renderRefmMoodboard(); renderRefs();
     });
   });
@@ -3677,7 +3698,7 @@ function openRefPreview(id) {
   const cl = item.refChecklist || [];
   const sb = item.storyboard  || [];
   const mb = item.moodboard   || [];
-  const cover  = links.find(l => l.thumb)?.thumb || mb.find(m => m.type !== 'video')?.url;
+  const cover  = item.cover || links.find(l => l.thumb)?.thumb || mb.find(m => m.type !== 'video')?.url;
   const firstLink = links[0];
 
   document.getElementById('rp-topbar-title').textContent = item.title || item.text || 'referencia';
@@ -3788,7 +3809,7 @@ function exportRefBrief(id) {
   const sb = item.storyboard  || [];
   const mb = item.moodboard   || [];
   const cl = item.refChecklist || [];
-  const cover  = links.find(l => l.thumb)?.thumb || mb.find(m => m.type !== 'video')?.url;
+  const cover  = item.cover || links.find(l => l.thumb)?.thumb || mb.find(m => m.type !== 'video')?.url;
   const firstLink = links[0];
 
   const imgTag = (url, style = '') =>
