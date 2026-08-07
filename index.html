@@ -1373,6 +1373,11 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
       </select>
     </div>
 
+    <div class="em-img-upload">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">nota del creativo</div>
+      <textarea id="refm-creative-note" rows="3" placeholder="comentario de la revisión..."></textarea>
+    </div>
+
     <div class="refm-link-row">
       <input type="text" id="refm-link-input" placeholder="link de referencia (uno por card)...">
       <button class="em-img-upload-label" id="refm-link-add" style="cursor:pointer">+ link</button>
@@ -3329,6 +3334,7 @@ function refCard(item) {
         <div class="card-ref-status ${brandCls}">${brandLabel}</div>
         ${statusLabel ? `<div class="card-ref-status ${item.status}">${statusLabel}</div>` : ''}
         ${formatLabel ? `<div class="card-ref-status">${formatLabel}</div>` : ''}
+        ${item.creativeNote ? `<div class="card-ref-status" title="tiene nota del creativo">📝</div>` : ''}
       </div>`;
   const linkBtn = firstLink
     ? `<a class="card-ref-link" href="${esc(firstLink.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🔗 ver ref</a>`
@@ -3408,6 +3414,7 @@ function openRef(existingId, col) {
   document.getElementById('refm-status').value = item.status || 'pendiente';
   document.getElementById('refm-format').value = item.format || '';
   document.getElementById('refm-script').value = item.script || '';
+  document.getElementById('refm-creative-note').value = item.creativeNote || '';
   document.getElementById('refm-link-input').value = '';
   document.getElementById('refm-delete').style.display = existingId ? 'inline-flex' : 'none';
   renderRefmCover();
@@ -3434,6 +3441,7 @@ function saveRefText() {
     item.status = document.getElementById('refm-status').value || 'pendiente';
     item.format = document.getElementById('refm-format').value;
     item.script = document.getElementById('refm-script').value.trim();
+    item.creativeNote = document.getElementById('refm-creative-note').value.trim();
     if (item.status === 'rechazada') item.col = 'inspiracion';
     if (item.status === 'aprobada')  item.col = 'para-producir';
     saveRefs();
@@ -3820,6 +3828,12 @@ function openRefPreview(id) {
       <div class="rp-checklist" style="white-space:pre-wrap;padding:14px 16px;font-size:14px;line-height:1.6;color:rgba(220,218,210,0.85)">${esc(item.script)}</div>
     </div>` : ''}
 
+    ${item.creativeNote ? `
+    <div class="rp-section">
+      <div class="rp-section-label">nota del creativo</div>
+      <div class="rp-checklist" style="white-space:pre-wrap;padding:14px 16px;font-size:14px;line-height:1.6;color:rgba(220,218,210,0.85)">${esc(item.creativeNote)}</div>
+    </div>` : ''}
+
     ${sb.length ? `
     <div class="rp-section">
       <div class="rp-section-label">shotlist <span>${sb.length} ${sb.length === 1 ? 'toma' : 'tomas'}</span></div>
@@ -3919,6 +3933,12 @@ function exportRefBrief(id) {
     <section>
       <h2>GUIÓN</h2>
       <div class="script">${esc(item.script)}</div>
+    </section>` : '';
+
+  const creativeNoteHTML = item.creativeNote ? `
+    <section>
+      <h2>NOTA DEL CREATIVO</h2>
+      <div class="script">${esc(item.creativeNote)}</div>
     </section>` : '';
 
   const sbHTML = sb.length ? `
@@ -4052,6 +4072,7 @@ function exportRefBrief(id) {
     ${cover ? `<div class="hero-cover"><img src="${esc(cover)}" alt="cover" style="object-position:${COVER_POS_CSS[item.coverPosition] || 'center'}"></div>` : ''}
   </div>
   ${scriptHTML}
+  ${creativeNoteHTML}
   ${sbHTML}
   ${mbHTML}
   ${clHTML}
