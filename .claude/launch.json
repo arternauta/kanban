@@ -4,7 +4,7 @@
     {
       "name": "kanban",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["/Users/arternauta/projects/kanban/server.js"],
+      "runtimeArgs": ["/Users/arterland/Documents/01-PROYECTOS/kanban/server.cjs"],
       "port": 3000
     }
   ]

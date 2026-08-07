@@ -770,6 +770,14 @@ body.public-mode .col-add-btn { display: none !important; }
 body.public-mode .col-archive-btn { display: none !important; }
 body.public-mode .inbox-toggle { display: none !important; }
 body.public-mode .card { cursor: default; }
+/* Notas y semillas nunca visibles en público */
+body.public-mode #tab-notas { display: none !important; }
+body.public-mode #board-notas { display: none !important; }
+/* Vista tareas: ocultar tab refs */
+body.public-tasks #tab-refs { display: none !important; }
+/* Vista refs: ocultar tab tareas, semillas */
+body.public-refs #tab-tasks { display: none !important; }
+body.public-refs #col-notas-semillas { display: none !important; }
 .public-badge {
   font-size: 9px; color: #3B6D11; letter-spacing: 0.12em;
   text-transform: uppercase; padding: 3px 8px;
@@ -1147,7 +1155,11 @@ body.public-mode .card { cursor: default; }
     <div class="modal-btns" style="margin-bottom:0">
       <button class="mbtn-save" id="settings-pw-save">Cambiar contraseña</button>
     </div>
-    <p class="modal-note" style="margin-top:10px">Compartí <strong>?public</strong> al final de la URL con tus compañeros para una vista sin tareas personales.</p>
+    <p class="modal-note" style="margin-top:10px">
+      <strong>?public=tasks</strong> — vista equipo (solo tareas)<br>
+      <strong>?public=refs</strong> — vista refs (trabajo en conjunto)<br>
+      Notas y semillas nunca son visibles en modo público.
+    </p>
 
     <div style="border-top:0.5px solid #252523;margin:18px 0 14px"></div>
     <h2>Google Calendar</h2>
@@ -1537,6 +1549,47 @@ body.public-mode .card { cursor: default; }
 </div>
 
 <!-- Nota modal -->
+<div class="modal-overlay" id="semilla-modal">
+  <div class="edit-modal">
+    <div style="font-size:11px;color:#9b8fff;letter-spacing:0.08em;text-transform:uppercase">semilla</div>
+    <input type="text" id="sm-title" placeholder="título...">
+    <textarea id="sm-text" rows="6" placeholder="idea..."></textarea>
+
+    <select id="sm-brand">
+      <option value="personal">Personal</option>
+      <option value="byd">BYD</option>
+      <option value="bmw">BMW</option>
+      <option value="mini">MINI</option>
+      <option value="motorrad">MOTORRAD</option>
+    </select>
+
+    <div class="em-img-upload">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">imágenes</div>
+      <div id="sm-gallery" class="em-gallery"></div>
+      <label class="em-img-upload-label" id="sm-upload-label">
+        + agregar imagen
+        <input type="file" id="sm-img-input" accept="image/*" multiple>
+      </label>
+    </div>
+
+    <div class="em-checklist-section" id="sm-checklist-wrap">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px">checklist</div>
+      <div id="sm-checklist"></div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <input type="text" id="sm-cl-input" placeholder="agregar ítem..." style="flex:1">
+        <button class="em-img-upload-label" id="sm-cl-add" style="cursor:pointer">+</button>
+      </div>
+    </div>
+
+    <div class="edit-modal-btns">
+      <button class="edit-modal-save" id="sm-save">guardar</button>
+      <button class="edit-modal-cancel" id="sm-cancel">cancelar</button>
+      <button class="edit-modal-cancel" id="sm-to-ideas" style="color:#2DC98F;border-color:#1D9E75">→ ideas</button>
+      <button class="edit-modal-cancel" id="sm-delete" style="color:#c95c5c">eliminar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="nota-modal">
   <div class="edit-modal">
     <div style="font-size:11px;color:#5f5e5a;letter-spacing:0.08em;text-transform:uppercase" id="notam-label">nota</div>
@@ -1573,6 +1626,7 @@ body.public-mode .card { cursor: default; }
       <button class="edit-modal-save" id="notam-save">guardar</button>
       <button class="edit-modal-cancel" id="notam-cancel">cancelar</button>
       <button class="edit-modal-cancel" id="notam-delete" style="display:none;color:#c95c5c">eliminar</button>
+      <button class="edit-modal-cancel" id="notam-archive" style="display:none;color:#5f5e5a">archivar</button>
       <button class="edit-modal-cancel" id="notam-obsidian" style="display:none;color:#9b8fff;border-color:#9b8fff" title="Enviar a Obsidian">obsidian ↗</button>
     </div>
   </div>
@@ -1591,6 +1645,16 @@ body.public-mode .card { cursor: default; }
 
 <!-- Notas board -->
 <div class="board-notas" id="board-notas">
+  <div class="col" id="col-notas-semillas">
+    <div class="col-head">
+      <div class="col-dot" style="background:#9b8fff"></div>
+      <div class="col-name">semillas</div>
+      <div class="col-actions-row">
+        <div class="col-count" id="notas-count-semillas">0</div>
+      </div>
+    </div>
+    <div class="cards" id="notas-semillas"></div>
+  </div>
   <div class="col">
     <div class="col-head">
       <div class="col-dot" style="background:#5f5e5a"></div>
@@ -1602,8 +1666,8 @@ body.public-mode .card { cursor: default; }
     </div>
     <div class="cards" id="notas-pending"></div>
   </div>
-  <div class="col">
-    <div class="col-head">
+  <div class="col col-collapsible collapsed" id="col-notas-analyzed">
+    <div class="col-head" data-toggle-col="notas-analyzed">
       <div class="col-dot" style="background:#2DC98F"></div>
       <div class="col-name">analizadas</div>
       <div class="col-actions-row">
@@ -1612,11 +1676,23 @@ body.public-mode .card { cursor: default; }
     </div>
     <div class="cards" id="notas-analyzed"></div>
   </div>
+  <div class="col col-collapsible collapsed" id="col-notas-archived">
+    <div class="col-head" data-toggle-col="notas-archived">
+      <div class="col-dot" style="background:#3a3937"></div>
+      <div class="col-name">archivadas</div>
+      <div class="col-actions-row">
+        <div class="col-count" id="notas-count-archived">0</div>
+      </div>
+    </div>
+    <div class="cards" id="notas-archived"></div>
+  </div>
 </div>
 
 <script>
 // ── Auth & public mode ─────────────────────────────────────────
-const IS_PUBLIC = location.search.includes('public');
+const _pubParam = new URLSearchParams(location.search).get('public');
+const IS_PUBLIC  = _pubParam !== null;
+const PUBLIC_VIEW = _pubParam || 'tasks'; // 'tasks' | 'refs'
 
 async function hashPw(pw) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw + 'kb-kanbarter'));
@@ -1632,10 +1708,15 @@ const IS_SETUP = location.search.includes('setup=kb-admin-2024');
 async function initAuth() {
   if (IS_PUBLIC) {
     document.body.classList.add('public-mode');
-    document.getElementById('public-badge').style.display = '';
+    document.body.classList.add('public-' + PUBLIC_VIEW);
+    const badge = document.getElementById('public-badge');
+    badge.textContent = PUBLIC_VIEW === 'refs' ? 'vista refs' : 'vista equipo';
+    badge.style.display = '';
     document.querySelector('select#brand-filter').style.display = 'none';
     document.querySelector('select#sort-filter').style.display = 'none';
     hideAuthOverlay();
+    if (PUBLIC_VIEW === 'refs') switchTab('refs');
+    else switchTab('tasks');
     return;
   }
 
@@ -3033,8 +3114,9 @@ TASKS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
 // ── Referencias (segundo tablero, independiente del de tareas) ──
 // ═══════════════════════════════════════════════════════════════
 
-const REFS_DOC  = db.collection('kanban').doc('refs');
-const NOTAS_DOC = db.collection('kanban').doc('notas');
+const REFS_DOC     = db.collection('kanban').doc('refs');
+const NOTAS_DOC    = db.collection('kanban').doc('notas');
+const SEMILLAS_DOC = db.collection('kanban').doc('semillas');
 const REF_COLS = ['ideas','para-producir','finalizadas'];
 const REF_COL_LABELS = { ideas:'ideas', 'para-producir':'para producir', finalizadas:'finalizadas' };
 const REF_BRAND_CLASS = { byd:'byd', bmw:'bmw', mini:'mini', motorrad:'motorrad', personal:'personal' };
@@ -3977,6 +4059,7 @@ function notaCard(nota) {
          ${cover?`style="background-image:url('${esc(cover)}')"`:''}>
       ${cover ? `<div class="card-glass">${inner}</div>` : inner}
       <div class="card-btns">
+        <button class="cbtn${nota.analyzed ? ' active' : ''}" data-nota-toggle="${esc(nota.id)}" title="${nota.analyzed ? 'marcar pendiente' : 'marcar analizada'}" style="${nota.analyzed ? 'color:#2DC98F' : ''}">✓</button>
         <button class="cbtn del" data-nota-delete="${esc(nota.id)}" title="eliminar">✕</button>
       </div>
     </div>`;
@@ -3986,10 +4069,13 @@ function renderNotas() {
   const brandFilter = n => notaBrandFilter === 'all' || (n.brand || 'personal') === notaBrandFilter;
   const pending  = notas.filter(n => !n.analyzed && !n.archivedNote && brandFilter(n));
   const analyzed = notas.filter(n =>  n.analyzed && !n.archivedNote && brandFilter(n));
+  const archived = notas.filter(n =>  n.archivedNote && brandFilter(n));
   document.getElementById('notas-pending').innerHTML  = pending.length  ? pending.map(notaCard).join('')  : '<div class="empty">vacío</div>';
   document.getElementById('notas-analyzed').innerHTML = analyzed.length ? analyzed.map(notaCard).join('') : '<div class="empty">vacío</div>';
+  document.getElementById('notas-archived').innerHTML = archived.length ? archived.map(notaCard).join('') : '<div class="empty">vacío</div>';
   document.getElementById('notas-count-pending').textContent  = pending.length;
   document.getElementById('notas-count-analyzed').textContent = analyzed.length;
+  document.getElementById('notas-count-archived').textContent = archived.length;
 }
 
 function renderNotamGallery() {
@@ -4049,6 +4135,9 @@ function openNota(id) {
   document.getElementById('notam-text').value   = nota.text   || '';
   document.getElementById('notam-brand').value  = nota.brand  || 'personal';
   document.getElementById('notam-delete').style.display = id ? 'inline-flex' : 'none';
+  const archiveBtn = document.getElementById('notam-archive');
+  archiveBtn.style.display = id ? 'inline-flex' : 'none';
+  archiveBtn.textContent = nota?.archivedNote ? 'restaurar' : 'archivar';
   document.getElementById('notam-obsidian').style.display = id ? 'inline-flex' : 'none';
   renderNotamGallery();
   renderNotamChecklist();
@@ -4133,6 +4222,12 @@ document.getElementById('notam-cl-input').addEventListener('keydown', e => {
 
 // Click on nota card to open
 document.addEventListener('click', e => {
+  const toggle = e.target.closest('[data-nota-toggle]');
+  if (toggle) {
+    const nota = notas.find(n => n.id === toggle.dataset.notaToggle);
+    if (nota) { nota.analyzed = !nota.analyzed; saveNotas(); renderNotas(); }
+    return;
+  }
   const el = e.target.closest('[data-nota-edit]');
   if (el && !e.target.closest('[data-nota-delete]')) openNota(el.dataset.notaEdit);
   const del = e.target.closest('[data-nota-delete]');
@@ -4140,6 +4235,14 @@ document.addEventListener('click', e => {
     notas = notas.filter(n => n.id !== del.dataset.notaDelete);
     saveNotas(); renderNotas();
   }
+});
+
+document.getElementById('notam-archive').addEventListener('click', () => {
+  const nota = notas.find(n => n.id === notaEditingId);
+  if (nota) { nota.archivedNote = !nota.archivedNote; saveNotas(); }
+  document.getElementById('nota-modal').classList.remove('open');
+  notaEditingId = null;
+  renderNotas();
 });
 
 // switchTab update
@@ -4199,6 +4302,202 @@ NOTAS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
 });
 
 renderNotas();
+
+// ── SEMILLAS ─────────────────────────────────────────────────────
+
+let semillas = [], semillasPendingWrite = false, semillaEditingId = null;
+
+function saveSemillas() {
+  semillasPendingWrite = true;
+  SEMILLAS_DOC.set({ data: semillas })
+    .then(() => { semillasPendingWrite = false; })
+    .catch(() => { semillasPendingWrite = false; });
+}
+
+function semillaCard(s) {
+  const brand  = s.brand || 'personal';
+  const label  = REF_BRAND_LABEL[brand] ?? brand;
+  const cover  = s.images && s.images[0];
+  const cl     = s.checklist || [];
+  const clDone = cl.filter(i => i.done).length;
+  const clBadge = cl.length ? `<span class="cbadge cl-prog${clDone===cl.length?' done':''}">${clDone}/${cl.length}</span>` : '';
+
+  const inner = `
+    <div class="card-ref-badges" style="margin-bottom:6px">
+      <div class="card-ref-status ${brand}">${label}</div>
+      ${clBadge}
+    </div>
+    ${s.title ? `<div class="card-ref-title">${esc(s.title)}</div>` : ''}
+    <div class="card-ref-desc" style="-webkit-line-clamp:3">${esc(s.text)}</div>`;
+
+  return `<div class="card ${brand}${cover?' has-cover':''}" data-semilla-edit="${esc(s.id)}"
+       ${cover?`style="background-image:url('${esc(cover)}')"`:''}>
+    ${cover ? `<div class="card-glass">${inner}</div>` : inner}
+    <div class="card-btns">
+      <button class="cbtn" data-semilla-to-ideas="${esc(s.id)}" style="font-size:10px;padding:2px 6px" title="→ ideas">→</button>
+      <button class="cbtn del" data-semilla-delete="${esc(s.id)}" title="eliminar">✕</button>
+    </div>
+  </div>`;
+}
+
+function renderSemillas() {
+  document.getElementById('notas-semillas').innerHTML = semillas.length ? semillas.map(semillaCard).join('') : '<div class="empty">vacío</div>';
+  document.getElementById('notas-count-semillas').textContent = semillas.length;
+}
+
+function renderSmGallery() {
+  const s = semillas.find(x => x.id === semillaEditingId);
+  if (!s) return;
+  const g = document.getElementById('sm-gallery');
+  g.innerHTML = (s.images||[]).map((img,idx) => `
+    <div class="em-gallery-img">
+      <img src="${esc(img)}" alt="">
+      <button class="em-gallery-del" data-sm-del-img="${idx}">×</button>
+    </div>`).join('');
+  g.querySelectorAll('[data-sm-del-img]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      s.images.splice(parseInt(btn.dataset.smDelImg), 1);
+      saveSemillas(); renderSmGallery(); renderSemillas();
+    });
+  });
+}
+
+function renderSmChecklist() {
+  const s = semillas.find(x => x.id === semillaEditingId);
+  if (!s) return;
+  const cl = s.checklist || [];
+  document.getElementById('sm-checklist').innerHTML = cl.map((item,idx) => `
+    <div class="cl-item">
+      <input type="checkbox" class="cl-check" ${item.done?'checked':''} data-sm-cl="${idx}">
+      <span class="${item.done?'cl-done':''}">${esc(item.text)}</span>
+      <button class="em-gallery-del" data-sm-cl-del="${idx}" style="position:static;margin-left:auto">×</button>
+    </div>`).join('');
+  document.querySelectorAll('[data-sm-cl]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cl[parseInt(cb.dataset.smCl)].done = cb.checked;
+      saveSemillas(); renderSmChecklist(); renderSemillas();
+    });
+  });
+  document.querySelectorAll('[data-sm-cl-del]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      cl.splice(parseInt(btn.dataset.smClDel), 1);
+      saveSemillas(); renderSmChecklist(); renderSemillas();
+    });
+  });
+}
+
+function openSemilla(id) {
+  const s = semillas.find(x => x.id === id);
+  if (!s) return;
+  semillaEditingId = id;
+  document.getElementById('sm-title').value = s.title || '';
+  document.getElementById('sm-text').value  = s.text  || '';
+  document.getElementById('sm-brand').value = s.brand || 'personal';
+  renderSmGallery();
+  renderSmChecklist();
+  document.getElementById('semilla-modal').classList.add('open');
+  setTimeout(() => document.getElementById('sm-title').focus(), 50);
+}
+
+function saveSemillaModal() {
+  const s = semillas.find(x => x.id === semillaEditingId);
+  if (s) {
+    s.title = document.getElementById('sm-title').value.trim();
+    s.text  = document.getElementById('sm-text').value.trim();
+    s.brand = document.getElementById('sm-brand').value || 'personal';
+    saveSemillas();
+  }
+  document.getElementById('semilla-modal').classList.remove('open');
+  semillaEditingId = null;
+  renderSemillas();
+}
+
+function semillaToIdeas(id) {
+  const s = semillas.find(x => x.id === id);
+  if (!s) return;
+  const newRef = {
+    id: uid(), col: 'ideas',
+    title: s.title || '',
+    text:  s.text,
+    brand: s.brand || 'personal',
+    status: 'pendiente',
+    createdAt: new Date().toISOString()
+  };
+  if (s.images && s.images.length) newRef.media = s.images.map(url => ({ type:'image', url }));
+  refs.unshift(newRef);
+  REFS_DOC.set({ data: refs });
+  semillas = semillas.filter(x => x.id !== id);
+  saveSemillas(); renderSemillas();
+}
+
+document.getElementById('sm-save').addEventListener('click', saveSemillaModal);
+document.getElementById('sm-cancel').addEventListener('click', () => {
+  document.getElementById('semilla-modal').classList.remove('open');
+  semillaEditingId = null;
+});
+document.getElementById('sm-delete').addEventListener('click', () => {
+  semillas = semillas.filter(x => x.id !== semillaEditingId);
+  saveSemillas();
+  document.getElementById('semilla-modal').classList.remove('open');
+  semillaEditingId = null;
+  renderSemillas();
+});
+document.getElementById('sm-to-ideas').addEventListener('click', () => {
+  const id = semillaEditingId;
+  saveSemillaModal();
+  semillaToIdeas(id);
+});
+
+document.getElementById('sm-img-input').addEventListener('change', async e => {
+  const s = semillas.find(x => x.id === semillaEditingId);
+  if (!s) return;
+  for (const file of e.target.files) {
+    const url = await uploadImage(file);
+    if (url) { if (!s.images) s.images = []; s.images.push(url); }
+  }
+  e.target.value = '';
+  saveSemillas(); renderSmGallery(); renderSemillas();
+});
+
+document.getElementById('sm-cl-add').addEventListener('click', () => {
+  const s = semillas.find(x => x.id === semillaEditingId);
+  const input = document.getElementById('sm-cl-input');
+  if (!s || !input.value.trim()) return;
+  if (!s.checklist) s.checklist = [];
+  s.checklist.push({ id: uid(), text: input.value.trim(), done: false });
+  input.value = '';
+  saveSemillas(); renderSmChecklist(); renderSemillas();
+});
+document.getElementById('sm-cl-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('sm-cl-add').click(); }
+});
+
+document.addEventListener('click', e => {
+  const toIdeas = e.target.closest('[data-semilla-to-ideas]');
+  if (toIdeas) {
+    semillaToIdeas(toIdeas.dataset.semillaToIdeas);
+    return;
+  }
+  const edit = e.target.closest('[data-semilla-edit]');
+  if (edit && !e.target.closest('[data-semilla-to-ideas]') && !e.target.closest('[data-semilla-delete]')) {
+    openSemilla(edit.dataset.semillaEdit);
+    return;
+  }
+  const delS = e.target.closest('[data-semilla-delete]');
+  if (delS) {
+    semillas = semillas.filter(x => x.id !== delS.dataset.semillaDelete);
+    saveSemillas(); renderSemillas();
+  }
+});
+
+SEMILLAS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
+  if (snap.metadata.hasPendingWrites) return;
+  if (semillasPendingWrite) return;
+  semillas = snap.data()?.data || [];
+  renderSemillas();
+});
+
+renderSemillas();
 </script>
 </body>
 </html>
