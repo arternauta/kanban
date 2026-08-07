@@ -16,7 +16,12 @@
       "package.json",
       "package-lock.json",
       "node_modules/**",
-      ".claude/**"
+      ".claude/**",
+      ".git/**",
+      ".firebase/**",
+      "functions/**",
+      "uploads/**",
+      ".DS_Store"
     ]
   }
 }
