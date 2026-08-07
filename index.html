@@ -350,6 +350,24 @@ body:not(.showing-notas) #board-notas { display: none !important; }
 .em-img-upload-label:hover, .em-img-upload-label.drag-over { border-color: rgba(255,255,255,0.4); color: #e8e6dc; background: rgba(255,255,255,0.07); }
 .em-img-upload input[type="file"] { display: none; }
 
+/* Shotlist (storyboard + texto por toma) */
+.sb-shotlist { display: flex; flex-direction: column; gap: 6px; }
+.sb-shot-row { display: flex; align-items: center; gap: 8px; }
+.sb-shot-num {
+  flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(255,255,255,0.06); color: #888780; font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.sb-shot-thumb { flex-shrink: 0; width: 48px; height: 48px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+.sb-shot-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sb-shot-text {
+  flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 7px 10px; font-size: 13px; color: #e8e6dc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; outline: none;
+}
+.sb-shot-text:focus { border-color: rgba(255,255,255,0.22); }
+.sb-shot-row .em-gallery-del { position: static; flex-shrink: 0; }
+
 /* Video item in gallery (ref modal) */
 .em-gallery-video { position: relative; width: 80px; height: 80px; }
 .em-gallery-video video { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); background: #000; }
@@ -955,7 +973,7 @@ body.public-refs #col-notas-semillas { display: none !important; }
   .rp-hero-content, .rp-header-no-cover { padding-left: 18px; padding-right: 18px; }
   .rp-section { padding: 32px 18px 0; }
   .rp-sb-frame { width: 180px; }
-  .rp-moodboard-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .rp-moodboard-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
 }
 
 /* ── Ref Preview Panel ─────────────────────────────────────────── */
@@ -1053,24 +1071,26 @@ body.public-refs #col-notas-semillas { display: none !important; }
   gap: 10px;
 }
 .rp-sb-frame {
-  position: relative; border-radius: 10px; overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);
 }
-.rp-sb-frame img { width: 100%; height: 140px; object-fit: cover; display: block; }
+.rp-sb-frame-img { position: relative; }
+.rp-sb-frame-img img { width: 100%; height: 140px; object-fit: cover; display: block; }
 .rp-sb-num {
   position: absolute; bottom: 6px; left: 8px;
   font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5);
   background: rgba(0,0,0,0.5); padding: 1px 6px; border-radius: 4px;
 }
+.rp-sb-caption { padding: 8px 10px; font-size: 12px; line-height: 1.4; color: rgba(220,218,210,0.75); }
 
 /* Moodboard */
 .rp-moodboard-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
 }
-.rp-mb-img { border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
-.rp-mb-img img { width: 100%; height: 180px; object-fit: cover; display: block; transition: transform 0.3s ease; }
-.rp-mb-img video { width: 100%; height: 180px; object-fit: cover; display: block; background: #000; }
+.rp-mb-img { border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+.rp-mb-img img { width: 100%; height: 110px; object-fit: cover; display: block; transition: transform 0.3s ease; }
+.rp-mb-img video { width: 100%; height: 110px; object-fit: cover; display: block; background: #000; }
 .rp-mb-img:hover img { transform: scale(1.04); }
 
 /* Checklist */
@@ -1344,10 +1364,10 @@ body.public-refs #col-notas-semillas { display: none !important; }
     </div>
 
     <div class="em-img-upload">
-      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">storyboard</div>
-      <div id="refm-storyboard" class="em-gallery"></div>
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">shotlist</div>
+      <div id="refm-storyboard" class="sb-shotlist"></div>
       <label class="em-img-upload-label" id="refm-storyboard-label">
-        + frames del storyboard
+        + agregar toma
         <input type="file" id="refm-storyboard-input" accept="image/*" multiple>
       </label>
     </div>
@@ -3457,20 +3477,33 @@ document.getElementById('refm-link-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); addRefLink(); }
 });
 
-// ── Storyboard dentro del modal ─────────────────────────────────
+// ── Shotlist dentro del modal (ex-storyboard: frame + toma) ──────
 function renderRefmStoryboard() {
   const item = refs.find(r => r.id === refEditingId);
   if (!item) return;
   const frames = item.storyboard || [];
   const box = document.getElementById('refm-storyboard');
-  box.innerHTML = frames.map((f, idx) =>
-    `<div class="em-gallery-img"><img src="${esc(f.url)}" alt=""><button class="em-gallery-del" data-del-sb="${idx}">×</button></div>`
+  box.innerHTML = frames.map((f, idx) => `
+    <div class="sb-shot-row">
+      <div class="sb-shot-num">${idx + 1}</div>
+      <div class="sb-shot-thumb"><img src="${esc(f.url)}" alt=""></div>
+      <input type="text" class="sb-shot-text" data-sb-text="${idx}" placeholder="qué se graba en esta toma..." value="${esc(f.text || '')}">
+      <button class="em-gallery-del" data-del-sb="${idx}">×</button>
+    </div>`
   ).join('');
   box.querySelectorAll('[data-del-sb]').forEach(btn => {
     btn.addEventListener('click', () => {
       item.storyboard = (item.storyboard || []).filter((_, i) => i !== parseInt(btn.dataset.delSb));
       saveRefs(); renderRefmStoryboard(); renderRefs();
     });
+  });
+  box.querySelectorAll('[data-sb-text]').forEach(input => {
+    input.addEventListener('blur', () => {
+      const idx = parseInt(input.dataset.sbText);
+      if (item.storyboard[idx]) item.storyboard[idx].text = input.value.trim();
+      saveRefs(); renderRefs();
+    });
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
   });
 }
 
@@ -3673,12 +3706,15 @@ function openRefPreview(id) {
 
     ${sb.length ? `
     <div class="rp-section">
-      <div class="rp-section-label">storyboard <span>${sb.length} ${sb.length === 1 ? 'frame' : 'frames'}</span></div>
+      <div class="rp-section-label">shotlist <span>${sb.length} ${sb.length === 1 ? 'toma' : 'tomas'}</span></div>
       <div class="rp-storyboard-strip">
         ${sb.map((f, i) => `
           <div class="rp-sb-frame">
-            <img src="${esc(f.url)}" alt="frame ${i+1}" loading="lazy">
-            <div class="rp-sb-num">${i+1}</div>
+            <div class="rp-sb-frame-img">
+              <img src="${esc(f.url)}" alt="toma ${i+1}" loading="lazy">
+              <div class="rp-sb-num">${i+1}</div>
+            </div>
+            ${f.text ? `<div class="rp-sb-caption">${esc(f.text)}</div>` : ''}
           </div>`).join('')}
       </div>
     </div>` : ''}
@@ -3771,12 +3807,15 @@ function exportRefBrief(id) {
 
   const sbHTML = sb.length ? `
     <section>
-      <h2>STORYBOARD</h2>
+      <h2>SHOTLIST</h2>
       <div class="strip">
         ${sb.map((f, i) => `
           <div class="frame">
-            ${imgTag(f.url, 'width:100%;height:160px;object-fit:cover;border-radius:8px;')}
-            <div class="frame-num">${i + 1}</div>
+            <div class="frame-img">
+              ${imgTag(f.url, 'width:100%;height:160px;object-fit:cover;border-radius:8px;')}
+              <div class="frame-num">${i + 1}</div>
+            </div>
+            ${f.text ? `<div class="frame-caption">${esc(f.text)}</div>` : ''}
           </div>`).join('')}
       </div>
     </section>` : '';
@@ -3786,8 +3825,8 @@ function exportRefBrief(id) {
       <h2>MOODBOARD</h2>
       <div class="grid">
         ${mb.map(f => `<div class="grid-item">${f.type === 'video'
-          ? `<video src="${f.url}" style="display:block;width:100%;height:200px;object-fit:cover;border-radius:8px;" muted controls></video>`
-          : imgTag(f.url, 'width:100%;height:200px;object-fit:cover;border-radius:8px;')}</div>`).join('')}
+          ? `<video src="${f.url}" style="display:block;width:100%;height:110px;object-fit:cover;border-radius:8px;" muted controls></video>`
+          : imgTag(f.url, 'width:100%;height:110px;object-fit:cover;border-radius:8px;')}</div>`).join('')}
       </div>
     </section>` : '';
 
@@ -3859,13 +3898,15 @@ function exportRefBrief(id) {
     padding: 18px 20px;
   }
   .strip { display: flex; flex-wrap: wrap; gap: 12px; }
-  .frame { flex: 0 1 240px; position: relative; }
+  .frame { flex: 0 1 240px; }
+  .frame-img { position: relative; }
   .frame-num {
     position: absolute; bottom: 6px; left: 8px;
     font-size: 10px; font-weight: 700; color: #fff;
     background: rgba(0,0,0,0.6); padding: 1px 7px; border-radius: 4px;
   }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .frame-caption { font-size: 12px; line-height: 1.4; color: rgba(26,26,24,0.65); padding: 6px 2px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
   .grid-item { border-radius: 8px; overflow: hidden; border: 1px solid rgba(0,0,0,0.08); }
   ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
   li {
