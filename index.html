@@ -3367,8 +3367,11 @@ const _igObserver = new IntersectionObserver(entries => {
 }, { rootMargin: '200px' });
 
 function renderRefs() {
-  const anyMigrated = refs.map(migrateRefItem).some(Boolean);
-  if (anyMigrated) saveRefs();
+  // Solo normaliza en memoria (para que se vea bien) — NO auto-guarda.
+  // Guardar automáticamente acá es peligroso: si esta carga llegó de la
+  // caché local de Firestore (puede ser vieja) en vez del servidor,
+  // persistiría esa versión vieja y pisaría cambios recientes.
+  refs.forEach(migrateRefItem);
   REF_COLS.forEach(col => {
     let colItems = refs.filter(r => r.col === col);
     if (refStatusFilter !== 'all') colItems = colItems.filter(r => r.status === refStatusFilter);
