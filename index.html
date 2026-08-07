@@ -3370,7 +3370,9 @@ function renderRefs() {
   REF_COLS.forEach(col => {
     let colItems = refs.filter(r => r.col === col);
     if (refStatusFilter !== 'all') colItems = colItems.filter(r => r.status === refStatusFilter);
-    if (refBrandFilter  !== 'all') colItems = colItems.filter(r => r.brand  === refBrandFilter);
+    // El filtro de marca solo aplica en "análisis de equipo" — en el resto de
+    // las columnas todavía no suele estar taggeado.
+    if (refBrandFilter !== 'all' && col === 'ideas') colItems = colItems.filter(r => r.brand === refBrandFilter);
     const container = document.getElementById('refs-' + col);
     container.innerHTML = colItems.length ? colItems.map(refCard).join('') : '<div class="empty">vacío</div>';
     document.querySelector(`[data-ref-count="${col}"]`).textContent = colItems.length;
