@@ -3226,30 +3226,53 @@ const PLATFORM_ICON = { instagram:'📸', tiktok:'🎵', youtube:'▶️', other
 
 let refs = [], refSaveTimer = null, refWriteGen = 0, refPendingWrite = false, refEditingId = null;
 let refDragId = null, refTouchDragEl = null, refTouchGhost = null, refTouchHoldTimer = null;
+let refDirtySet = new Set();
 
-function saveRefs() {
+// Guardar por "item tocado", no por copia local completa: si esta pestaña
+// quedó desincronizada (otra pestaña/Telegram cambió algo mientras tanto),
+// un guardado ciego con toda la copia local pisaba esos cambios ajenos —
+// pasaba con la marca de una referencia al moverla de columna, o una
+// referencia que volvía sola de Inspiración a Análisis de equipo.
+// Ahora el servidor es la verdad para todo excepto el/los item(s) que se
+// acaban de tocar acá — se identifican por id (dirtyId, por defecto el que
+// está abierto en el modal) y son los únicos que se escriben con la copia
+// local. Sin dirtyId (ej. recuperar el backup local tras un refresh a mitad
+// de guardado) se vuelve al comportamiento anterior: confiar en toda la
+// copia local, recuperando solo lo que falte.
+function saveRefs(dirtyId = refEditingId) {
+  if (dirtyId) {
+    (Array.isArray(dirtyId) ? dirtyId : [dirtyId]).forEach(id => refDirtySet.add(id));
+  } else {
+    refDirtySet = null;
+  }
   const gen = ++refWriteGen;
   refPendingWrite = true;
   try { localStorage.setItem('kb_refs_backup', JSON.stringify({ ts: Date.now(), data: refs })); } catch(e) {}
   clearTimeout(refSaveTimer);
   refSaveTimer = setTimeout(() => {
-    // Transacción en vez de .set() ciego — mismo fix que save() de tareas:
-    // si esta pestaña quedó desincronizada, recupera antes de escribir
-    // cualquier referencia que exista en el servidor y no en la copia local.
+    const dirtyIds  = refDirtySet;
+    const localById = new Map(refs.map(r => [r.id, r]));
     db.runTransaction(async tx => {
       const snap = await tx.get(REFS_DOC);
       const serverRefs = snap.exists ? (snap.data().data || []) : [];
-      const localIds = new Set(refs.map(r => r.id));
-      const missing = serverRefs.filter(r => !localIds.has(r.id));
-      const merged = missing.length ? [...refs, ...missing] : refs;
+      let merged;
+      if (dirtyIds) {
+        merged = serverRefs.filter(r => !dirtyIds.has(r.id));
+        dirtyIds.forEach(id => { const local = localById.get(id); if (local) merged.push(local); });
+      } else {
+        const localIds = new Set(refs.map(r => r.id));
+        const missing = serverRefs.filter(r => !localIds.has(r.id));
+        merged = missing.length ? [...refs, ...missing] : refs;
+      }
       tx.set(REFS_DOC, { data: merged });
       return merged;
     })
       .then(merged => {
         if (gen === refWriteGen) {
           refPendingWrite = false;
+          refDirtySet = new Set();
           try { localStorage.removeItem('kb_refs_backup'); } catch(e) {}
-          if (merged.length !== refs.length) { refs = merged; renderRefs(); }
+          refs = merged; renderRefs();
         }
       })
       .catch(() => { if (gen === refWriteGen) refPendingWrite = false; });
@@ -3404,7 +3427,7 @@ function openRef(existingId, col) {
   } else {
     item = { id: uid(), col, text: '', media: [], createdAt: new Date().toISOString() };
     refs.push(item);
-    saveRefs();
+    saveRefs(item.id);
   }
   refEditingId = item.id;
   document.getElementById('refm-title').textContent = existingId ? 'referencia' : ('+ ' + (REF_COL_LABELS[col] || col));
@@ -3768,8 +3791,9 @@ document.addEventListener('click', e => {
   const delBtn = el.closest('[data-ref-delete]');
   if (delBtn) {
     if (confirm('¿Eliminar esta referencia?')) {
-      refs = refs.filter(r => r.id !== delBtn.dataset.refDelete);
-      saveRefs(); renderRefs();
+      const delId = delBtn.dataset.refDelete;
+      refs = refs.filter(r => r.id !== delId);
+      saveRefs(delId); renderRefs();
     }
     return;
   }
@@ -3886,7 +3910,7 @@ function openRefPreview(id) {
       if (!refItem?.refChecklist?.[idx]) return;
       refItem.refChecklist[idx].done = e.target.checked;
       label.classList.toggle('done', e.target.checked);
-      saveRefs(); renderRefs();
+      saveRefs(id); renderRefs();
     });
   });
 
@@ -4104,7 +4128,7 @@ function performRefDrop(id, newCol) {
   r.col = newCol;
   refs = refs.filter(x => x.id !== id);
   refs.push(r);
-  saveRefs(); renderRefs();
+  saveRefs(id); renderRefs();
 }
 
 document.querySelectorAll('#board-refs .col').forEach(col => {
@@ -4198,7 +4222,7 @@ document.getElementById('tab-refs').addEventListener('click', () => switchTab('r
 
 // ── Backfill thumbnails para links de Instagram sin caché ────────
 async function backfillIgThumbs() {
-  let changed = false;
+  const dirtyIds = [];
   for (const item of refs) {
     const links = (item.media || []).filter(m => m.type === 'link' && m.platform === 'instagram' && !m.thumb);
     for (const link of links) {
@@ -4206,11 +4230,11 @@ async function backfillIgThumbs() {
       if (meta?.thumb) {
         link.thumb = meta.thumb;
         if (!link.title) link.title = meta.title;
-        changed = true;
+        if (!dirtyIds.includes(item.id)) dirtyIds.push(item.id);
       }
     }
   }
-  if (changed) { saveRefs(); renderRefs(); }
+  if (dirtyIds.length) { saveRefs(dirtyIds); renderRefs(); }
 }
 
 // ── Firebase real-time listener (refs) ────────────────────────────
@@ -4662,7 +4686,7 @@ function semillaToIdeas(id) {
   };
   if (s.images && s.images.length) newRef.moodboard = s.images.map(url => ({ type:'image', url }));
   refs.unshift(newRef);
-  saveRefs(); renderRefs();
+  saveRefs(newRef.id); renderRefs();
   semillas = semillas.filter(x => x.id !== id);
   saveSemillas(); renderSemillas();
 }
