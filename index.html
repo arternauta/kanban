@@ -1322,6 +1322,14 @@ body.public-refs #col-notas-semillas { display: none !important; }
         <option value="aprobada">aprobada</option>
         <option value="rechazada">rechazada</option>
       </select>
+      <select id="refm-format" style="flex:1">
+        <option value="">— formato —</option>
+        <option value="reel">Reel</option>
+        <option value="story">Story</option>
+        <option value="tiktok">TikTok</option>
+        <option value="post">Post</option>
+        <option value="carrusel">Carrusel</option>
+      </select>
     </div>
 
     <div class="refm-link-row">
@@ -1329,6 +1337,11 @@ body.public-refs #col-notas-semillas { display: none !important; }
       <button class="em-img-upload-label" id="refm-link-add" style="cursor:pointer">+ link</button>
     </div>
     <div id="refm-links" class="refm-links"></div>
+
+    <div class="em-img-upload">
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">guión</div>
+      <textarea id="refm-script" rows="5" placeholder="guión / copy / texto en pantalla..."></textarea>
+    </div>
 
     <div class="em-img-upload">
       <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">storyboard</div>
@@ -3125,6 +3138,7 @@ const REF_COLS = ['inbox','ideas','para-producir','finalizadas'];
 const REF_COL_LABELS = { inbox:'inbox', ideas:'análisis de equipo', 'para-producir':'para producir', finalizadas:'finalizadas' };
 const REF_BRAND_CLASS = { byd:'byd', bmw:'bmw', mini:'mini', motorrad:'motorrad', personal:'personal' };
 const REF_BRAND_LABEL = { '':'sin marca', byd:'BYD', bmw:'BMW', mini:'MINI', motorrad:'MOTORRAD', personal:'Personal' };
+const REF_FORMAT_LABEL = { reel:'Reel', story:'Story', tiktok:'TikTok', post:'Post', carrusel:'Carrusel' };
 const OLD_BRAND_COLS = ['byd','bmw','mini','motorrad'];
 
 let refStatusFilter = 'all';
@@ -3242,9 +3256,11 @@ function refCard(item) {
 
   const brandLabel = REF_BRAND_LABEL[item.brand] ?? 'sin marca';
   const brandCls   = item.brand || 'sin-marca';
+  const formatLabel = REF_FORMAT_LABEL[item.format] || '';
   const badges = `<div class="card-ref-badges">
         <div class="card-ref-status ${brandCls}">${brandLabel}</div>
         ${statusLabel ? `<div class="card-ref-status ${item.status}">${statusLabel}</div>` : ''}
+        ${formatLabel ? `<div class="card-ref-status">${formatLabel}</div>` : ''}
       </div>`;
   const linkBtn = firstLink
     ? `<a class="card-ref-link" href="${esc(firstLink.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🔗 ver ref</a>`
@@ -3317,6 +3333,8 @@ function openRef(existingId, col) {
   document.getElementById('refm-text').value = item.text || '';
   document.getElementById('refm-brand').value = item.brand || '';
   document.getElementById('refm-status').value = item.status || 'pendiente';
+  document.getElementById('refm-format').value = item.format || '';
+  document.getElementById('refm-script').value = item.script || '';
   document.getElementById('refm-link-input').value = '';
   document.getElementById('refm-delete').style.display = existingId ? 'inline-flex' : 'none';
   renderRefmLinks();
@@ -3340,6 +3358,8 @@ function saveRefText() {
     item.text   = document.getElementById('refm-text').value.trim();
     item.brand  = document.getElementById('refm-brand').value;
     item.status = document.getElementById('refm-status').value || 'pendiente';
+    item.format = document.getElementById('refm-format').value;
+    item.script = document.getElementById('refm-script').value.trim();
     if (item.status === 'rechazada') item.col = 'finalizadas';
     if (item.status === 'aprobada')  item.col = 'para-producir';
     saveRefs();
@@ -3645,6 +3665,12 @@ function openRefPreview(id) {
       ${firstLink  ? `<a  class="rp-link-btn" href="${esc(firstLink.url)}" target="_blank" rel="noopener noreferrer">🔗 ver referencia</a>` : ''}
     </div>`}
 
+    ${item.script ? `
+    <div class="rp-section">
+      <div class="rp-section-label">guión</div>
+      <div class="rp-checklist" style="white-space:pre-wrap;padding:14px 16px;font-size:14px;line-height:1.6;color:rgba(220,218,210,0.85)">${esc(item.script)}</div>
+    </div>` : ''}
+
     ${sb.length ? `
     <div class="rp-section">
       <div class="rp-section-label">storyboard <span>${sb.length} ${sb.length === 1 ? 'frame' : 'frames'}</span></div>
@@ -3730,7 +3756,18 @@ function exportRefBrief(id) {
   const firstLink = links[0];
 
   const imgTag = (url, style = '') =>
-    `<img src="${url}" style="display:block;${style}" crossorigin="anonymous">`;
+    `<img src="${url}" style="display:block;${style}">`;
+
+  const badges = [
+    item.brand ? `<span class="tag">${esc(REF_BRAND_LABEL[item.brand] || item.brand)}</span>` : '',
+    item.format ? `<span class="tag">${esc(REF_FORMAT_LABEL[item.format] || item.format)}</span>` : ''
+  ].filter(Boolean).join('');
+
+  const scriptHTML = item.script ? `
+    <section>
+      <h2>GUIÓN</h2>
+      <div class="script">${esc(item.script)}</div>
+    </section>` : '';
 
   const sbHTML = sb.length ? `
     <section>
@@ -3758,7 +3795,7 @@ function exportRefBrief(id) {
     <section>
       <h2>CHECKLIST</h2>
       <ul>
-        ${cl.map(c => `<li class="${c.done ? 'done' : ''}">${c.done ? '✓' : '○'} ${c.text}</li>`).join('')}
+        ${cl.map(c => `<li class="${c.done ? 'done' : ''}">${c.done ? '✓' : '○'} ${esc(c.text)}</li>`).join('')}
       </ul>
     </section>` : '';
 
@@ -3767,70 +3804,97 @@ function exportRefBrief(id) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${item.title || item.text || 'referencia'}</title>
+<title>${esc(item.title || item.text || 'referencia')}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: #0c0c0a; color: #e8e6dc;
+    background: #fafaf8; color: #1a1a18;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    max-width: 1100px; margin: 0 auto; padding: 48px 40px 80px;
+    max-width: 1100px; margin: 0 auto; padding: 20px 40px 80px;
   }
+  .print-bar {
+    display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 24px;
+  }
+  .print-btn {
+    font-family: inherit; font-size: 13px; cursor: pointer;
+    padding: 8px 16px; border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.15); background: #fff; color: #1a1a18;
+  }
+  .print-btn:hover { background: #f0f0ee; }
   .hero {
     display: flex; gap: 28px; align-items: flex-start;
-    padding-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 40px; border-bottom: 1px solid rgba(0,0,0,0.1);
     margin-bottom: 48px;
   }
   .hero-text { flex: 1; }
+  .tags { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tag {
+    display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.15); color: rgba(26,26,24,0.7);
+  }
   .hero-cover {
     flex-shrink: 0; width: 140px; height: 140px;
-    border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,0,0,0.1);
   }
   .hero-cover img { width: 100%; height: 100%; object-fit: cover; }
-  h1 { font-size: 36px; font-weight: 700; color: #f0ede4; margin-bottom: 10px; line-height: 1.2; }
-  .desc { font-size: 16px; color: rgba(220,218,210,0.65); line-height: 1.65; margin-bottom: 18px; }
+  h1 { font-size: 36px; font-weight: 700; color: #0c0c0a; margin-bottom: 10px; line-height: 1.2; }
+  .desc { font-size: 16px; color: rgba(26,26,24,0.65); line-height: 1.65; margin-bottom: 18px; }
   .link-chip {
     display: inline-flex; align-items: center; gap: 6px;
-    font-size: 12px; color: rgba(220,218,210,0.7);
+    font-size: 12px; color: rgba(26,26,24,0.75);
     text-decoration: none; padding: 6px 14px;
-    border: 1px solid rgba(255,255,255,0.18); border-radius: 20px;
+    border: 1px solid rgba(0,0,0,0.15); border-radius: 20px;
   }
   section { margin-bottom: 52px; }
   h2 {
     font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
-    text-transform: uppercase; color: rgba(220,218,210,0.3);
+    text-transform: uppercase; color: rgba(26,26,24,0.4);
     margin-bottom: 20px; padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .script {
+    font-size: 15px; line-height: 1.7; white-space: pre-wrap;
+    background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px;
+    padding: 18px 20px;
   }
   .strip { display: flex; flex-wrap: wrap; gap: 12px; }
   .frame { flex: 0 1 240px; position: relative; }
   .frame-num {
     position: absolute; bottom: 6px; left: 8px;
-    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5);
-    background: rgba(0,0,0,0.55); padding: 1px 7px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; color: #fff;
+    background: rgba(0,0,0,0.6); padding: 1px 7px; border-radius: 4px;
   }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-  .grid-item { border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); }
+  .grid-item { border-radius: 8px; overflow: hidden; border: 1px solid rgba(0,0,0,0.08); }
   ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
   li {
     display: flex; align-items: center; gap: 12px;
     padding: 12px 16px; border-radius: 8px;
-    background: rgba(255,255,255,0.03); font-size: 15px;
+    background: #fff; border: 1px solid rgba(0,0,0,0.06); font-size: 15px;
   }
-  li.done { text-decoration: line-through; opacity: 0.4; }
+  li.done { text-decoration: line-through; opacity: 0.5; }
   @media print {
-    body { padding: 20px; }
+    body { padding: 0 20px 20px; background: #fff; }
+    .print-bar { display: none; }
+    a { color: inherit; }
   }
 </style>
 </head>
 <body>
+  <div class="print-bar">
+    <button class="print-btn" onclick="window.print()">🖨 imprimir / guardar PDF</button>
+  </div>
   <div class="hero">
     <div class="hero-text">
-      ${item.title ? `<h1>${item.title}</h1>` : ''}
-      ${item.text  ? `<p class="desc">${item.text}</p>` : ''}
-      ${firstLink  ? `<a class="link-chip" href="${firstLink.url}" target="_blank">🔗 ver referencia</a>` : ''}
+      ${badges ? `<div class="tags">${badges}</div>` : ''}
+      ${item.title ? `<h1>${esc(item.title)}</h1>` : ''}
+      ${item.text  ? `<p class="desc">${esc(item.text)}</p>` : ''}
+      ${firstLink  ? `<a class="link-chip" href="${esc(firstLink.url)}" target="_blank">🔗 ver referencia</a>` : ''}
     </div>
-    ${cover ? `<div class="hero-cover"><img src="${cover}" alt="cover" crossorigin="anonymous"></div>` : ''}
+    ${cover ? `<div class="hero-cover"><img src="${esc(cover)}" alt="cover"></div>` : ''}
   </div>
+  ${scriptHTML}
   ${sbHTML}
   ${mbHTML}
   ${clHTML}
