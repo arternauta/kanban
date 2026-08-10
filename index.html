@@ -1035,6 +1035,38 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
 }
 .rp-export-btn:hover { color: #e8e6dc; border-color: rgba(255,255,255,0.3); }
 
+/* Navegación anterior/siguiente — círculos fijos al borde de la pantalla */
+.rp-nav-btn {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(20,20,18,0.7); border: 1px solid rgba(255,255,255,0.15);
+  color: #e8e6dc; font-size: 22px; line-height: 1; cursor: pointer; z-index: 3100;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+  visibility: hidden;
+}
+.rp-nav-btn:hover { background: rgba(40,40,36,0.9); border-color: rgba(255,255,255,0.3); }
+.rp-nav-prev { left: 16px; }
+.rp-nav-next { right: 16px; }
+@media (max-width: 680px) {
+  .rp-nav-btn { width: 36px; height: 36px; font-size: 18px; }
+  .rp-nav-prev { left: 6px; }
+  .rp-nav-next { right: 6px; }
+}
+
+/* Comentario rápido (nota del creativo) desde el preview */
+.rp-comment-box {
+  max-width: 860px; width: 100%; margin: 0 auto; padding: 14px 20px 0;
+}
+.rp-comment-box textarea {
+  width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #e8e6dc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  outline: none; resize: none;
+}
+.rp-comment-box textarea:focus { border-color: rgba(255,255,255,0.25); }
+.rp-comment-box-btns { display: flex; gap: 8px; margin-top: 8px; }
+
 .rp-body { flex: 1; max-width: 860px; width: 100%; margin: 0 auto; padding: 0 0 80px; }
 
 /* Hero */
@@ -1436,9 +1468,20 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
   <div class="rp-topbar">
     <button class="rp-back" id="rp-close">← volver</button>
     <span class="rp-topbar-title" id="rp-topbar-title"></span>
+    <button class="rp-export-btn" id="rp-comment">💬 comentar</button>
+    <button class="rp-export-btn" id="rp-reject" style="display:none;color:#FF8A8A;border-color:#c95c5c">✕ rechazar</button>
     <button class="rp-export-btn" id="rp-approve" style="display:none;color:#2DC98F;border-color:#1D9E75">✓ aprobar</button>
     <button class="rp-export-btn" id="rp-export">↓ exportar</button>
   </div>
+  <div class="rp-comment-box" id="rp-comment-box" style="display:none">
+    <textarea id="rp-comment-input" rows="3" placeholder="nota del creativo..."></textarea>
+    <div class="rp-comment-box-btns">
+      <button class="edit-modal-save" id="rp-comment-save">guardar</button>
+      <button class="edit-modal-cancel" id="rp-comment-cancel">cancelar</button>
+    </div>
+  </div>
+  <button class="rp-nav-btn rp-nav-prev" id="rp-prev" title="anterior">‹</button>
+  <button class="rp-nav-btn rp-nav-next" id="rp-next" title="siguiente">›</button>
   <div class="rp-body" id="rp-body"></div>
 </div>
 
@@ -3441,6 +3484,17 @@ const _igObserver = new IntersectionObserver(entries => {
   });
 }, { rootMargin: '200px' });
 
+// Compartido con la navegación anterior/siguiente del preview, para que
+// camine exactamente la misma lista que se ve en el tablero.
+function visibleRefsInCol(col) {
+  let colItems = refs.filter(r => r.col === col);
+  if (refStatusFilter !== 'all') colItems = colItems.filter(r => r.status === refStatusFilter);
+  // El filtro de marca solo aplica en "análisis de equipo" — en el resto de
+  // las columnas todavía no suele estar taggeado.
+  if (refBrandFilter !== 'all' && col === 'ideas') colItems = colItems.filter(r => r.brand === refBrandFilter);
+  return colItems;
+}
+
 function renderRefs() {
   // Solo normaliza en memoria (para que se vea bien) — NO auto-guarda.
   // Guardar automáticamente acá es peligroso: si esta carga llegó de la
@@ -3448,11 +3502,7 @@ function renderRefs() {
   // persistiría esa versión vieja y pisaría cambios recientes.
   refs.forEach(migrateRefItem);
   REF_COLS.forEach(col => {
-    let colItems = refs.filter(r => r.col === col);
-    if (refStatusFilter !== 'all') colItems = colItems.filter(r => r.status === refStatusFilter);
-    // El filtro de marca solo aplica en "análisis de equipo" — en el resto de
-    // las columnas todavía no suele estar taggeado.
-    if (refBrandFilter !== 'all' && col === 'ideas') colItems = colItems.filter(r => r.brand === refBrandFilter);
+    const colItems = visibleRefsInCol(col);
     const container = document.getElementById('refs-' + col);
     container.innerHTML = colItems.length ? colItems.map(refCard).join('') : '<div class="empty">vacío</div>';
     document.querySelector(`[data-ref-count="${col}"]`).textContent = colItems.length;
@@ -3861,14 +3911,34 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (document.getElementById('ref-preview').classList.contains('open')) { closeRefPreview(); return; }
     if (document.getElementById('ref-modal').classList.contains('open')) cancelRefModal();
+    return;
   }
+  if (!document.getElementById('ref-preview').classList.contains('open')) return;
+  if (document.activeElement?.closest('textarea, input')) return; // no interferir al escribir
+  if (e.key === 'ArrowLeft')  document.getElementById('rp-prev').click();
+  if (e.key === 'ArrowRight') document.getElementById('rp-next').click();
 });
 
 // ── Ref Preview Panel ────────────────────────────────────────────
 
-function openRefPreview(id) {
+let refPreviewSiblings = [];
+
+function openRefPreview(id, keepSiblings) {
   const item = refs.find(r => r.id === id);
   if (!item) return;
+
+  if (!keepSiblings) refPreviewSiblings = visibleRefsInCol(item.col).map(r => r.id);
+  const idx = refPreviewSiblings.indexOf(id);
+  const prevId = idx > 0 ? refPreviewSiblings[idx - 1] : '';
+  const nextId = (idx !== -1 && idx < refPreviewSiblings.length - 1) ? refPreviewSiblings[idx + 1] : '';
+  const prevBtn = document.getElementById('rp-prev');
+  const nextBtn = document.getElementById('rp-next');
+  prevBtn.style.visibility = prevId ? 'visible' : 'hidden';
+  nextBtn.style.visibility = nextId ? 'visible' : 'hidden';
+  prevBtn.dataset.navId = prevId;
+  nextBtn.dataset.navId = nextId;
+
+  document.getElementById('rp-comment-box').style.display = 'none';
 
   const links = (item.media || []).filter(m => m.type === 'link');
   const cl = item.refChecklist || [];
@@ -3879,6 +3949,7 @@ function openRefPreview(id) {
 
   document.getElementById('rp-topbar-title').textContent = item.title || item.text || 'referencia';
   document.getElementById('rp-approve').style.display = item.status === 'aprobada' ? 'none' : 'inline-flex';
+  document.getElementById('rp-reject').style.display  = item.status === 'rechazada' ? 'none' : 'inline-flex';
 
   const body = document.getElementById('rp-body');
   body.innerHTML = `
@@ -3990,7 +4061,50 @@ document.getElementById('rp-approve').addEventListener('click', () => {
   const fields = { status: 'aprobada', col: 'para-producir' };
   Object.assign(item, fields); // optimista: se ve el cambio ya mismo
   patchRefFields(id, fields);
-  openRefPreview(id); // re-dibuja el panel (oculta el botón, título/hero al día)
+  openRefPreview(id, true); // re-dibuja el panel sin recalcular la lista de navegación
+});
+document.getElementById('rp-reject').addEventListener('click', () => {
+  const id = document.getElementById('ref-preview').dataset.refId;
+  const item = refs.find(r => r.id === id);
+  if (!item) return;
+  const fields = { status: 'rechazada', col: 'inspiracion' };
+  Object.assign(item, fields);
+  patchRefFields(id, fields);
+  openRefPreview(id, true);
+});
+
+// Navegación anterior / siguiente
+document.getElementById('rp-prev').addEventListener('click', () => {
+  const id = document.getElementById('rp-prev').dataset.navId;
+  if (id) openRefPreview(id, true);
+});
+document.getElementById('rp-next').addEventListener('click', () => {
+  const id = document.getElementById('rp-next').dataset.navId;
+  if (id) openRefPreview(id, true);
+});
+
+// Comentario rápido (nota del creativo) sin abrir el modal completo
+document.getElementById('rp-comment').addEventListener('click', () => {
+  const id = document.getElementById('ref-preview').dataset.refId;
+  const item = refs.find(r => r.id === id);
+  if (!item) return;
+  document.getElementById('rp-comment-input').value = item.creativeNote || '';
+  const box = document.getElementById('rp-comment-box');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  if (box.style.display === 'block') document.getElementById('rp-comment-input').focus();
+});
+document.getElementById('rp-comment-cancel').addEventListener('click', () => {
+  document.getElementById('rp-comment-box').style.display = 'none';
+});
+document.getElementById('rp-comment-save').addEventListener('click', () => {
+  const id = document.getElementById('ref-preview').dataset.refId;
+  const item = refs.find(r => r.id === id);
+  if (!item) return;
+  const fields = { creativeNote: document.getElementById('rp-comment-input').value.trim() };
+  Object.assign(item, fields);
+  patchRefFields(id, fields);
+  document.getElementById('rp-comment-box').style.display = 'none';
+  openRefPreview(id, true);
 });
 
 function exportRefBrief(id) {
