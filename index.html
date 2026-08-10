@@ -1436,6 +1436,7 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
   <div class="rp-topbar">
     <button class="rp-back" id="rp-close">← volver</button>
     <span class="rp-topbar-title" id="rp-topbar-title"></span>
+    <button class="rp-export-btn" id="rp-approve" style="display:none;color:#2DC98F;border-color:#1D9E75">✓ aprobar</button>
     <button class="rp-export-btn" id="rp-export">↓ exportar</button>
   </div>
   <div class="rp-body" id="rp-body"></div>
@@ -3877,6 +3878,7 @@ function openRefPreview(id) {
   const firstLink = links[0];
 
   document.getElementById('rp-topbar-title').textContent = item.title || item.text || 'referencia';
+  document.getElementById('rp-approve').style.display = item.status === 'aprobada' ? 'none' : 'inline-flex';
 
   const body = document.getElementById('rp-body');
   body.innerHTML = `
@@ -3980,6 +3982,15 @@ document.getElementById('rp-close').addEventListener('click', closeRefPreview);
 document.getElementById('rp-export').addEventListener('click', () => {
   const id = document.getElementById('ref-preview').dataset.refId;
   if (id) exportRefBrief(id);
+});
+document.getElementById('rp-approve').addEventListener('click', () => {
+  const id = document.getElementById('ref-preview').dataset.refId;
+  const item = refs.find(r => r.id === id);
+  if (!item) return;
+  const fields = { status: 'aprobada', col: 'para-producir' };
+  Object.assign(item, fields); // optimista: se ve el cambio ya mismo
+  patchRefFields(id, fields);
+  openRefPreview(id); // re-dibuja el panel (oculta el botón, título/hero al día)
 });
 
 function exportRefBrief(id) {
