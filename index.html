@@ -3291,6 +3291,32 @@ function saveRefs(dirtyId = refEditingId) {
   }, 100);
 }
 
+// Para acciones puntuales (mover de columna, guardar el modal): lee el item
+// FRESCO del servidor dentro de la transacción y pisa solo los campos
+// indicados — nunca depende de lo que esta pestaña sepa de sus otros
+// campos, así que una pestaña vieja no puede revertir nada por su cuenta.
+function patchRefFields(id, fields) {
+  const gen = ++refWriteGen;
+  refPendingWrite = true;
+  return db.runTransaction(async tx => {
+    const snap = await tx.get(REFS_DOC);
+    const serverRefs = snap.exists ? (snap.data().data || []) : [];
+    const idx = serverRefs.findIndex(r => r.id === id);
+    if (idx === -1) return serverRefs;
+    serverRefs[idx] = { ...serverRefs[idx], ...fields };
+    tx.set(REFS_DOC, { data: serverRefs });
+    return serverRefs;
+  })
+    .then(merged => {
+      if (gen === refWriteGen) {
+        refPendingWrite = false;
+        refs = merged;
+        renderRefs();
+      }
+    })
+    .catch(() => { if (gen === refWriteGen) refPendingWrite = false; });
+}
+
 // ── Links: detección de plataforma + oEmbed best-effort ─────────
 
 function detectPlatform(url) {
@@ -3470,16 +3496,19 @@ function closeRefModalUI() {
 function saveRefText() {
   const item = refs.find(r => r.id === refEditingId);
   if (item) {
-    item.title  = document.getElementById('refm-title-input').value.trim();
-    item.text   = document.getElementById('refm-text').value.trim();
-    item.brand  = document.getElementById('refm-brand').value;
-    item.status = document.getElementById('refm-status').value || 'pendiente';
-    item.format = document.getElementById('refm-format').value;
-    item.script = document.getElementById('refm-script').value.trim();
-    item.creativeNote = document.getElementById('refm-creative-note').value.trim();
-    if (item.status === 'rechazada') item.col = 'inspiracion';
-    if (item.status === 'aprobada')  item.col = 'para-producir';
-    saveRefs();
+    const fields = {
+      title:        document.getElementById('refm-title-input').value.trim(),
+      text:         document.getElementById('refm-text').value.trim(),
+      brand:        document.getElementById('refm-brand').value,
+      status:       document.getElementById('refm-status').value || 'pendiente',
+      format:       document.getElementById('refm-format').value,
+      script:       document.getElementById('refm-script').value.trim(),
+      creativeNote: document.getElementById('refm-creative-note').value.trim(),
+    };
+    if (fields.status === 'rechazada') fields.col = 'inspiracion';
+    if (fields.status === 'aprobada')  fields.col = 'para-producir';
+    Object.assign(item, fields); // optimista: se ve el cambio ya mismo
+    patchRefFields(item.id, fields);
   }
   closeRefModalUI();
 }
@@ -4137,10 +4166,13 @@ function onRefDragEnd() {
 function performRefDrop(id, newCol) {
   const r = refs.find(r => r.id === id);
   if (!r) return;
+  // Optimista: se mueve visualmente ya mismo.
   r.col = newCol;
   refs = refs.filter(x => x.id !== id);
   refs.push(r);
-  saveRefs(id); renderRefs();
+  renderRefs();
+  // El guardado real lee el item fresco del servidor y solo pisa `col`.
+  patchRefFields(id, { col: newCol });
 }
 
 document.querySelectorAll('#board-refs .col').forEach(col => {
