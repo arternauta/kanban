@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 const __dir = dirname(fileURLToPath(import.meta.url));
 
 const PROJECT_ID   = 'kanbarter-a2951';
-const OBSIDIAN_DIR = '/Users/arterland/Library/Mobile Documents/iCloud~md~obsidian/Documents/CerebroV2/04_ARCHIVO/PAGINAS MATUTINAS';
+const OBSIDIAN_DIR = '/Users/arternauta/Library/Mobile Documents/iCloud~md~obsidian/Documents/CerebroV2/04_ARCHIVO/PAGINAS MATUTINAS';
 const FIRESTORE    = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
 // ── Firestore REST helpers ─────────────────────────────────────────────────
