@@ -3227,6 +3227,7 @@ const PLATFORM_ICON = { instagram:'📸', tiktok:'🎵', youtube:'▶️', other
 let refs = [], refSaveTimer = null, refWriteGen = 0, refPendingWrite = false, refEditingId = null;
 let refDragId = null, refTouchDragEl = null, refTouchGhost = null, refTouchHoldTimer = null;
 let refDirtySet = new Set();
+let refDirtySnapshots = new Map();
 
 // Guardar por "item tocado", no por copia local completa: si esta pestaña
 // quedó desincronizada (otra pestaña/Telegram cambió algo mientras tanto),
@@ -3241,7 +3242,16 @@ let refDirtySet = new Set();
 // copia local, recuperando solo lo que falte.
 function saveRefs(dirtyId = refEditingId) {
   if (dirtyId) {
-    (Array.isArray(dirtyId) ? dirtyId : [dirtyId]).forEach(id => refDirtySet.add(id));
+    // Capturar el estado del item AHORA, no cuando dispare el guardado
+    // debounced: si en el medio llega un snapshot del servidor que todavía
+    // no tiene este cambio, puede reemplazar `refs` entero y "revertir" el
+    // item en memoria antes de que el guardado pendiente lea sus datos.
+    (Array.isArray(dirtyId) ? dirtyId : [dirtyId]).forEach(id => {
+      refDirtySet.add(id);
+      const local = refs.find(r => r.id === id);
+      if (local) refDirtySnapshots.set(id, JSON.parse(JSON.stringify(local)));
+      else refDirtySnapshots.delete(id); // se borró a propósito
+    });
   } else {
     refDirtySet = null;
   }
@@ -3250,19 +3260,20 @@ function saveRefs(dirtyId = refEditingId) {
   try { localStorage.setItem('kb_refs_backup', JSON.stringify({ ts: Date.now(), data: refs })); } catch(e) {}
   clearTimeout(refSaveTimer);
   refSaveTimer = setTimeout(() => {
-    const dirtyIds  = refDirtySet;
-    const localById = new Map(refs.map(r => [r.id, r]));
+    const dirtyIds   = refDirtySet;
+    const snapshots  = refDirtySnapshots;
+    const localCopy  = refs; // solo se usa en el fallback sin dirtyId
     db.runTransaction(async tx => {
       const snap = await tx.get(REFS_DOC);
       const serverRefs = snap.exists ? (snap.data().data || []) : [];
       let merged;
       if (dirtyIds) {
         merged = serverRefs.filter(r => !dirtyIds.has(r.id));
-        dirtyIds.forEach(id => { const local = localById.get(id); if (local) merged.push(local); });
+        dirtyIds.forEach(id => { if (snapshots.has(id)) merged.push(snapshots.get(id)); });
       } else {
-        const localIds = new Set(refs.map(r => r.id));
+        const localIds = new Set(localCopy.map(r => r.id));
         const missing = serverRefs.filter(r => !localIds.has(r.id));
-        merged = missing.length ? [...refs, ...missing] : refs;
+        merged = missing.length ? [...localCopy, ...missing] : localCopy;
       }
       tx.set(REFS_DOC, { data: merged });
       return merged;
@@ -3271,6 +3282,7 @@ function saveRefs(dirtyId = refEditingId) {
         if (gen === refWriteGen) {
           refPendingWrite = false;
           refDirtySet = new Set();
+          refDirtySnapshots = new Map();
           try { localStorage.removeItem('kb_refs_backup'); } catch(e) {}
           refs = merged; renderRefs();
         }
