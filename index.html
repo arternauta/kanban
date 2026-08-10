@@ -1058,18 +1058,33 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
   .rp-nav-next { right: 6px; }
 }
 
-/* Comentario rápido (nota del creativo) desde el preview */
+/* Comentarios — hilo tipo chat, compartido entre el preview y el modal */
 .rp-comment-box {
   max-width: 860px; width: 100%; margin: 0 auto; padding: 14px 20px 0;
 }
-.rp-comment-box textarea {
-  width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #e8e6dc;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  outline: none; resize: none;
+.rc-thread {
+  display: flex; flex-direction: column; gap: 6px;
+  max-height: 240px; overflow-y: auto; padding: 2px;
 }
-.rp-comment-box textarea:focus { border-color: rgba(255,255,255,0.25); }
-.rp-comment-box-btns { display: flex; gap: 8px; margin-top: 8px; }
+.rc-thread .empty { padding: 8px 2px; font-size: 12px; }
+.rc-msg {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px; padding: 8px 10px;
+}
+.rc-msg-text { font-size: 13px; color: #e8e6dc; line-height: 1.4; white-space: pre-wrap; }
+.rc-msg-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: #5f5e5a; margin-top: 4px;
+}
+.rc-msg-del { background: none; border: none; color: #5f5e5a; cursor: pointer; font-size: 13px; line-height: 1; }
+.rc-msg-del:hover { color: #e8e6dc; }
+.rc-input-row { display: flex; gap: 6px; margin-top: 8px; }
+.rc-input-row input {
+  flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #e8e6dc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; outline: none;
+}
+.rc-input-row input:focus { border-color: rgba(255,255,255,0.25); }
 
 .rp-body { flex: 1; max-width: 860px; width: 100%; margin: 0 auto; padding: 0 0 80px; }
 
@@ -1417,8 +1432,12 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
     </div>
 
     <div class="em-img-upload">
-      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">nota del creativo</div>
-      <textarea id="refm-creative-note" rows="3" placeholder="comentario de la revisión..."></textarea>
+      <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">comentarios</div>
+      <div class="rc-thread" id="refm-comments"></div>
+      <div class="rc-input-row">
+        <input type="text" id="refm-comment-input" placeholder="agregar comentario...">
+        <button class="em-img-upload-label" id="refm-comment-add" style="cursor:pointer">+</button>
+      </div>
     </div>
 
     <div class="refm-link-row">
@@ -1474,14 +1493,14 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
     <span class="rp-topbar-title" id="rp-topbar-title"></span>
     <button class="rp-export-btn" id="rp-comment">💬 comentar</button>
     <button class="rp-export-btn rp-status-btn" id="rp-reject" data-status="rechazada">✕ rechazar</button>
-    <button class="rp-export-btn rp-status-btn" id="rp-approve" data-status="aprobada">✓ aprobar</button>
+    <button class="rp-export-btn rp-status-btn" id="rp-approve" data-status="aprobada">→ enviar a producción</button>
     <button class="rp-export-btn" id="rp-export">↓ exportar</button>
   </div>
   <div class="rp-comment-box" id="rp-comment-box" style="display:none">
-    <textarea id="rp-comment-input" rows="3" placeholder="nota del creativo..."></textarea>
-    <div class="rp-comment-box-btns">
-      <button class="edit-modal-save" id="rp-comment-save">guardar</button>
-      <button class="edit-modal-cancel" id="rp-comment-cancel">cancelar</button>
+    <div class="rc-thread" id="rp-comment-thread"></div>
+    <div class="rc-input-row">
+      <input type="text" id="rp-comment-input" placeholder="agregar comentario...">
+      <button class="edit-modal-save" id="rp-comment-add">+</button>
     </div>
   </div>
   <button class="rp-nav-btn rp-nav-prev" id="rp-prev" title="anterior">‹</button>
@@ -3275,6 +3294,12 @@ function migrateRefItem(item) {
     item.media = item.media.filter(m => m.type === 'link');
     changed = true;
   }
+  // "Nota del creativo" (un solo texto) pasó a ser un hilo de comentarios.
+  if (item.creativeNote && !item.comments) {
+    item.comments = [{ text: item.creativeNote, createdAt: item.createdAt || new Date().toISOString() }];
+    delete item.creativeNote;
+    changed = true;
+  }
   return changed;
 }
 const PLATFORM_ICON = { instagram:'📸', tiktok:'🎵', youtube:'▶️', other:'🔗' };
@@ -3450,7 +3475,7 @@ function refCard(item) {
         <div class="card-ref-status ${brandCls}">${brandLabel}</div>
         ${statusLabel ? `<div class="card-ref-status ${item.status}">${statusLabel}</div>` : ''}
         ${formatLabel ? `<div class="card-ref-status">${formatLabel}</div>` : ''}
-        ${item.creativeNote ? `<div class="card-ref-status" title="tiene nota del creativo">📝</div>` : ''}
+        ${item.comments && item.comments.length ? `<div class="card-ref-status" title="${item.comments.length} comentario(s)">💬 ${item.comments.length}</div>` : ''}
       </div>`;
   const linkBtn = firstLink
     ? `<a class="card-ref-link" href="${esc(firstLink.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🔗 ver ref</a>`
@@ -3537,7 +3562,6 @@ function openRef(existingId, col) {
   document.getElementById('refm-status').value = item.status || 'pendiente';
   document.getElementById('refm-format').value = item.format || '';
   document.getElementById('refm-script').value = item.script || '';
-  document.getElementById('refm-creative-note').value = item.creativeNote || '';
   document.getElementById('refm-link-input').value = '';
   document.getElementById('refm-delete').style.display = existingId ? 'inline-flex' : 'none';
   renderRefmCover();
@@ -3545,6 +3569,7 @@ function openRef(existingId, col) {
   renderRefmStoryboard();
   renderRefmMoodboard();
   renderRefmChecklist();
+  renderRefmComments();
   document.getElementById('ref-modal').classList.add('open');
   setTimeout(() => document.getElementById('refm-title-input').focus(), 50);
 }
@@ -3565,7 +3590,6 @@ function saveRefText() {
       status:       document.getElementById('refm-status').value || 'pendiente',
       format:       document.getElementById('refm-format').value,
       script:       document.getElementById('refm-script').value.trim(),
-      creativeNote: document.getElementById('refm-creative-note').value.trim(),
     };
     if (fields.status === 'rechazada') fields.col = 'inspiracion';
     if (fields.status === 'aprobada')  fields.col = 'para-producir';
@@ -3885,6 +3909,35 @@ document.getElementById('refm-cl-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); document.getElementById('refm-cl-add').click(); }
 });
 
+// ── Comentarios dentro del modal (hilo tipo chat) ─────────────────
+function renderRefmComments() {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const box = document.getElementById('refm-comments');
+  box.innerHTML = commentThreadHTML(item.comments || []);
+  box.querySelectorAll('[data-del-comment]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      item.comments.splice(parseInt(btn.dataset.delComment), 1);
+      saveRefs(); renderRefmComments(); renderRefs();
+    });
+  });
+  box.scrollTop = box.scrollHeight;
+}
+document.getElementById('refm-comment-add').addEventListener('click', () => {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const input = document.getElementById('refm-comment-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!item.comments) item.comments = [];
+  item.comments.push({ text, createdAt: new Date().toISOString() });
+  input.value = '';
+  saveRefs(); renderRefmComments(); renderRefs();
+});
+document.getElementById('refm-comment-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('refm-comment-add').click(); }
+});
+
 // ── Abrir tarjetas / agregar / borrar (delegación) ────────────────
 
 document.addEventListener('click', e => {
@@ -3952,8 +4005,12 @@ function openRefPreview(id, keepSiblings) {
   const firstLink = links[0];
 
   document.getElementById('rp-topbar-title').textContent = item.title || item.text || 'referencia';
-  document.getElementById('rp-approve').classList.toggle('rp-status-on', item.status === 'aprobada');
+  const isInProduction = item.status === 'aprobada';
+  const approveBtn = document.getElementById('rp-approve');
+  approveBtn.classList.toggle('rp-status-on', isInProduction);
+  approveBtn.textContent = isInProduction ? '↺ volver a análisis' : '→ enviar a producción';
   document.getElementById('rp-reject').style.display = item.status === 'rechazada' ? 'none' : 'inline-flex';
+  renderRpComments(item);
 
   const body = document.getElementById('rp-body');
   body.innerHTML = `
@@ -3975,12 +4032,6 @@ function openRefPreview(id, keepSiblings) {
     <div class="rp-section">
       <div class="rp-section-label">guión</div>
       <div class="rp-checklist" style="white-space:pre-wrap;padding:14px 16px;font-size:14px;line-height:1.6;color:rgba(220,218,210,0.85)">${esc(item.script)}</div>
-    </div>` : ''}
-
-    ${item.creativeNote ? `
-    <div class="rp-section">
-      <div class="rp-section-label">nota del creativo</div>
-      <div class="rp-checklist" style="white-space:pre-wrap;padding:14px 16px;font-size:14px;line-height:1.6;color:rgba(220,218,210,0.85)">${esc(item.creativeNote)}</div>
     </div>` : ''}
 
     ${sb.length ? `
@@ -4086,27 +4137,62 @@ document.getElementById('rp-next').addEventListener('click', () => {
 });
 
 // Comentario rápido (nota del creativo) sin abrir el modal completo
+function fmtCommentDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const date = d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+  const time = d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  return `${date} · ${time}`;
+}
+
+function commentThreadHTML(comments) {
+  if (!comments.length) return '<div class="empty">sin comentarios todavía</div>';
+  return comments.map((c, idx) => `
+    <div class="rc-msg">
+      <div class="rc-msg-text">${esc(c.text)}</div>
+      <div class="rc-msg-meta">
+        <span>${fmtCommentDate(c.createdAt)}</span>
+        <button class="rc-msg-del" data-del-comment="${idx}" title="borrar">×</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderRpComments(item) {
+  const box = document.getElementById('rp-comment-thread');
+  box.innerHTML = commentThreadHTML(item.comments || []);
+  box.querySelectorAll('[data-del-comment]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      item.comments.splice(parseInt(btn.dataset.delComment), 1);
+      patchRefFields(item.id, { comments: item.comments });
+      renderRpComments(item);
+      renderRefs();
+    });
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
 document.getElementById('rp-comment').addEventListener('click', () => {
-  const id = document.getElementById('ref-preview').dataset.refId;
-  const item = refs.find(r => r.id === id);
-  if (!item) return;
-  document.getElementById('rp-comment-input').value = item.creativeNote || '';
   const box = document.getElementById('rp-comment-box');
   box.style.display = box.style.display === 'none' ? 'block' : 'none';
   if (box.style.display === 'block') document.getElementById('rp-comment-input').focus();
 });
-document.getElementById('rp-comment-cancel').addEventListener('click', () => {
-  document.getElementById('rp-comment-box').style.display = 'none';
-});
-document.getElementById('rp-comment-save').addEventListener('click', () => {
+function addRpComment() {
   const id = document.getElementById('ref-preview').dataset.refId;
   const item = refs.find(r => r.id === id);
   if (!item) return;
-  const fields = { creativeNote: document.getElementById('rp-comment-input').value.trim() };
-  Object.assign(item, fields);
-  patchRefFields(id, fields);
-  document.getElementById('rp-comment-box').style.display = 'none';
-  openRefPreview(id, true);
+  const input = document.getElementById('rp-comment-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!item.comments) item.comments = [];
+  item.comments.push({ text, createdAt: new Date().toISOString() });
+  patchRefFields(id, { comments: item.comments });
+  input.value = '';
+  renderRpComments(item);
+  renderRefs();
+}
+document.getElementById('rp-comment-add').addEventListener('click', addRpComment);
+document.getElementById('rp-comment-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addRpComment(); }
 });
 
 function exportRefBrief(id) {
@@ -4134,10 +4220,13 @@ function exportRefBrief(id) {
       <div class="script">${esc(item.script)}</div>
     </section>` : '';
 
-  const creativeNoteHTML = item.creativeNote ? `
+  const comments = item.comments || [];
+  const commentsHTML = comments.length ? `
     <section>
-      <h2>NOTA DEL CREATIVO</h2>
-      <div class="script">${esc(item.creativeNote)}</div>
+      <h2>COMENTARIOS</h2>
+      <ul>
+        ${comments.map(c => `<li><span style="opacity:0.5;margin-right:8px">${fmtCommentDate(c.createdAt)}</span>${esc(c.text)}</li>`).join('')}
+      </ul>
     </section>` : '';
 
   const sbHTML = sb.length ? `
@@ -4271,7 +4360,7 @@ function exportRefBrief(id) {
     ${cover ? `<div class="hero-cover"><img src="${esc(cover)}" alt="cover" style="object-position:${COVER_POS_CSS[item.coverPosition] || 'center'}"></div>` : ''}
   </div>
   ${scriptHTML}
-  ${creativeNoteHTML}
+  ${commentsHTML}
   ${sbHTML}
   ${mbHTML}
   ${clHTML}
