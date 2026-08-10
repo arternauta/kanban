@@ -1035,6 +1035,10 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
 }
 .rp-export-btn:hover { color: #e8e6dc; border-color: rgba(255,255,255,0.3); }
 
+/* Aprobar/rechazar como toggles: estado activo con fondo lleno */
+#rp-approve.rp-status-on { background: #1D9E75; border-color: #1D9E75; color: #0c0c0a; }
+#rp-reject.rp-status-on  { background: #c95c5c; border-color: #c95c5c; color: #0c0c0a; }
+
 /* Navegación anterior/siguiente — círculos fijos al borde de la pantalla */
 .rp-nav-btn {
   position: fixed; top: 50%; transform: translateY(-50%);
@@ -1469,8 +1473,8 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
     <button class="rp-back" id="rp-close">← volver</button>
     <span class="rp-topbar-title" id="rp-topbar-title"></span>
     <button class="rp-export-btn" id="rp-comment">💬 comentar</button>
-    <button class="rp-export-btn" id="rp-reject" style="display:none;color:#FF8A8A;border-color:#c95c5c">✕ rechazar</button>
-    <button class="rp-export-btn" id="rp-approve" style="display:none;color:#2DC98F;border-color:#1D9E75">✓ aprobar</button>
+    <button class="rp-export-btn rp-status-btn" id="rp-reject" data-status="rechazada">✕ rechazar</button>
+    <button class="rp-export-btn rp-status-btn" id="rp-approve" data-status="aprobada">✓ aprobar</button>
     <button class="rp-export-btn" id="rp-export">↓ exportar</button>
   </div>
   <div class="rp-comment-box" id="rp-comment-box" style="display:none">
@@ -3948,8 +3952,8 @@ function openRefPreview(id, keepSiblings) {
   const firstLink = links[0];
 
   document.getElementById('rp-topbar-title').textContent = item.title || item.text || 'referencia';
-  document.getElementById('rp-approve').style.display = item.status === 'aprobada' ? 'none' : 'inline-flex';
-  document.getElementById('rp-reject').style.display  = item.status === 'rechazada' ? 'none' : 'inline-flex';
+  document.getElementById('rp-approve').classList.toggle('rp-status-on', item.status === 'aprobada');
+  document.getElementById('rp-reject').classList.toggle('rp-status-on', item.status === 'rechazada');
 
   const body = document.getElementById('rp-body');
   body.innerHTML = `
@@ -4054,24 +4058,22 @@ document.getElementById('rp-export').addEventListener('click', () => {
   const id = document.getElementById('ref-preview').dataset.refId;
   if (id) exportRefBrief(id);
 });
-document.getElementById('rp-approve').addEventListener('click', () => {
+// Aprobar/rechazar son toggles: tocar de nuevo el mismo vuelve a "pendiente".
+// Rechazar NO borra nada — solo cambia el status y mueve la card a Inspiración.
+const REF_STATUS_COL = { aprobada: 'para-producir', rechazada: 'inspiracion', pendiente: 'ideas' };
+function toggleRefStatus(btn) {
   const id = document.getElementById('ref-preview').dataset.refId;
   const item = refs.find(r => r.id === id);
   if (!item) return;
-  const fields = { status: 'aprobada', col: 'para-producir' };
+  const status = btn.dataset.status;
+  const targetStatus = item.status === status ? 'pendiente' : status;
+  const fields = { status: targetStatus, col: REF_STATUS_COL[targetStatus] };
   Object.assign(item, fields); // optimista: se ve el cambio ya mismo
   patchRefFields(id, fields);
   openRefPreview(id, true); // re-dibuja el panel sin recalcular la lista de navegación
-});
-document.getElementById('rp-reject').addEventListener('click', () => {
-  const id = document.getElementById('ref-preview').dataset.refId;
-  const item = refs.find(r => r.id === id);
-  if (!item) return;
-  const fields = { status: 'rechazada', col: 'inspiracion' };
-  Object.assign(item, fields);
-  patchRefFields(id, fields);
-  openRefPreview(id, true);
-});
+}
+document.getElementById('rp-approve').addEventListener('click', e => toggleRefStatus(e.currentTarget));
+document.getElementById('rp-reject').addEventListener('click', e => toggleRefStatus(e.currentTarget));
 
 // Navegación anterior / siguiente
 document.getElementById('rp-prev').addEventListener('click', () => {
