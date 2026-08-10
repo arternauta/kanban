@@ -1060,11 +1060,17 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
 
 /* Comentarios — hilo tipo chat, compartido entre el preview y el modal */
 .rp-comment-box {
-  max-width: 860px; width: 100%; margin: 0 auto; padding: 14px 20px 0;
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 3200;
+  width: 340px; max-width: 85vw;
+  background: #131311; border-left: 1px solid rgba(255,255,255,0.1);
+  box-shadow: -12px 0 32px rgba(0,0,0,0.4);
+  padding: 66px 16px 16px; display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
+.rp-comment-box.open { transform: translateX(0); }
 .rc-thread {
   display: flex; flex-direction: column; gap: 6px;
-  max-height: 240px; overflow-y: auto; padding: 2px;
+  flex: 1; overflow-y: auto; padding: 2px;
 }
 .rc-thread .empty { padding: 8px 2px; font-size: 12px; }
 .rc-msg {
@@ -1496,7 +1502,7 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
     <button class="rp-export-btn rp-status-btn" id="rp-approve" data-status="aprobada">→ enviar a producción</button>
     <button class="rp-export-btn" id="rp-export">↓ exportar</button>
   </div>
-  <div class="rp-comment-box" id="rp-comment-box" style="display:none">
+  <div class="rp-comment-box" id="rp-comment-box">
     <div class="rc-thread" id="rp-comment-thread"></div>
     <div class="rc-input-row">
       <input type="text" id="rp-comment-input" placeholder="agregar comentario...">
@@ -3995,7 +4001,7 @@ function openRefPreview(id, keepSiblings) {
   prevBtn.dataset.navId = prevId;
   nextBtn.dataset.navId = nextId;
 
-  document.getElementById('rp-comment-box').style.display = 'none';
+  document.getElementById('rp-comment-box').classList.remove('open');
 
   const links = (item.media || []).filter(m => m.type === 'link');
   const cl = item.refChecklist || [];
@@ -4173,8 +4179,8 @@ function renderRpComments(item) {
 
 document.getElementById('rp-comment').addEventListener('click', () => {
   const box = document.getElementById('rp-comment-box');
-  box.style.display = box.style.display === 'none' ? 'block' : 'none';
-  if (box.style.display === 'block') document.getElementById('rp-comment-input').focus();
+  box.classList.toggle('open');
+  if (box.classList.contains('open')) document.getElementById('rp-comment-input').focus();
 });
 function addRpComment() {
   const id = document.getElementById('ref-preview').dataset.refId;
