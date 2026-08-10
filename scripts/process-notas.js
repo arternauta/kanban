@@ -6,11 +6,14 @@
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { homedir } from 'os';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 
 const PROJECT_ID   = 'kanbarter-a2951';
-const OBSIDIAN_DIR = '/Users/arternauta/Library/Mobile Documents/iCloud~md~obsidian/Documents/CerebroV2/04_ARCHIVO/PAGINAS MATUTINAS';
+// homedir() en vez de hardcodear el usuario: este script corre en más de
+// una compu (misma persona, distinto usuario de sistema en cada una).
+const OBSIDIAN_DIR = join(homedir(), 'Library/Mobile Documents/iCloud~md~obsidian/Documents/CerebroV2/04_ARCHIVO/PAGINAS MATUTINAS');
 const FIRESTORE    = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
 // ── Firestore REST helpers ─────────────────────────────────────────────────
