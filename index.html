@@ -888,6 +888,13 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
   .board-notas .col-collapsible.collapsed { flex: 0 0 38px !important; max-width: 38px !important; }
 }
 
+/* ── Tablet: ni el ancho fijo de desktop ni el snap-scroll de celular ── */
+@media (min-width: 681px) and (max-width: 1024px) {
+  .col { min-width: 130px; }
+  .board-refs, .board-notas { justify-content: flex-start; }
+  .board-refs .col, .board-notas .col { flex: 0 0 260px; max-width: 260px; }
+}
+
 /* ── Refs toolbar ──────────────────────────────────────────────── */
 .refs-toolbar {
   padding: 8px 20px; display: flex; align-items: center; gap: 6px;
