@@ -3953,7 +3953,7 @@ function openRefPreview(id, keepSiblings) {
 
   document.getElementById('rp-topbar-title').textContent = item.title || item.text || 'referencia';
   document.getElementById('rp-approve').classList.toggle('rp-status-on', item.status === 'aprobada');
-  document.getElementById('rp-reject').classList.toggle('rp-status-on', item.status === 'rechazada');
+  document.getElementById('rp-reject').style.display = item.status === 'rechazada' ? 'none' : 'inline-flex';
 
   const body = document.getElementById('rp-body');
   body.innerHTML = `
