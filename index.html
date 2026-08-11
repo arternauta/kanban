@@ -3544,6 +3544,7 @@ function renderRefs() {
     container.querySelectorAll('.card').forEach(el => {
       el.addEventListener('dragstart', onRefDragStart);
       el.addEventListener('dragend', onRefDragEnd);
+      el.addEventListener('dragover', onRefCardDragOver);
     });
   });
 }
@@ -4381,6 +4382,14 @@ function exportRefBrief(id) {
 
 // ── Drag & drop (mouse) — simplificado a nivel de columna ─────────
 
+let refDragOverCardId = null;
+let refDragOverPos = null;
+function clearRefInsertIndicators() {
+  document.querySelectorAll('#board-refs .insert-before, #board-refs .insert-after').forEach(el => {
+    el.classList.remove('insert-before', 'insert-after');
+  });
+}
+
 function onRefDragStart(e) {
   refDragId = this.dataset.refId;
   this.classList.add('dragging');
@@ -4390,18 +4399,60 @@ function onRefDragStart(e) {
 function onRefDragEnd() {
   this.classList.remove('dragging');
   document.querySelectorAll('#board-refs .col').forEach(c => c.classList.remove('drag-over'));
-  refDragId = null;
+  clearRefInsertIndicators();
+  refDragId = null; refDragOverCardId = null; refDragOverPos = null;
 }
-function performRefDrop(id, newCol) {
+function onRefCardDragOver(e) {
+  e.preventDefault(); e.stopPropagation();
+  const rect = this.getBoundingClientRect();
+  refDragOverCardId = this.dataset.refId;
+  refDragOverPos = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+  clearRefInsertIndicators();
+  this.classList.add(refDragOverPos === 'before' ? 'insert-before' : 'insert-after');
+}
+
+// Reordena localmente (optimista) y guarda posición real leyendo el
+// servidor fresco dentro de la transacción — mismo espíritu que
+// patchRefFields, pero reposicionando en el array en vez de un campo.
+function performRefDrop(id, newCol, targetId, pos) {
   const r = refs.find(r => r.id === id);
   if (!r) return;
-  // Optimista: se mueve visualmente ya mismo.
   r.col = newCol;
   refs = refs.filter(x => x.id !== id);
-  refs.push(r);
+  if (targetId && targetId !== id) {
+    const targetIdx = refs.findIndex(x => x.id === targetId);
+    if (targetIdx !== -1) refs.splice(pos === 'before' ? targetIdx : targetIdx + 1, 0, r);
+    else refs.push(r);
+  } else {
+    refs.push(r);
+  }
   renderRefs();
-  // El guardado real lee el item fresco del servidor y solo pisa `col`.
-  patchRefFields(id, { col: newCol });
+  patchRefPosition(id, newCol, targetId, pos);
+}
+
+function patchRefPosition(id, newCol, targetId, pos) {
+  const gen = ++refWriteGen;
+  refPendingWrite = true;
+  return db.runTransaction(async tx => {
+    const snap = await tx.get(REFS_DOC);
+    const serverRefs = snap.exists ? (snap.data().data || []) : [];
+    const idx = serverRefs.findIndex(r => r.id === id);
+    if (idx === -1) return serverRefs;
+    const [item] = serverRefs.splice(idx, 1);
+    item.col = newCol;
+    let insertAt = serverRefs.length;
+    if (targetId) {
+      const targetIdx = serverRefs.findIndex(r => r.id === targetId);
+      if (targetIdx !== -1) insertAt = pos === 'before' ? targetIdx : targetIdx + 1;
+    }
+    serverRefs.splice(insertAt, 0, item);
+    tx.set(REFS_DOC, { data: serverRefs });
+    return serverRefs;
+  })
+    .then(merged => {
+      if (gen === refWriteGen) { refPendingWrite = false; refs = merged; renderRefs(); }
+    })
+    .catch(() => { if (gen === refWriteGen) refPendingWrite = false; });
 }
 
 document.querySelectorAll('#board-refs .col').forEach(col => {
@@ -4409,12 +4460,14 @@ document.querySelectorAll('#board-refs .col').forEach(col => {
   col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over'); });
   col.addEventListener('drop', e => {
     e.preventDefault(); col.classList.remove('drag-over');
+    clearRefInsertIndicators();
     const id = e.dataTransfer.getData('text/plain');
-    if (id) performRefDrop(id, col.dataset.refCol);
+    if (id) performRefDrop(id, col.dataset.refCol, refDragOverCardId, refDragOverPos);
+    refDragOverCardId = null; refDragOverPos = null;
   });
 });
 
-// ── Drag & drop (touch) — mismo patrón simplificado ───────────────
+// ── Drag & drop (touch) ───────────────────────────────────────────
 
 document.addEventListener('touchstart', e => {
   const card = e.target.closest('.card[data-ref-id]');
@@ -4444,6 +4497,29 @@ document.addEventListener('touchstart', e => {
   }, { once: true });
 }, { passive: true });
 
+function refTouchUpdateTarget(x, y) {
+  if (refTouchGhost) refTouchGhost.style.display = 'none';
+  const el = document.elementFromPoint(x, y);
+  if (refTouchGhost) refTouchGhost.style.display = '';
+
+  document.querySelectorAll('#board-refs .col').forEach(c => c.classList.remove('drag-over'));
+  clearRefInsertIndicators();
+
+  const targetCard = el?.closest('.card[data-ref-id]');
+  if (targetCard && targetCard.dataset.refId !== refDragId) {
+    const rect = targetCard.getBoundingClientRect();
+    refDragOverCardId = targetCard.dataset.refId;
+    refDragOverPos = y < rect.top + rect.height / 2 ? 'before' : 'after';
+    targetCard.classList.add(refDragOverPos === 'before' ? 'insert-before' : 'insert-after');
+  } else {
+    refDragOverCardId = null; refDragOverPos = null;
+  }
+
+  const col = el?.closest('#board-refs .col');
+  if (col) col.classList.add('drag-over');
+  return col;
+}
+
 document.addEventListener('touchmove', e => {
   if (!refTouchDragEl) return;
   e.preventDefault();
@@ -4451,25 +4527,20 @@ document.addEventListener('touchmove', e => {
   if (refTouchGhost) {
     refTouchGhost.style.left = (touch.clientX - refTouchGhost.offsetWidth / 2) + 'px';
     refTouchGhost.style.top  = (touch.clientY - 40) + 'px';
-    refTouchGhost.style.display = 'none';
   }
-  const el = document.elementFromPoint(touch.clientX, touch.clientY);
-  if (refTouchGhost) refTouchGhost.style.display = '';
-  document.querySelectorAll('#board-refs .col').forEach(c => c.classList.remove('drag-over'));
-  const col = el?.closest('#board-refs .col');
-  if (col) col.classList.add('drag-over');
+  refTouchUpdateTarget(touch.clientX, touch.clientY);
 }, { passive: false });
 
 document.addEventListener('touchend', e => {
   if (!refTouchDragEl) return;
   const touch = e.changedTouches[0];
-  const el = document.elementFromPoint(touch.clientX, touch.clientY);
-  const col = el?.closest('#board-refs .col');
+  const col = refTouchUpdateTarget(touch.clientX, touch.clientY);
   document.querySelectorAll('#board-refs .col').forEach(c => c.classList.remove('drag-over'));
+  clearRefInsertIndicators();
   if (refTouchGhost) { refTouchGhost.remove(); refTouchGhost = null; }
   refTouchDragEl.classList.remove('touch-dragging');
-  if (col && refDragId) performRefDrop(refDragId, col.dataset.refCol);
-  refTouchDragEl = null; refDragId = null;
+  if (col && refDragId) performRefDrop(refDragId, col.dataset.refCol, refDragOverCardId, refDragOverPos);
+  refTouchDragEl = null; refDragId = null; refDragOverCardId = null; refDragOverPos = null;
 });
 
 // ── Tabs ───────────────────────────────────────────────────────
