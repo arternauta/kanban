@@ -5060,20 +5060,23 @@ function saveSemillaModal() {
   renderSemillas();
 }
 
+// A pesar del nombre histórico, esto va a "ideas" del tablero de
+// TAREAS (Prioridades > inbox, etiquetado "ideas" ahí) — no a
+// Referencias. Antes creaba mal una referencia en Inbox de Referencias.
 function semillaToIdeas(id) {
   const s = semillas.find(x => x.id === id);
   if (!s) return;
-  const newRef = {
-    id: uid(), col: 'inbox',
-    title: s.title || '',
-    text:  s.text,
-    brand: s.brand || 'personal',
-    status: 'pendiente',
+  const text = [s.title, s.text].filter(Boolean).join(' — ') || '(sin texto)';
+  const newTask = {
+    id: uid(), col: 'inbox', text,
+    brand: s.brand ? s.brand.toUpperCase() : '',
+    priority: '', date: '', assignee: '',
+    archived: false, timeLog: [], timeSpent: 0,
     createdAt: new Date().toISOString()
   };
-  if (s.images && s.images.length) newRef.moodboard = s.images.map(url => ({ type:'image', url }));
-  refs.unshift(newRef);
-  saveRefs(newRef.id); renderRefs();
+  if (s.images && s.images.length) { newTask.images = s.images; newTask.cover = s.images[0]; }
+  tasks.unshift(newTask);
+  save(); render();
   semillas = semillas.filter(x => x.id !== id);
   saveSemillas(); renderSemillas();
 }
