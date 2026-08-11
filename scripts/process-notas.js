@@ -64,6 +64,30 @@ function uid() {
   return Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10);
 }
 
+// ── Merge de notas partidas por el límite de Telegram ──────────────────────
+// Cuando una nota dictada supera ~4096 caracteres, la app la manda como dos
+// mensajes seguidos → dos notas separadas con createdAt casi idéntico. Se
+// mergean acá (no en la Cloud Function) porque este es el único lugar donde
+// se trabajan las notas; la función de Telegram queda simple.
+const MERGE_WINDOW_MS = 2 * 60 * 1000; // 2 minutos entre mensajes consecutivos
+
+function mergeSplitNotas(notas) {
+  const sorted = [...notas].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const merged = [];
+  for (const n of sorted) {
+    const last = merged[merged.length - 1];
+    const closeEnough = last && n.source === 'telegram' && last.source === 'telegram' &&
+      (new Date(n.createdAt) - new Date(last.createdAt)) <= MERGE_WINDOW_MS;
+    if (closeEnough) {
+      last.text = `${last.text}\n\n${n.text}`;
+      last.mergedIds.push(n.id);
+    } else {
+      merged.push({ ...n, mergedIds: [n.id] });
+    }
+  }
+  return merged;
+}
+
 // ── Obsidian helpers ───────────────────────────────────────────────────────
 
 function safeFilename(nota) {
@@ -77,7 +101,7 @@ function safeFilename(nota) {
   return `${date} ${title} ${shortId}.md`;
 }
 
-function toMarkdown(nota) {
+function toMarkdown(nota, summary) {
   const date = nota.createdAt
     ? new Date(nota.createdAt).toLocaleDateString('es-AR', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
     : '';
@@ -85,6 +109,10 @@ function toMarkdown(nota) {
   lines.push(nota.title ? `# ${nota.title}` : `# Página matutina — ${date}`);
   lines.push('');
   if (date) lines.push(`**Fecha:** ${date}  `);
+  if (summary) {
+    lines.push('');
+    lines.push(`**Resumen:** ${summary}`);
+  }
   lines.push('');
   lines.push('---');
   lines.push('');
@@ -99,7 +127,8 @@ async function cmdFetch() {
   const raw  = snap?.fields?.data?.arrayValue?.values || [];
   const all  = raw.map(v => parseValue(v)).filter(Boolean);
 
-  const pending = all.filter(n => !n.analyzed && !n.archivedNote);
+  const rawPending = all.filter(n => !n.analyzed && !n.archivedNote);
+  const pending = mergeSplitNotas(rawPending);
 
   if (pending.length === 0) {
     console.log('No hay notas pendientes de analizar.');
@@ -112,7 +141,8 @@ async function cmdFetch() {
   console.log('\n── Notas pendientes ─────────────────────────────────────────\n');
   for (const n of pending) {
     const date = n.createdAt ? new Date(n.createdAt).toISOString().slice(0, 10) : '?';
-    console.log(`[${n.id.slice(-6)}] ${date} — ${n.title || '(sin título)'}`);
+    const fused = n.mergedIds.length > 1 ? ` (fusionada de ${n.mergedIds.length} mensajes)` : '';
+    console.log(`[${n.id.slice(-6)}] ${date} — ${n.title || '(sin título)'}${fused}`);
     console.log(n.text?.slice(0, 200) + (n.text?.length > 200 ? '…' : ''));
     console.log('');
   }
@@ -120,6 +150,7 @@ async function cmdFetch() {
   console.log('\nCreá scripts/ideas.json con este formato y corré: node scripts/process-notas.js push\n');
   console.log(JSON.stringify([{
     notaId: pending[0].id,
+    summary: 'Resumen de 1-2 líneas de la nota',
     ideas: [
       { text: 'Ejemplo de idea extraída', brand: 'personal' }
     ]
@@ -163,18 +194,28 @@ async function cmdPush() {
 
   const updatedSemillas = [...allSemillas, ...newSemillas];
 
+  // pending viene ya fusionado (fetch): cada entrada trae mergedIds con los
+  // ids originales de Firestore que representa (1 si no hubo split, 2+ si sí).
+  const summaryByNotaId  = new Map(ideasMap.map(e => [e.notaId, e.summary || '']));
+  const primaryIdsDone   = new Set(ideasMap.map(e => e.notaId));
+  const allOriginalIdsDone = new Set();
+  for (const entry of pending) {
+    if (primaryIdsDone.has(entry.id)) {
+      for (const oid of entry.mergedIds) allOriginalIdsDone.add(oid);
+    }
+  }
+
   // Marcar notas procesadas como analyzed + obsidianExported
-  const processedIds = new Set(ideasMap.map(e => e.notaId));
   const updatedNotas = allNotas.map(n =>
-    processedIds.has(n.id) ? { ...n, analyzed: true, obsidianExported: true } : n
+    allOriginalIdsDone.has(n.id) ? { ...n, analyzed: true, obsidianExported: true } : n
   );
 
-  // Escribir Obsidian
+  // Escribir Obsidian (un archivo por entrada fusionada, no por nota original)
   if (!existsSync(OBSIDIAN_DIR)) mkdirSync(OBSIDIAN_DIR, { recursive: true });
   let obsidianCount = 0;
-  for (const nota of pending.filter(n => processedIds.has(n.id))) {
+  for (const nota of pending.filter(n => primaryIdsDone.has(n.id))) {
     const filepath = join(OBSIDIAN_DIR, safeFilename(nota));
-    writeFileSync(filepath, toMarkdown(nota), 'utf8');
+    writeFileSync(filepath, toMarkdown(nota, summaryByNotaId.get(nota.id)), 'utf8');
     console.log(`📝 Obsidian: ${safeFilename(nota)}`);
     obsidianCount++;
   }
@@ -187,7 +228,7 @@ async function cmdPush() {
 
   console.log(`\n✓ ${newSemillas.length} semilla(s) → columna semillas`);
   console.log(`✓ ${obsidianCount} nota(s) → Obsidian`);
-  console.log(`✓ ${processedIds.size} nota(s) marcadas como analizadas`);
+  console.log(`✓ ${allOriginalIdsDone.size} nota(s) marcadas como analizadas`);
 }
 
 // ── Entry point ────────────────────────────────────────────────────────────

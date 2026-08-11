@@ -2063,7 +2063,22 @@ setInterval(() => {
 // (ej. la compu se durmió) y mientras tanto se agregó algo desde otra
 // sesión o Telegram, esa tarea NO estaba en `tasks` local — sin esto,
 // guardar la borraría. Acá se recupera antes de escribir.
+let saveRetryTimer = null;
+let saveRetryDelay = 1000;
+
+function setSaveStatus(state) {
+  const el = document.getElementById('save-status');
+  if (!el) return;
+  el.className = 'save-status admin-only' + (state ? ' ' + state : '');
+  el.textContent = state === 'saving'   ? 'guardando…'
+                  : state === 'retrying' ? 'sin conexión, reintentando…'
+                  : state === 'saved'    ? 'guardado'
+                  : '';
+  if (state === 'saved') setTimeout(() => { if (el.textContent === 'guardado') el.textContent = ''; }, 2000);
+}
+
 function writeTasksTransactional(gen) {
+  if (gen === writeGen) setSaveStatus('saving');
   return db.runTransaction(async tx => {
     const snap = await tx.get(TASKS_DOC);
     const serverTasks = snap.exists ? (snap.data().data || []) : [];
@@ -2076,16 +2091,40 @@ function writeTasksTransactional(gen) {
     .then(merged => {
       if (gen === writeGen) {
         pendingWrite = false;
+        saveRetryDelay = 1000;
+        clearTimeout(saveRetryTimer);
+        setSaveStatus('saved');
         try { localStorage.removeItem('kb_backup'); } catch(e) {}
         if (merged.length !== tasks.length) { tasks = merged; render(); }
       }
     })
-    .catch(() => { if (gen === writeGen) pendingWrite = false; });
+    .catch(() => {
+      if (gen !== writeGen) return;
+      // No abandonar el intento: si se rinde acá y pone pendingWrite en
+      // false, la próxima sincronización de otra pestaña puede pisar esta
+      // tarea porque nunca llegó a guardarse en el servidor. Se reintenta
+      // con backoff hasta que funcione (o hasta que un save() más nuevo
+      // invalide este gen).
+      setSaveStatus('retrying');
+      clearTimeout(saveRetryTimer);
+      saveRetryTimer = setTimeout(() => writeTasksTransactional(gen), saveRetryDelay);
+      saveRetryDelay = Math.min(saveRetryDelay * 2, 30000);
+    });
 }
+
+window.addEventListener('online', () => {
+  if (pendingWrite) {
+    clearTimeout(saveRetryTimer);
+    saveRetryDelay = 1000;
+    writeTasksTransactional(writeGen);
+  }
+});
 
 function save() {
   const gen = ++writeGen;
   pendingWrite = true;
+  clearTimeout(saveRetryTimer);
+  saveRetryDelay = 1000;
   try { localStorage.setItem('kb_backup', JSON.stringify({ ts: Date.now(), data: tasks })); } catch(e) {}
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => { writeTasksTransactional(gen); }, 100);
