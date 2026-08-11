@@ -4412,8 +4412,13 @@ function refBriefStyles() {
   ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
   li { display: flex; align-items: baseline; gap: 10px; font-size: 16px; color: #26261f; }
   li.done { text-decoration: line-through; opacity: 0.5; }
+  /* margin:0 en @page saca el hueco donde Chrome dibuja fecha/URL/página
+     al imprimir — sin eso, esos datos aparecen aunque "Encabezados y pies
+     de página" esté tildado en el diálogo de impresión. El padding pasa
+     al body para no perder el margen visual del contenido. */
+  @page { margin: 0; }
   @media print {
-    body { padding: 0 30px 30px; }
+    body { padding: 20mm 18mm 24mm; }
     .print-bar { display: none; }
     a { color: inherit; }
   }`;
