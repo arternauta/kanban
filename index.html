@@ -1671,6 +1671,7 @@ body.public-client .rc-msg-actions { display: none !important; }
   <button class="ref-brand-btn" data-brand-filter="motorrad">MOTORRAD</button>
   <button class="ref-brand-btn" data-brand-filter="">Sin marca</button>
   <button class="ref-brand-btn" data-brand-filter="personal">Personal</button>
+  <button class="hbtn" id="export-brand-btn" style="display:none;margin-left:10px">↓ exportar marca</button>
 </div>
 
 <div class="board-refs" id="board-refs">
@@ -4318,80 +4319,8 @@ document.getElementById('rp-comment-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); addRpComment(); }
 });
 
-function exportRefBrief(id) {
-  const item = refs.find(r => r.id === id);
-  if (!item) return;
-
-  const links = (item.media || []).filter(m => m.type === 'link');
-  const sb = item.storyboard  || [];
-  const mb = item.moodboard   || [];
-  const cl = item.refChecklist || [];
-  const cover  = item.cover || links.find(l => l.thumb)?.thumb || mb.find(m => m.type !== 'video')?.url;
-  const firstLink = links[0];
-
-  const imgTag = (url, style = '') =>
-    `<img src="${url}" style="display:block;${style}">`;
-
-  const badges = [
-    item.brand ? `<span class="tag">${esc(REF_BRAND_LABEL[item.brand] || item.brand)}</span>` : '',
-    item.format ? `<span class="tag">${esc(REF_FORMAT_LABEL[item.format] || item.format)}</span>` : ''
-  ].filter(Boolean).join('');
-
-  const scriptHTML = item.script ? `
-    <section>
-      <h2>GUIÓN</h2>
-      <div class="script">${esc(item.script)}</div>
-    </section>` : '';
-
-  const comments = item.comments || [];
-  const commentsHTML = comments.length ? `
-    <section>
-      <h2>COMENTARIOS</h2>
-      <ul>
-        ${comments.map(c => `<li><span style="opacity:0.5;margin-right:8px">${fmtCommentDate(c.createdAt)}</span>${esc(c.text)}</li>`).join('')}
-      </ul>
-    </section>` : '';
-
-  const sbHTML = sb.length ? `
-    <section>
-      <h2>SHOTLIST</h2>
-      <div class="strip">
-        ${sb.map((f, i) => `
-          <div class="frame">
-            <div class="frame-img">
-              ${imgTag(f.url, 'width:100%;height:160px;object-fit:cover;border-radius:8px;')}
-              <div class="frame-num">${i + 1}</div>
-            </div>
-            ${f.text ? `<div class="frame-caption">${esc(f.text)}</div>` : ''}
-          </div>`).join('')}
-      </div>
-    </section>` : '';
-
-  const mbHTML = mb.length ? `
-    <section>
-      <h2>MOODBOARD</h2>
-      <div class="grid">
-        ${mb.map(f => `<div class="grid-item">${f.type === 'video'
-          ? `<video src="${f.url}" style="display:block;width:100%;height:110px;object-fit:cover;border-radius:8px;" muted controls></video>`
-          : imgTag(f.url, 'width:100%;height:110px;object-fit:cover;border-radius:8px;')}</div>`).join('')}
-      </div>
-    </section>` : '';
-
-  const clHTML = cl.length ? `
-    <section>
-      <h2>CHECKLIST</h2>
-      <ul>
-        ${cl.map(c => `<li class="${c.done ? 'done' : ''}">${c.done ? '✓' : '○'} ${esc(c.text)}</li>`).join('')}
-      </ul>
-    </section>` : '';
-
-  const html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(item.title || item.text || 'referencia')}</title>
-<style>
+function refBriefStyles() {
+  return `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: #fafaf8; color: #1a1a18;
@@ -4466,13 +4395,77 @@ function exportRefBrief(id) {
     body { padding: 0 20px 20px; background: #fff; }
     .print-bar { display: none; }
     a { color: inherit; }
-  }
-</style>
-</head>
-<body>
-  <div class="print-bar">
-    <button class="print-btn" onclick="window.print()">🖨 imprimir / guardar PDF</button>
-  </div>
+  }`;
+}
+
+// Genera solo el <div class="hero">...secciones</div> de UNA referencia —
+// compartido entre el export individual y el export por marca, para que
+// las dos salidas tengan siempre el mismo diseño.
+function refBriefBody(item) {
+  const links = (item.media || []).filter(m => m.type === 'link');
+  const sb = item.storyboard  || [];
+  const mb = item.moodboard   || [];
+  const cl = item.refChecklist || [];
+  const cover  = item.cover || links.find(l => l.thumb)?.thumb || mb.find(m => m.type !== 'video')?.url;
+  const firstLink = links[0];
+
+  const imgTag = (url, style = '') =>
+    `<img src="${url}" style="display:block;${style}">`;
+
+  const badges = [
+    item.brand ? `<span class="tag">${esc(REF_BRAND_LABEL[item.brand] || item.brand)}</span>` : '',
+    item.format ? `<span class="tag">${esc(REF_FORMAT_LABEL[item.format] || item.format)}</span>` : ''
+  ].filter(Boolean).join('');
+
+  const scriptHTML = item.script ? `
+    <section>
+      <h2>GUIÓN</h2>
+      <div class="script">${esc(item.script)}</div>
+    </section>` : '';
+
+  const comments = item.comments || [];
+  const commentsHTML = comments.length ? `
+    <section>
+      <h2>COMENTARIOS</h2>
+      <ul>
+        ${comments.map(c => `<li><span style="opacity:0.5;margin-right:8px">${fmtCommentDate(c.createdAt)}</span>${esc(c.text)}</li>`).join('')}
+      </ul>
+    </section>` : '';
+
+  const sbHTML = sb.length ? `
+    <section>
+      <h2>SHOTLIST</h2>
+      <div class="strip">
+        ${sb.map((f, i) => `
+          <div class="frame">
+            <div class="frame-img">
+              ${imgTag(f.url, 'width:100%;height:160px;object-fit:cover;border-radius:8px;')}
+              <div class="frame-num">${i + 1}</div>
+            </div>
+            ${f.text ? `<div class="frame-caption">${esc(f.text)}</div>` : ''}
+          </div>`).join('')}
+      </div>
+    </section>` : '';
+
+  const mbHTML = mb.length ? `
+    <section>
+      <h2>MOODBOARD</h2>
+      <div class="grid">
+        ${mb.map(f => `<div class="grid-item">${f.type === 'video'
+          ? `<video src="${f.url}" style="display:block;width:100%;height:110px;object-fit:cover;border-radius:8px;" muted controls></video>`
+          : imgTag(f.url, 'width:100%;height:110px;object-fit:cover;border-radius:8px;')}</div>`).join('')}
+      </div>
+    </section>` : '';
+
+  const clHTML = cl.length ? `
+    <section>
+      <h2>CHECKLIST</h2>
+      <ul>
+        ${cl.map(c => `<li class="${c.done ? 'done' : ''}">${c.done ? '✓' : '○'} ${esc(c.text)}</li>`).join('')}
+      </ul>
+    </section>` : '';
+
+  return `
   <div class="hero">
     <div class="hero-text">
       ${badges ? `<div class="tags">${badges}</div>` : ''}
@@ -4486,7 +4479,23 @@ function exportRefBrief(id) {
   ${commentsHTML}
   ${sbHTML}
   ${mbHTML}
-  ${clHTML}
+  ${clHTML}`;
+}
+
+function openPrintDoc(title, styleExtra, bodyHTML) {
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title>
+<style>${refBriefStyles()}${styleExtra || ''}</style>
+</head>
+<body>
+  <div class="print-bar">
+    <button class="print-btn" onclick="window.print()">🖨 imprimir / guardar PDF</button>
+  </div>
+  ${bodyHTML}
 </body>
 </html>`;
 
@@ -4494,6 +4503,37 @@ function exportRefBrief(id) {
   const url  = URL.createObjectURL(blob);
   const win  = window.open(url, '_blank');
   if (win) setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+function exportRefBrief(id) {
+  const item = refs.find(r => r.id === id);
+  if (!item) return;
+  openPrintDoc(item.title || item.text || 'referencia', '', refBriefBody(item));
+}
+
+// Exporta todas las referencias aprobadas/finalizadas de una marca en un
+// solo documento imprimible. Cada referencia arranca en página nueva
+// (break-before:page) y su contenido fluye solo — las cortas dejan
+// espacio en blanco antes de la siguiente, las largas se extienden solas
+// a una 2ª página. break-inside:avoid en los elementos atómicos (frames,
+// imágenes de moodboard, ítems de checklist) para que ninguno quede
+// cortado a la mitad entre dos páginas.
+function exportBrandBrief(brand) {
+  const items = refs.filter(r => r.brand === brand && ['para-producir', 'finalizadas'].includes(r.col));
+  if (!items.length) { alert('No hay referencias aprobadas para esta marca todavía.'); return; }
+
+  const pagesHTML = items.map((item, i) => `
+    <div class="ref-page${i === 0 ? ' ref-page-first' : ''}">
+      ${refBriefBody(item)}
+    </div>`).join('');
+
+  const styleExtra = `
+  .ref-page { break-before: page; padding-top: 20px; }
+  .ref-page-first { break-before: auto; padding-top: 0; }
+  h1, h2 { break-after: avoid; }
+  .hero, .frame, .grid-item, li { break-inside: avoid; }`;
+
+  openPrintDoc(`Referencias — ${(REF_BRAND_LABEL[brand] || brand).toUpperCase()}`, styleExtra, pagesHTML);
 }
 
 // ── Drag & drop (mouse) — simplificado a nivel de columna ─────────
@@ -4981,8 +5021,12 @@ document.querySelectorAll('[data-brand-filter]').forEach(btn => {
     document.querySelectorAll('[data-brand-filter]').forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
     renderRefs();
+    const exportBtn = document.getElementById('export-brand-btn');
+    // Solo tiene sentido exportar una marca puntual, no "todas" ni "sin marca"
+    exportBtn.style.display = (refBrandFilter && refBrandFilter !== 'all') ? 'inline-flex' : 'none';
   });
 });
+document.getElementById('export-brand-btn').addEventListener('click', () => exportBrandBrief(refBrandFilter));
 
 document.querySelectorAll('[data-nota-brand]').forEach(btn => {
   btn.addEventListener('click', () => {
