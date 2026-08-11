@@ -2306,12 +2306,43 @@ function render() {
 
 // ── Image upload ───────────────────────────────────────────────
 
+// Capturas de pantalla (sobre todo en retina) suben pesadísimas sin
+// ninguna razón — 32 capturas llegaron a pesar 93MB. Se redimensionan a
+// un máximo de 1920px de lado y se recodifican como JPEG antes de subir.
+// GIF y video pasan sin tocar (recomprimir un GIF por canvas mata la
+// animación; los video quedan afuera directamente por el chequeo de tipo).
+async function compressImageFile(file, maxDim = 1920, quality = 0.82) {
+  if (!file.type.startsWith('image/') || file.type === 'image/gif' || file.type === 'image/svg+xml') return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const { width, height } = bitmap;
+    if (width <= maxDim && height <= maxDim && file.size < 800 * 1024) {
+      bitmap.close?.();
+      return file; // ya es chica, no vale la pena recomprimir
+    }
+    const scale = Math.min(1, maxDim / Math.max(width, height));
+    const w = Math.round(width * scale);
+    const h = Math.round(height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+    bitmap.close?.();
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+    if (!blob || blob.size >= file.size) return file; // no mejoró, usar el original
+    return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+  } catch (e) {
+    console.error('No se pudo comprimir, subiendo original:', e);
+    return file;
+  }
+}
+
 async function uploadImage(file) {
   try {
-    const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const toUpload = await compressImageFile(file);
+    const ext = toUpload.name.split('.').pop().toLowerCase() || 'jpg';
     const filename = Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
     const ref = storage.ref('uploads/' + filename);
-    await ref.put(file);
+    await ref.put(toUpload);
     return await ref.getDownloadURL();
   } catch (e) {
     console.error('Upload error:', e);
