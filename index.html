@@ -3587,9 +3587,10 @@ const _igObserver = new IntersectionObserver(entries => {
 function visibleRefsInCol(col) {
   let colItems = refs.filter(r => r.col === col);
   if (refStatusFilter !== 'all') colItems = colItems.filter(r => r.status === refStatusFilter);
-  // El filtro de marca solo aplica en "análisis de equipo" — en el resto de
-  // las columnas todavía no suele estar taggeado.
-  if (refBrandFilter !== 'all' && col === 'ideas') colItems = colItems.filter(r => r.brand === refBrandFilter);
+  // El filtro de marca aplica desde "análisis de equipo" en adelante — antes
+  // de eso (inspiración/inbox) todavía no suele estar taggeado.
+  const BRAND_FILTER_COLS = ['ideas', 'para-producir', 'finalizadas'];
+  if (refBrandFilter !== 'all' && BRAND_FILTER_COLS.includes(col)) colItems = colItems.filter(r => r.brand === refBrandFilter);
   return colItems;
 }
 
