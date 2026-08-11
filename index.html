@@ -2255,8 +2255,12 @@ function render() {
       ? visible.map(card).join('')
       : '<div class="empty">vacío</div>';
 
-    document.querySelector(`[data-count="${col}"]`).textContent =
-      colTasks.filter(t => !t.archived).length;
+    // El badge tiene que contar exactamente lo que se ve en la columna, no
+    // una cuenta aparte: antes excluía solo archivadas pero no borradas
+    // (papelera) ni el filtro de marca/búsqueda activo, así que el número
+    // quedaba cada vez más alto que las cards reales a medida que se
+    // borraban tareas sin vaciar la papelera.
+    document.querySelector(`[data-count="${col}"]`).textContent = visible.length;
 
     container.querySelectorAll('.card').forEach(el => {
       el.addEventListener('dragstart', onDragStart);
