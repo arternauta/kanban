@@ -812,6 +812,19 @@ body.public-refs #tab-tasks { display: none !important; }
 body.public-refs #col-notas-semillas { display: none !important; }
 /* Vista refs: sí se puede agregar una referencia nueva ("trabajo en conjunto") */
 body.public-refs .col-add-btn { display: inline-flex !important; }
+/* Vista cliente (?client=marca): un link por marca, solo lectura + comentar.
+   Ni siquiera "trabajo en conjunto" del team aplica acá — nada de agregar,
+   editar, borrar, arrastrar ni ver el filtro/columnas internas. */
+body.public-refs.public-client .col-add-btn { display: none !important; }
+body.public-client #refs-toolbar { display: none !important; }
+body.public-client [data-ref-col="inspiracion"],
+body.public-client [data-ref-col="inbox"],
+body.public-client [data-ref-col="ideas"] { display: none !important; }
+body.public-client .card-btns { display: none !important; }
+body.public-client #rp-reject,
+body.public-client #rp-approve,
+body.public-client #rp-export { display: none !important; }
+body.public-client .rc-msg-actions { display: none !important; }
 .public-badge {
   font-size: 9px; color: #3B6D11; letter-spacing: 0.12em;
   text-transform: uppercase; padding: 3px 8px;
@@ -1275,7 +1288,8 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
     <p class="modal-note" style="margin-top:10px">
       <strong>?public=tasks</strong> — vista equipo (solo tareas)<br>
       <strong>?public=refs</strong> — vista refs (trabajo en conjunto)<br>
-      Notas y semillas nunca son visibles en modo público.
+      <strong>?public=refs&client=bmw</strong> — vista cliente (solo esa marca, aprobadas/finalizadas, puede comentar). Cambiar <code>bmw</code> por <code>byd</code>/<code>mini</code>/<code>motorrad</code>.<br>
+      Notas y semillas nunca son visibles en modo público. Ninguna vista pública tiene privacidad real a nivel de datos — solo oculta visualmente lo que no corresponde.
     </p>
 
     <div style="border-top:0.5px solid #252523;margin:18px 0 14px"></div>
@@ -1868,6 +1882,10 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
 const _pubParam = new URLSearchParams(location.search).get('public');
 const IS_PUBLIC  = _pubParam !== null;
 const PUBLIC_VIEW = _pubParam || 'tasks'; // 'tasks' | 'refs'
+// Vista cliente: ?public=refs&client=bmw — un link por marca, la marca
+// nunca se elige libremente, viene fija en el link que se comparte.
+const _clientParam = new URLSearchParams(location.search).get('client');
+const CLIENT_BRAND = (PUBLIC_VIEW === 'refs' && _clientParam) ? _clientParam.toLowerCase() : null;
 
 async function hashPw(pw) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw + 'kb-kanbarter'));
@@ -1884,8 +1902,11 @@ async function initAuth() {
   if (IS_PUBLIC) {
     document.body.classList.add('public-mode');
     document.body.classList.add('public-' + PUBLIC_VIEW);
+    if (CLIENT_BRAND) document.body.classList.add('public-client');
     const badge = document.getElementById('public-badge');
-    badge.textContent = PUBLIC_VIEW === 'refs' ? 'vista refs' : 'vista equipo';
+    badge.textContent = CLIENT_BRAND
+      ? `vista cliente · ${CLIENT_BRAND.toUpperCase()}`
+      : (PUBLIC_VIEW === 'refs' ? 'vista refs' : 'vista equipo');
     badge.style.display = '';
     document.querySelector('select#brand-filter').style.display = 'none';
     document.querySelector('select#sort-filter').style.display = 'none';
@@ -3563,7 +3584,7 @@ function refCard(item) {
     <div class="card ref-card ${cls}${cover ? ' has-cover' : ''}${item.col === 'finalizadas' ? ' done-card' : ''}"
          data-ref-id="${esc(item.id)}"
          data-ref-edit="${esc(item.id)}"
-         draggable="true"
+         draggable="${CLIENT_BRAND ? 'false' : 'true'}"
          ${cover ? `style="background-image:url('${esc(cover)}');background-position:${COVER_POS_CSS[item.coverPosition] || 'center'}"` : ''}>
       ${innerHtml}
       <div class="card-btns">
@@ -3586,6 +3607,10 @@ const _igObserver = new IntersectionObserver(entries => {
 // camine exactamente la misma lista que se ve en el tablero.
 function visibleRefsInCol(col) {
   let colItems = refs.filter(r => r.col === col);
+  // Vista cliente: aislamiento por marca en TODAS las columnas, no solo las
+  // que ya tienen el filtro manual de marca — un cliente de BMW no debe ver
+  // ni rastro de otras marcas en ninguna columna, aunque esté oculta por CSS.
+  if (CLIENT_BRAND) colItems = colItems.filter(r => r.brand === CLIENT_BRAND);
   if (refStatusFilter !== 'all') colItems = colItems.filter(r => r.status === refStatusFilter);
   // El filtro de marca aplica desde "análisis de equipo" en adelante — antes
   // de eso (inspiración/inbox) todavía no suele estar taggeado.
@@ -4021,9 +4046,10 @@ document.getElementById('refm-comment-input').addEventListener('keydown', e => {
 document.addEventListener('click', e => {
   const el = e.target;
   const addBtn = el.closest('[data-ref-target]');
-  if (addBtn && el.closest('.col-add-btn')) { openRef(null, addBtn.dataset.refTarget); return; }
+  if (addBtn && el.closest('.col-add-btn')) { if (!CLIENT_BRAND) openRef(null, addBtn.dataset.refTarget); return; }
   const delBtn = el.closest('[data-ref-delete]');
   if (delBtn) {
+    if (CLIENT_BRAND) return; // vista cliente: solo lectura + comentar
     if (confirm('¿Eliminar esta referencia?')) {
       const delId = delBtn.dataset.refDelete;
       refs = refs.filter(r => r.id !== delId);
@@ -4032,7 +4058,7 @@ document.addEventListener('click', e => {
     return;
   }
   const editBtn = el.closest('[data-ref-edit-btn]');
-  if (editBtn) { openRef(editBtn.dataset.refEditBtn, null); return; }
+  if (editBtn) { if (!CLIENT_BRAND) openRef(editBtn.dataset.refEditBtn, null); return; }
   const previewBtn = el.closest('[data-ref-preview]');
   if (previewBtn) { openRefPreview(previewBtn.dataset.refPreview); return; }
   // click en el cuerpo de la card (fuera de botones) → preview
@@ -4192,6 +4218,7 @@ document.getElementById('rp-export').addEventListener('click', () => {
 // Rechazar NO borra nada — solo cambia el status y mueve la card a Inspiración.
 const REF_STATUS_COL = { aprobada: 'para-producir', rechazada: 'inspiracion', pendiente: 'ideas' };
 function toggleRefStatus(btn) {
+  if (CLIENT_BRAND) return; // vista cliente: solo lectura + comentar
   const id = document.getElementById('ref-preview').dataset.refId;
   const item = refs.find(r => r.id === id);
   if (!item) return;
@@ -4244,6 +4271,7 @@ function renderRpComments(item) {
   box.innerHTML = commentThreadHTML(item.comments || []);
   box.querySelectorAll('[data-del-comment]').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (CLIENT_BRAND) return; // vista cliente: puede comentar, no borrar/resolver
       item.comments.splice(parseInt(btn.dataset.delComment), 1);
       patchRefFields(item.id, { comments: item.comments });
       renderRpComments(item);
@@ -4252,6 +4280,7 @@ function renderRpComments(item) {
   });
   box.querySelectorAll('[data-resolve-comment]').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (CLIENT_BRAND) return; // vista cliente: puede comentar, no borrar/resolver
       const c = item.comments[parseInt(btn.dataset.resolveComment)];
       c.resolved = !c.resolved;
       patchRefFields(item.id, { comments: item.comments });
@@ -4502,6 +4531,7 @@ function onRefCardDragOver(e) {
 // servidor fresco dentro de la transacción — mismo espíritu que
 // patchRefFields, pero reposicionando en el array en vez de un campo.
 function performRefDrop(id, newCol, targetId, pos) {
+  if (CLIENT_BRAND) return; // vista cliente: solo lectura + comentar
   const r = refs.find(r => r.id === id);
   if (!r) return;
   r.col = newCol;
