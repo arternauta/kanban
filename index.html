@@ -1051,11 +1051,14 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
 }
 .rp-nav-btn:hover { background: rgba(40,40,36,0.9); border-color: rgba(255,255,255,0.3); }
 .rp-nav-prev { left: 16px; }
-.rp-nav-next { right: 16px; }
+.rp-nav-next { right: 16px; transition: background 0.15s, border-color 0.15s, right 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+/* El panel de comentarios (a la derecha) no debe tapar "siguiente" */
+.rp-comment-box.open ~ .rp-nav-next { right: 356px; }
 @media (max-width: 680px) {
   .rp-nav-btn { width: 36px; height: 36px; font-size: 18px; }
   .rp-nav-prev { left: 6px; }
   .rp-nav-next { right: 6px; }
+  .rp-comment-box.open ~ .rp-nav-next { right: calc(85vw + 6px); }
 }
 
 /* Comentarios — hilo tipo chat, compartido entre el preview y el modal */
@@ -1068,6 +1071,13 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
   transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .rp-comment-box.open { transform: translateX(0); }
+.rc-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #5f5e5a;
+  margin-bottom: 10px; flex-shrink: 0;
+}
+.rc-panel-close { background: none; border: none; color: #5f5e5a; font-size: 18px; line-height: 1; cursor: pointer; }
+.rc-panel-close:hover { color: #e8e6dc; }
 .rc-thread {
   display: flex; flex-direction: column; gap: 6px;
   flex: 1; overflow-y: auto; padding: 2px;
@@ -1082,8 +1092,14 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
   display: flex; align-items: center; justify-content: space-between;
   font-size: 10px; color: #5f5e5a; margin-top: 4px;
 }
+.rc-msg-actions { display: flex; align-items: center; gap: 8px; }
 .rc-msg-del { background: none; border: none; color: #5f5e5a; cursor: pointer; font-size: 13px; line-height: 1; }
 .rc-msg-del:hover { color: #e8e6dc; }
+.rc-msg-resolve { background: none; border: none; color: #5f5e5a; cursor: pointer; font-size: 12px; line-height: 1; }
+.rc-msg-resolve:hover { color: #2DC98F; }
+.rc-msg.rc-resolved { opacity: 0.5; }
+.rc-msg.rc-resolved .rc-msg-text { text-decoration: line-through; }
+.rc-msg.rc-resolved .rc-msg-resolve { color: #2DC98F; }
 .rc-input-row { display: flex; gap: 6px; margin-top: 8px; }
 .rc-input-row input {
   flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
@@ -1503,6 +1519,10 @@ body.public-refs .col-add-btn { display: inline-flex !important; }
     <button class="rp-export-btn" id="rp-export">↓ exportar</button>
   </div>
   <div class="rp-comment-box" id="rp-comment-box">
+    <div class="rc-panel-header">
+      <span>comentarios</span>
+      <button class="rc-panel-close" id="rp-comment-close" title="cerrar">×</button>
+    </div>
     <div class="rc-thread" id="rp-comment-thread"></div>
     <div class="rc-input-row">
       <input type="text" id="rp-comment-input" placeholder="agregar comentario...">
@@ -3928,6 +3948,13 @@ function renderRefmComments() {
       saveRefs(); renderRefmComments(); renderRefs();
     });
   });
+  box.querySelectorAll('[data-resolve-comment]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const c = item.comments[parseInt(btn.dataset.resolveComment)];
+      c.resolved = !c.resolved;
+      saveRefs(); renderRefmComments(); renderRefs();
+    });
+  });
   box.scrollTop = box.scrollHeight;
 }
 document.getElementById('refm-comment-add').addEventListener('click', () => {
@@ -4002,7 +4029,8 @@ function openRefPreview(id, keepSiblings) {
   prevBtn.dataset.navId = prevId;
   nextBtn.dataset.navId = nextId;
 
-  document.getElementById('rp-comment-box').classList.remove('open');
+  // Si ya tiene comentarios, mostrarlos siempre sin tener que tocar "comentar".
+  document.getElementById('rp-comment-box').classList.toggle('open', !!(item.comments && item.comments.length));
 
   const links = (item.media || []).filter(m => m.type === 'link');
   const cl = item.refChecklist || [];
@@ -4155,11 +4183,14 @@ function fmtCommentDate(iso) {
 function commentThreadHTML(comments) {
   if (!comments.length) return '<div class="empty">sin comentarios todavía</div>';
   return comments.map((c, idx) => `
-    <div class="rc-msg">
+    <div class="rc-msg${c.resolved ? ' rc-resolved' : ''}">
       <div class="rc-msg-text">${esc(c.text)}</div>
       <div class="rc-msg-meta">
         <span>${fmtCommentDate(c.createdAt)}</span>
-        <button class="rc-msg-del" data-del-comment="${idx}" title="borrar">×</button>
+        <span class="rc-msg-actions">
+          <button class="rc-msg-resolve" data-resolve-comment="${idx}" title="${c.resolved ? 'marcar pendiente' : 'marcar resuelto'}">${c.resolved ? '↺' : '✓'}</button>
+          <button class="rc-msg-del" data-del-comment="${idx}" title="borrar">×</button>
+        </span>
       </div>
     </div>`).join('');
 }
@@ -4175,6 +4206,15 @@ function renderRpComments(item) {
       renderRefs();
     });
   });
+  box.querySelectorAll('[data-resolve-comment]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const c = item.comments[parseInt(btn.dataset.resolveComment)];
+      c.resolved = !c.resolved;
+      patchRefFields(item.id, { comments: item.comments });
+      renderRpComments(item);
+      renderRefs();
+    });
+  });
   box.scrollTop = box.scrollHeight;
 }
 
@@ -4182,6 +4222,9 @@ document.getElementById('rp-comment').addEventListener('click', () => {
   const box = document.getElementById('rp-comment-box');
   box.classList.toggle('open');
   if (box.classList.contains('open')) document.getElementById('rp-comment-input').focus();
+});
+document.getElementById('rp-comment-close').addEventListener('click', () => {
+  document.getElementById('rp-comment-box').classList.remove('open');
 });
 function addRpComment() {
   const id = document.getElementById('ref-preview').dataset.refId;
