@@ -374,6 +374,12 @@ body:not(.showing-notas) #board-notas { display: none !important; }
 }
 .sb-shot-thumb { flex-shrink: 0; width: 48px; height: 48px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
 .sb-shot-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sb-shot-thumb-empty {
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  font-size: 18px; color: rgba(255,255,255,0.3); background: transparent;
+  border: 1px dashed rgba(255,255,255,0.18);
+}
+.sb-shot-thumb-empty:hover { border-color: rgba(255,255,255,0.35); color: rgba(255,255,255,0.5); }
 .sb-shot-text {
   flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
   border-radius: 6px; padding: 7px 10px; font-size: 13px; color: #e8e6dc;
@@ -1185,6 +1191,10 @@ body.public-client .rc-msg-actions { display: none !important; }
 }
 .rp-sb-frame-img { position: relative; }
 .rp-sb-frame-img img { width: 100%; height: 140px; object-fit: cover; display: block; }
+.rp-sb-frame-empty {
+  height: 140px; display: flex; align-items: flex-end; justify-content: flex-start;
+  background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.12);
+}
 .rp-sb-num {
   position: absolute; bottom: 6px; left: 8px;
   font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5);
@@ -1490,10 +1500,13 @@ body.public-client .rc-msg-actions { display: none !important; }
     <div class="em-img-upload">
       <div style="font-size:10px;color:#5f5e5a;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">shotlist</div>
       <div id="refm-storyboard" class="sb-shotlist"></div>
-      <label class="em-img-upload-label" id="refm-storyboard-label">
-        + agregar toma
-        <input type="file" id="refm-storyboard-input" accept="image/*" multiple>
-      </label>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="em-img-upload-label" id="refm-storyboard-add-text" type="button" style="cursor:pointer;flex:1">+ agregar frase</button>
+        <label class="em-img-upload-label" id="refm-storyboard-label" style="flex:1">
+          + agregar toma
+          <input type="file" id="refm-storyboard-input" accept="image/*" multiple>
+        </label>
+      </div>
     </div>
 
     <div class="em-img-upload">
@@ -3826,7 +3839,11 @@ function renderRefmStoryboard() {
   box.innerHTML = frames.map((f, idx) => `
     <div class="sb-shot-row">
       <div class="sb-shot-num">${idx + 1}</div>
-      <div class="sb-shot-thumb"><img src="${esc(f.url)}" alt=""></div>
+      ${f.url
+        ? `<div class="sb-shot-thumb"><img src="${esc(f.url)}" alt=""></div>`
+        : `<label class="sb-shot-thumb sb-shot-thumb-empty" title="agregar imagen">+
+             <input type="file" accept="image/*" data-add-sb-img="${idx}" style="display:none">
+           </label>`}
       <input type="text" class="sb-shot-text" data-sb-text="${idx}" placeholder="qué se graba en esta toma..." value="${esc(f.text || '')}">
       <button class="em-gallery-del" data-del-sb="${idx}">×</button>
     </div>`
@@ -3845,7 +3862,27 @@ function renderRefmStoryboard() {
     });
     input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
   });
+  box.querySelectorAll('[data-add-sb-img]').forEach(input => {
+    input.addEventListener('change', async () => {
+      const idx = parseInt(input.dataset.addSbImg);
+      const file = input.files[0];
+      if (!file) return;
+      const url = await uploadImage(file);
+      if (url && item.storyboard[idx]) item.storyboard[idx].url = url;
+      saveRefs(); renderRefmStoryboard(); renderRefs();
+    });
+  });
 }
+
+document.getElementById('refm-storyboard-add-text').addEventListener('click', () => {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  if (!item.storyboard) item.storyboard = [];
+  item.storyboard.push({ text: '' });
+  saveRefs(); renderRefmStoryboard(); renderRefs();
+  const inputs = document.querySelectorAll('#refm-storyboard [data-sb-text]');
+  inputs[inputs.length - 1]?.focus();
+});
 
 document.getElementById('refm-storyboard-input').addEventListener('change', async e => {
   const item = refs.find(r => r.id === refEditingId);
@@ -4177,10 +4214,14 @@ function openRefPreview(id, keepSiblings) {
       <div class="rp-storyboard-strip">
         ${sb.map((f, i) => `
           <div class="rp-sb-frame">
+            ${f.url ? `
             <div class="rp-sb-frame-img">
               <img src="${esc(f.url)}" alt="toma ${i+1}" loading="lazy">
               <div class="rp-sb-num">${i+1}</div>
-            </div>
+            </div>` : `
+            <div class="rp-sb-frame-img rp-sb-frame-empty">
+              <div class="rp-sb-num">${i+1}</div>
+            </div>`}
             ${f.text ? `<div class="rp-sb-caption">${esc(f.text)}</div>` : ''}
           </div>`).join('')}
       </div>
@@ -4401,6 +4442,7 @@ function refBriefStyles() {
   .frame { flex: 0 1 240px; }
   .frame-img { position: relative; }
   .frame-img img, .frame-img video { border-radius: 14px; }
+  .frame-img-empty { height: 160px; border-radius: 14px; background: #f5f5f3; border: 1px dashed rgba(0,0,0,0.15); }
   .frame-num {
     position: absolute; bottom: 8px; left: 10px;
     font-size: 10px; font-weight: 700; color: #fff;
@@ -4457,10 +4499,14 @@ function refBriefBody(item) {
       <div class="strip">
         ${sb.map((f, i) => `
           <div class="frame">
+            ${f.url ? `
             <div class="frame-img">
               ${imgTag(f.url, 'width:100%;height:160px;object-fit:cover;')}
               <div class="frame-num">${i + 1}</div>
-            </div>
+            </div>` : `
+            <div class="frame-img frame-img-empty">
+              <div class="frame-num">${i + 1}</div>
+            </div>`}
             ${f.text ? `<div class="frame-caption">${esc(f.text)}</div>` : ''}
           </div>`).join('')}
       </div>
