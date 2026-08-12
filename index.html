@@ -3792,6 +3792,8 @@ function renderRefmLinks() {
   }).join('');
   box.querySelectorAll('[data-del-link]').forEach(btn => {
     btn.addEventListener('click', () => {
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       const idx = parseInt(btn.dataset.delLink);
       const target = links[idx];
       item.media = item.media.filter(m => m !== target);
@@ -3817,11 +3819,18 @@ async function addRefLink() {
 
   const meta = await fetchOembed(url, platform) || await fetchLinkPreview(url);
   if (meta) {
-    linkObj.title = meta.title;
-    linkObj.thumb = meta.thumb;
-    saveRefs();
-    if (refEditingId === item.id) renderRefmLinks();
-    renderRefs();
+    // Volver a buscar el item fresco: `refs` puede haberse reemplazado
+    // mientras el fetch estaba en vuelo, y linkObj podría no ser parte
+    // del array vigente.
+    const liveItem = refs.find(r => r.id === item.id);
+    const liveLink = liveItem?.media?.find(m => m.type === 'link' && m.url === url);
+    if (liveLink) {
+      liveLink.title = meta.title;
+      liveLink.thumb = meta.thumb;
+      saveRefs(liveItem.id);
+      if (refEditingId === liveItem.id) renderRefmLinks();
+      renderRefs();
+    }
   }
 }
 
@@ -3848,14 +3857,23 @@ function renderRefmStoryboard() {
       <button class="em-gallery-del" data-del-sb="${idx}">×</button>
     </div>`
   ).join('');
+  // Cada handler vuelve a buscar el item en `refs` al momento del evento,
+  // en vez de reusar el `item` cerrado arriba: si un guardado en segundo
+  // plano ya reemplazó `refs` por una copia nueva (refs = merged) mientras
+  // el usuario tipeaba, seguir usando la referencia vieja mutaría un
+  // objeto huérfano que nunca se guarda.
   box.querySelectorAll('[data-del-sb]').forEach(btn => {
     btn.addEventListener('click', () => {
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       item.storyboard = (item.storyboard || []).filter((_, i) => i !== parseInt(btn.dataset.delSb));
       saveRefs(); renderRefmStoryboard(); renderRefs();
     });
   });
   box.querySelectorAll('[data-sb-text]').forEach(input => {
     input.addEventListener('blur', () => {
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       const idx = parseInt(input.dataset.sbText);
       if (item.storyboard[idx]) item.storyboard[idx].text = input.value.trim();
       saveRefs(); renderRefs();
@@ -3868,7 +3886,8 @@ function renderRefmStoryboard() {
       const file = input.files[0];
       if (!file) return;
       const url = await uploadImage(file);
-      if (url && item.storyboard[idx]) item.storyboard[idx].url = url;
+      const item = refs.find(r => r.id === refEditingId);
+      if (url && item && item.storyboard[idx]) item.storyboard[idx].url = url;
       saveRefs(); renderRefmStoryboard(); renderRefs();
     });
   });
@@ -3931,12 +3950,16 @@ function renderRefmCover() {
         <button class="ref-brand-btn${pos === 'bottom' ? ' on' : ''}" data-cover-pos="bottom">abajo</button>
       </div>`;
     box.querySelector('[data-clear-cover]').addEventListener('click', () => {
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       item.cover = null;
       item.coverPosition = null;
       saveRefs(); renderRefmCover(); renderRefmMoodboard(); renderRefs();
     });
     box.querySelectorAll('[data-cover-pos]').forEach(btn => {
       btn.addEventListener('click', () => {
+        const item = refs.find(r => r.id === refEditingId);
+        if (!item) return;
         item.coverPosition = btn.dataset.coverPos;
         saveRefs(); renderRefmCover(); renderRefs();
       });
@@ -3952,6 +3975,8 @@ function renderRefmCover() {
       if (!file) return;
       const url = await uploadImage(file);
       if (!url) return;
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       item.cover = url;
       saveRefs(); renderRefmCover(); renderRefmMoodboard(); renderRefs();
     });
@@ -3975,8 +4000,10 @@ function renderRefmMoodboard() {
   box.querySelectorAll('[data-del-mb]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       const idx = parseInt(btn.dataset.delMb);
-      const target = imgs[idx];
+      const target = (item.moodboard || [])[idx];
       if (target && item.cover === target.url) item.cover = null;
       item.moodboard = (item.moodboard || []).filter((_, i) => i !== idx);
       saveRefs(); renderRefmMoodboard(); renderRefmCover(); renderRefs();
@@ -3984,26 +4011,32 @@ function renderRefmMoodboard() {
   });
   box.querySelectorAll('[data-set-cover]').forEach(el => {
     el.addEventListener('click', () => {
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       const idx = parseInt(el.dataset.setCover);
-      item.cover = imgs[idx]?.url || null;
+      item.cover = (item.moodboard || [])[idx]?.url || null;
       item.coverPosition = null;
       saveRefs(); renderRefmMoodboard(); renderRefmCover(); renderRefs();
     });
   });
 }
 
-async function addRefMoodboardFile(item, file) {
+// Recibe el id (no el objeto) para no arrastrar una referencia que puede
+// quedar vieja mientras uploadImage() todavía está en vuelo.
+async function addRefMoodboardFile(refId, file) {
   const url = await uploadImage(file);
   if (!url) return;
+  const item = refs.find(r => r.id === refId);
+  if (!item) return;
   if (!item.moodboard) item.moodboard = [];
   item.moodboard.push({ type: file.type.startsWith('video/') ? 'video' : 'image', url });
   saveRefs(); renderRefmMoodboard(); renderRefs();
 }
 
 document.getElementById('refm-moodboard-input').addEventListener('change', async e => {
-  const item = refs.find(r => r.id === refEditingId);
-  if (!item) return;
-  for (const file of Array.from(e.target.files)) await addRefMoodboardFile(item, file);
+  const id = refEditingId;
+  if (!id) return;
+  for (const file of Array.from(e.target.files)) await addRefMoodboardFile(id, file);
   e.target.value = '';
 });
 
@@ -4013,23 +4046,23 @@ refmMbLabel.addEventListener('dragleave', () => refmMbLabel.classList.remove('dr
 refmMbLabel.addEventListener('drop', async e => {
   e.preventDefault();
   refmMbLabel.classList.remove('drag-over');
-  const item = refs.find(r => r.id === refEditingId);
-  if (!item) return;
+  const id = refEditingId;
+  if (!id) return;
   const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
-  for (const file of files) await addRefMoodboardFile(item, file);
+  for (const file of files) await addRefMoodboardFile(id, file);
 });
 
 // Pegar una captura de pantalla (⌘V) mientras el modal está abierto
 document.addEventListener('paste', async e => {
   if (!document.getElementById('ref-modal').classList.contains('open')) return;
-  const item = refs.find(r => r.id === refEditingId);
-  if (!item) return;
+  const id = refEditingId;
+  if (!id) return;
   const clipItems = Array.from(e.clipboardData?.items || []);
   const imgItem = clipItems.find(it => it.type.startsWith('image/'));
   if (!imgItem) return;
   e.preventDefault();
   const file = imgItem.getAsFile();
-  if (file) await addRefMoodboardFile(item, file);
+  if (file) await addRefMoodboardFile(id, file);
 });
 
 // ── Checklist dentro del modal ───────────────────────────────────
@@ -4047,12 +4080,16 @@ function renderRefmChecklist() {
   ).join('');
   box.querySelectorAll('[data-cl-toggle]').forEach(cb => {
     cb.addEventListener('change', () => {
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       item.refChecklist[parseInt(cb.dataset.clToggle)].done = cb.checked;
       saveRefs(); renderRefmChecklist(); renderRefs();
     });
   });
   box.querySelectorAll('[data-cl-del]').forEach(btn => {
     btn.addEventListener('click', () => {
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       item.refChecklist = (item.refChecklist || []).filter((_, i) => i !== parseInt(btn.dataset.clDel));
       saveRefs(); renderRefmChecklist(); renderRefs();
     });
@@ -4082,12 +4119,16 @@ function renderRefmComments() {
   box.innerHTML = commentThreadHTML(item.comments || []);
   box.querySelectorAll('[data-del-comment]').forEach(btn => {
     btn.addEventListener('click', () => {
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       item.comments.splice(parseInt(btn.dataset.delComment), 1);
       saveRefs(); renderRefmComments(); renderRefs();
     });
   });
   box.querySelectorAll('[data-resolve-comment]').forEach(btn => {
     btn.addEventListener('click', () => {
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
       const c = item.comments[parseInt(btn.dataset.resolveComment)];
       c.resolved = !c.resolved;
       saveRefs(); renderRefmComments(); renderRefs();
