@@ -2501,6 +2501,8 @@ function renderEmGallery() {
 
   gallery.querySelectorAll('[data-del-img]').forEach(btn => {
     btn.addEventListener('click', () => {
+      const task = tasks.find(t => t.id === editingId);
+      if (!task) return;
       const idx = parseInt(btn.dataset.delImg);
       if (task.images[idx] === task.cover) task.cover = task.images[idx + 1] || task.images[idx - 1] || null;
       task.images.splice(idx, 1);
@@ -2512,6 +2514,8 @@ function renderEmGallery() {
   // tap on image to set as cover
   gallery.querySelectorAll('.em-gallery-img img').forEach((img, idx) => {
     img.addEventListener('click', () => {
+      const task = tasks.find(t => t.id === editingId);
+      if (!task) return;
       task.cover = task.images[idx];
       save(); renderEmGallery(); render();
     });
@@ -2591,7 +2595,14 @@ function renderEmChecklist() {
       </div>
     </div>`;
 
+  // Cada handler vuelve a buscar la tarea en `tasks` al momento del evento
+  // (no reusa el `task` cerrado arriba): si un guardado en segundo plano ya
+  // reemplazó `tasks` por una copia nueva mientras el modal estaba abierto,
+  // seguir usando la referencia vieja mutaría un objeto huérfano que nunca
+  // se guarda — mismo bug que tenían los editores de Referencias.
   document.getElementById('em-cl-add-btn').addEventListener('click', () => {
+    const task = tasks.find(t => t.id === editingId);
+    if (!task) return;
     const input = document.getElementById('em-cl-input');
     const text = input.value.trim();
     if (!text) return;
@@ -2608,6 +2619,8 @@ function renderEmChecklist() {
 
   container.querySelectorAll('[data-em-cl-toggle]').forEach(el => {
     el.addEventListener('change', () => {
+      const task = tasks.find(t => t.id === editingId);
+      if (!task) return;
       const item = (task.checklist || []).find(i => i.id === el.dataset.emClToggle);
       if (item) {
         item.done = el.checked;
@@ -2620,6 +2633,8 @@ function renderEmChecklist() {
 
   container.querySelectorAll('[data-em-cl-del]').forEach(el => {
     el.addEventListener('click', () => {
+      const task = tasks.find(t => t.id === editingId);
+      if (!task) return;
       task.checklist = (task.checklist || []).filter(i => i.id !== el.dataset.emClDel);
       save();
       renderEmChecklist();
