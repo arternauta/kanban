@@ -3477,11 +3477,36 @@ db.collection('kanban').doc('settings').onSnapshot(snap => {
   }
 });
 
-// Guardado inmediato al cerrar + recarga al recuperar foco
+// fetch con keepalive: a diferencia de una llamada normal, el navegador
+// garantiza que este request sobrevive aunque la página/proceso se cierre
+// o el sistema se suspenda inmediatamente después de dispararlo. Es la
+// única red de seguridad real para "se durmió la compu con un guardado
+// pendiente" — una transacción de Firestore normal necesita que la red y
+// el JS sigan vivos para terminar, y dormir la compu no da esa garantía.
+function keepaliveFlush() {
+  try {
+    fetch('https://us-central1-kanbarter-a2951.cloudfunctions.net/flush', {
+      method: 'POST',
+      body: JSON.stringify({ data: tasks }),
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true
+    });
+  } catch(e) {}
+}
+
+// Guardado inmediato al cerrar/dormir + recarga al recuperar foco
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && pendingWrite) {
     clearTimeout(saveTimer);
+    // Dormir la compu (tapa cerrada) dispara "hidden" pero NO "pagehide" —
+    // sin esto, un guardado que queda a mitad de camino cuando el sistema
+    // suspende el proceso justo después nunca llega a confirmarse ni a
+    // fallar, así que ni siquiera el reintento con backoff llega a
+    // activarse. Se intentan las dos vías: la transacción normal (más
+    // precisa si alcanza a terminar) y el flush con keepalive como
+    // garantía de que el dato viaja igual aunque la compu se duerma ya.
     writeTasksTransactional(writeGen);
+    keepaliveFlush();
   }
   if (document.visibilityState === 'visible' && !pendingWrite) {
     // Fuerza lectura del servidor para evitar sobreescribir datos de otro dispositivo
@@ -3493,18 +3518,11 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// Garantía de escritura al cerrar el browser: keepalive sobrevive al proceso
+// Garantía de escritura al cerrar el browser (pestaña/proceso, no solo dormir)
 window.addEventListener('pagehide', () => {
   if (!pendingWrite) return;
   clearTimeout(saveTimer);
-  try {
-    fetch('https://us-central1-kanbarter-a2951.cloudfunctions.net/flush', {
-      method: 'POST',
-      body: JSON.stringify({ data: tasks }),
-      headers: { 'Content-Type': 'application/json' },
-      keepalive: true
-    });
-  } catch(e) {}
+  keepaliveFlush();
 });
 
 // ── Recover from localStorage backup if page was refreshed mid-save ──
