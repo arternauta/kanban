@@ -2507,7 +2507,8 @@ function renderEmGallery() {
       if (task.images[idx] === task.cover) task.cover = task.images[idx + 1] || task.images[idx - 1] || null;
       task.images.splice(idx, 1);
       if (!task.images.length) task.cover = null;
-      save(); renderEmGallery(); render();
+      patchTaskFields(task.id, { images: task.images, cover: task.cover });
+      renderEmGallery(); render();
     });
   });
 
@@ -2517,11 +2518,26 @@ function renderEmGallery() {
       const task = tasks.find(t => t.id === editingId);
       if (!task) return;
       task.cover = task.images[idx];
-      save(); renderEmGallery(); render();
+      patchTaskFields(task.id, { cover: task.cover });
+      renderEmGallery(); render();
     });
     img.title = 'tap para usar como portada';
     img.style.cursor = 'pointer';
   });
+}
+
+// Recibe el id (no el objeto) para no arrastrar una referencia que puede
+// quedar vieja mientras uploadImage() todavía está en vuelo — mismo
+// criterio que addRefMoodboardFile en Referencias.
+async function addTaskImageFile(taskId, file) {
+  const filename = await uploadImage(file);
+  if (!filename) return;
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) return;
+  if (!task.images) task.images = [];
+  task.images.push(filename);
+  if (!task.cover) task.cover = filename;
+  patchTaskFields(task.id, { images: task.images, cover: task.cover });
 }
 
 const emUploadLabel = document.querySelector('.em-img-upload-label');
@@ -2530,30 +2546,20 @@ emUploadLabel.addEventListener('dragleave', () => emUploadLabel.classList.remove
 emUploadLabel.addEventListener('drop', async e => {
   e.preventDefault();
   emUploadLabel.classList.remove('drag-over');
-  const task = tasks.find(t => t.id === editingId);
-  if (!task) return;
+  const id = editingId;
+  if (!id) return;
   const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-  for (const file of files) {
-    const filename = await uploadImage(file);
-    if (!task.images) task.images = [];
-    task.images.push(filename);
-    if (!task.cover) task.cover = filename;
-  }
-  save(); renderEmGallery(); render();
+  for (const file of files) await addTaskImageFile(id, file);
+  renderEmGallery(); render();
 });
 
 document.getElementById('em-img-input').addEventListener('change', async e => {
-  const task = tasks.find(t => t.id === editingId);
-  if (!task) return;
+  const id = editingId;
+  if (!id) return;
   const files = Array.from(e.target.files);
-  for (const file of files) {
-    const filename = await uploadImage(file);
-    if (!task.images) task.images = [];
-    task.images.push(filename);
-    if (!task.cover) task.cover = filename;
-  }
+  for (const file of files) await addTaskImageFile(id, file);
   e.target.value = '';
-  save(); renderEmGallery(); render();
+  renderEmGallery(); render();
 });
 
 // ── Edit ───────────────────────────────────────────────────────
@@ -2608,7 +2614,7 @@ function renderEmChecklist() {
     if (!text) return;
     if (!task.checklist) task.checklist = [];
     task.checklist.push({ id: uid(), text, done: false });
-    save();
+    patchTaskFields(task.id, { checklist: task.checklist });
     renderEmChecklist();
     document.getElementById('em-cl-input').focus();
   });
@@ -2626,7 +2632,8 @@ function renderEmChecklist() {
         item.done = el.checked;
         if (el.checked) item.timeAtCheck = getTimeTotal(task);
         else delete item.timeAtCheck;
-        save(); renderEmChecklist();
+        patchTaskFields(task.id, { checklist: task.checklist });
+        renderEmChecklist();
       }
     });
   });
@@ -2636,10 +2643,46 @@ function renderEmChecklist() {
       const task = tasks.find(t => t.id === editingId);
       if (!task) return;
       task.checklist = (task.checklist || []).filter(i => i.id !== el.dataset.emClDel);
-      save();
+      patchTaskFields(task.id, { checklist: task.checklist });
       renderEmChecklist();
     });
   });
+}
+
+// Para ediciones puntuales de una tarea ya existente (guardar desde el
+// modal, subtareas, galería): lee la tarea FRESCA del servidor dentro de
+// la transacción y pisa solo los campos indicados — igual que
+// patchRefFields en Referencias. Una copia vieja en otro dispositivo
+// (ej. una notebook que se durmió) ya no puede pisar un cambio reciente
+// con el resto de su copia local al terminar de escribir.
+let taskPatchRetryTimer = null;
+function patchTaskFields(id, fields, gen) {
+  gen = gen ?? ++writeGen;
+  pendingWrite = true;
+  return db.runTransaction(async tx => {
+    const snap = await tx.get(TASKS_DOC);
+    const serverTasks = snap.exists ? (snap.data().data || []) : [];
+    const idx = serverTasks.findIndex(t => t.id === id);
+    if (idx === -1) return serverTasks;
+    serverTasks[idx] = { ...serverTasks[idx], ...fields };
+    tx.set(TASKS_DOC, { data: serverTasks });
+    return serverTasks;
+  })
+    .then(merged => {
+      if (gen === writeGen) {
+        pendingWrite = false;
+        clearTimeout(taskPatchRetryTimer);
+        setSaveStatus('saved');
+        tasks = merged;
+        render();
+      }
+    })
+    .catch(() => {
+      if (gen !== writeGen) return;
+      setSaveStatus('retrying');
+      clearTimeout(taskPatchRetryTimer);
+      taskPatchRetryTimer = setTimeout(() => patchTaskFields(id, fields, gen), 2000);
+    });
 }
 
 function openEdit(id) {
@@ -2678,11 +2721,13 @@ function doSave() {
   if (!t) return;
   const text = document.getElementById('em-text').value.trim();
   if (!text) return;
-  t.text     = text;
-  t.brand    = document.getElementById('em-brand').value || '';
-  t.priority = document.getElementById('em-priority').value || '';
-  t.date     = document.getElementById('em-date').value || '';
-  if (t.col === 'waiting') t.assignee = document.getElementById('em-assignee').value.trim();
+  const fields = {
+    text,
+    brand:    document.getElementById('em-brand').value || '',
+    priority: document.getElementById('em-priority').value || '',
+    date:     document.getElementById('em-date').value || '',
+  };
+  if (t.col === 'waiting') fields.assignee = document.getElementById('em-assignee').value.trim();
   if (t.timeLog && t.timeLog.length > 0) {
     const h = parseInt(document.getElementById('em-time-h').value) || 0;
     const m = parseInt(document.getElementById('em-time-m').value) || 0;
@@ -2693,11 +2738,12 @@ function doSave() {
       const en = e.end ? new Date(e.end).getTime() : now;
       return sum + Math.floor((en - s) / 1000);
     }, 0);
-    t.timeAdjust = wantedSecs - computed;
+    fields.timeAdjust = wantedSecs - computed;
   }
+  Object.assign(t, fields); // optimista: se ve el cambio ya mismo
   document.getElementById('edit-modal').classList.remove('open');
   editingId = null;
-  save(); render();
+  patchTaskFields(t.id, fields); render();
 }
 
 document.getElementById('em-save').addEventListener('click', doSave);
