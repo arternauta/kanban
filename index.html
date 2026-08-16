@@ -97,35 +97,228 @@ header {
 .summary { font-size: 10px; color: #2c2c2a; letter-spacing: 0.06em; }
 .summary span { color: #444441; }
 
-/* ── Tabs ── */
-.tab-switch { display: flex; gap: 4px; flex-shrink: 0; }
-.tab-btn {
-  background: transparent;
-  border: 1px solid #2c2c2a;
-  border-radius: 6px;
-  padding: 7px 12px;
-  font-size: 11px;
-  font-family: 'IBM Plex Mono', monospace;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #5f5e5a;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.tab-btn:hover { color: #aaa8a0; border-color: #444441; }
-.tab-btn.on { color: #9FE1CB; border-color: #1D9E75; background: #0d2820; }
+/* ── Layout: sidebar + main ── */
+#layout { display: flex; min-height: 100vh; }
+#app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
 
-body.showing-refs .tasks-only { display: none !important; }
-body.showing-refs #board { display: none !important; }
+/* ── Sidebar ── */
+#sidebar {
+  width: 184px;
+  min-height: 100vh;
+  background: #0c0c0b;
+  border-right: 0.5px solid #1e1e1c;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  transition: width 0.2s;
+  z-index: 50;
+}
+#sidebar.sb-collapsed { width: 46px; }
+
+.sb-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px;
+  border-bottom: 0.5px solid #1e1e1c;
+  flex-shrink: 0;
+}
+.sb-logo {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: #444441; white-space: nowrap; overflow: hidden;
+  flex: 1; min-width: 0;
+  transition: opacity 0.15s;
+}
+.sb-logo span { color: #5f5e5a; }
+#sidebar.sb-collapsed .sb-logo { opacity: 0; width: 0; flex: 0; }
+
+#sb-toggle {
+  background: none; border: none; color: #444441; cursor: pointer;
+  font-size: 15px; padding: 2px; line-height: 1; flex-shrink: 0;
+  transition: color 0.15s;
+}
+#sb-toggle:hover { color: #888780; }
+
+.nav-section { overflow: hidden; }
+
+.nav-section-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 14px 5px;
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: #333331; cursor: pointer; white-space: nowrap; user-select: none;
+  transition: color 0.15s;
+}
+.nav-section-header:hover { color: #5f5e5a; }
+.nav-section-label { flex: 1; }
+.nav-chevron { font-size: 8px; transition: transform 0.2s; margin-left: auto; }
+.nav-section.ns-closed .nav-chevron { transform: rotate(-90deg); }
+.nav-section.ns-closed .nav-items { display: none; }
+#sidebar.sb-collapsed .nav-section-header { padding: 12px 0; justify-content: center; pointer-events: none; }
+#sidebar.sb-collapsed .nav-section-label { display: none; }
+#sidebar.sb-collapsed .nav-chevron { display: none; }
+#sidebar.sb-collapsed .nav-items { display: flex !important; }
+
+.nav-items { display: flex; flex-direction: column; padding-bottom: 4px; }
+
+.nav-item {
+  background: none; border: none; border-left: 2px solid transparent;
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 14px 7px 12px;
+  font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em;
+  color: #5f5e5a; cursor: pointer; text-align: left; white-space: nowrap;
+  transition: color 0.12s, background 0.12s, border-color 0.12s;
+}
+.nav-item:hover { color: #aaa8a0; background: rgba(255,255,255,0.025); }
+.nav-item.active { color: #9FE1CB; border-left-color: #1D9E75; background: rgba(29,158,117,0.06); }
+.nav-icon { font-size: 13px; flex-shrink: 0; }
+.nav-label { flex: 1; }
+#sidebar.sb-collapsed .nav-item { justify-content: center; padding: 9px 0; border-left: none; }
+#sidebar.sb-collapsed .nav-label { display: none; }
+
+/* Overlay para mobile */
+#sb-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); z-index: 49;
+}
+
+/* Hamburger en header (mobile only) */
+#hamburger {
+  background: none; border: none; color: #5f5e5a;
+  font-size: 18px; cursor: pointer; padding: 4px; line-height: 1;
+  display: none;
+}
+#hamburger:hover { color: #aaa8a0; }
+
+/* ── Tab visibility ── */
+body.showing-refs   .tasks-only { display: none !important; }
+body.showing-notas  .tasks-only { display: none !important; }
+body.showing-compras .tasks-only { display: none !important; }
+body.showing-recetas .tasks-only { display: none !important; }
+
+body.showing-refs   #board         { display: none !important; }
+body.showing-notas  #board         { display: none !important; }
+body.showing-compras #board        { display: none !important; }
+body.showing-recetas #board        { display: none !important; }
+
+body:not(.showing-refs)     #board-refs     { display: none !important; }
+body:not(.showing-notas)    #board-notas    { display: none !important; }
+body:not(.showing-compras)  #board-compras  { display: none !important; }
+body:not(.showing-recetas)  #board-recetas  { display: none !important; }
+
 body.showing-refs #calendar-view { display: none !important; }
-body:not(.showing-refs) #board-refs { display: none !important; }
+body.showing-notas #calendar-view { display: none !important; }
 body.showing-refs .refs-only { display: inline-flex !important; }
 
-body.showing-notas .tasks-only { display: none !important; }
-body.showing-notas #board { display: none !important; }
-body.showing-notas #calendar-view { display: none !important; }
-body.showing-notas #board-refs { display: none !important; }
-body:not(.showing-notas) #board-notas { display: none !important; }
+/* ── Compras board ── */
+#board-compras {
+  padding: 28px 24px; max-width: 520px; margin: 0 auto; width: 100%;
+}
+.compras-header {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: #5f5e5a; margin-bottom: 20px;
+}
+.compras-add {
+  display: flex; gap: 8px; margin-bottom: 20px;
+}
+.compras-input {
+  flex: 1; background: #1a1a18; border: 0.5px solid #2c2c2a;
+  border-radius: 4px; padding: 8px 12px;
+  font-size: 12px; font-family: 'IBM Plex Mono', monospace; color: #d3d1c7;
+  outline: none;
+}
+.compras-input:focus { border-color: #444441; }
+.compras-input::placeholder { color: #333331; }
+.compras-btn-add {
+  background: none; border: 0.5px solid #2c2c2a; border-radius: 4px;
+  color: #5f5e5a; font-size: 18px; padding: 4px 12px; cursor: pointer;
+  transition: all 0.12s;
+}
+.compras-btn-add:hover { color: #9FE1CB; border-color: #1D9E75; }
+.compras-list { display: flex; flex-direction: column; gap: 2px; }
+.compra-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 4px;
+  transition: background 0.12s; cursor: pointer;
+}
+.compra-item:hover { background: rgba(255,255,255,0.03); }
+.compra-check {
+  width: 16px; height: 16px; border: 1px solid #333331; border-radius: 3px;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; transition: all 0.12s;
+}
+.compra-item.done .compra-check { background: #1D9E75; border-color: #1D9E75; color: #fff; }
+.compra-text {
+  font-size: 12px; font-family: 'IBM Plex Mono', monospace;
+  color: #d3d1c7; flex: 1; transition: color 0.12s;
+}
+.compra-item.done .compra-text { color: #444441; text-decoration: line-through; }
+.compra-del {
+  background: none; border: none; color: #333331; cursor: pointer;
+  font-size: 16px; padding: 0 2px; line-height: 1; opacity: 0; transition: opacity 0.12s;
+}
+.compra-item:hover .compra-del { opacity: 1; }
+.compra-del:hover { color: #c95c5c; }
+.compras-clear-btn {
+  margin-top: 14px; background: none; border: none;
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #333331; cursor: pointer; transition: color 0.12s; padding: 0;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.compras-clear-btn:hover { color: #c95c5c; }
+
+/* ── Recetas board ── */
+#board-recetas {
+  display: flex; gap: 12px; padding: 20px; overflow-x: auto;
+  min-height: calc(100vh - 52px); align-items: flex-start;
+}
+.receta-card {
+  background: #161614; border: 0.5px solid #252523; border-radius: 6px;
+  padding: 9px 10px; display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: #d3d1c7; transition: border-color 0.12s;
+}
+.receta-card:hover { border-color: #3a3937; }
+.receta-card.hecha .receta-nombre { color: #444441; text-decoration: line-through; }
+.receta-nombre { flex: 1; }
+.receta-add-btn {
+  background: none; border: none; color: #444441; font-size: 14px;
+  cursor: pointer; padding: 0 2px; line-height: 1; transition: color 0.12s; flex-shrink: 0;
+}
+.receta-add-btn:hover { color: #9FE1CB; }
+.receta-check {
+  width: 16px; height: 16px; border: 1px solid #333331; border-radius: 3px;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; cursor: pointer; transition: all 0.12s;
+}
+.receta-card.hecha .receta-check { background: #1D9E75; border-color: #1D9E75; color: #fff; }
+.receta-del {
+  background: none; border: none; color: #333331; font-size: 15px;
+  cursor: pointer; padding: 0 2px; line-height: 1; opacity: 0; transition: opacity 0.12s;
+}
+.receta-card:hover .receta-del { opacity: 1; }
+.receta-del:hover { color: #c95c5c; }
+.recetas-semana { font-size: 10px; color: #444441; letter-spacing: 0.1em; margin-bottom: 10px; }
+.recetas-empty {
+  font-size: 11px; color: #333331; text-align: center; padding: 40px 0; letter-spacing: 0.06em;
+}
+
+/* ── Mobile sidebar ── */
+@media (max-width: 700px) {
+  #layout { display: block; }
+  #sidebar {
+    position: fixed; left: -184px; top: 0; height: 100vh;
+    transition: left 0.22s; z-index: 100; width: 184px !important;
+  }
+  #sidebar.mobile-open { left: 0; }
+  #sidebar.mobile-open ~ #app-main #sb-overlay,
+  #sb-overlay.on { display: block; position: fixed; }
+  #hamburger { display: flex; }
+  #sb-toggle { display: none; }
+}
+>>>>>>> f634536 (feat: sidebar con submenús + compras + recetario semanal)
 
 /* ── Board ── */
 .board, .board-refs, .board-notas {
@@ -1274,13 +1467,54 @@ body.public-client .rc-msg-actions { display: none !important; }
   </div>
 </div>
 
-<header>
-  <div class="logo">mis <span>prioridades</span></div>
-  <div class="tab-switch">
-    <button class="tab-btn on" id="tab-tasks" data-tab="tasks">prioridades</button>
-    <button class="tab-btn" id="tab-refs" data-tab="refs">referencias</button>
-    <button class="tab-btn" id="tab-notas" data-tab="notas">notas</button>
+<div id="layout">
+
+<!-- Sidebar -->
+<nav id="sidebar">
+  <div class="sb-top">
+    <button id="sb-toggle" title="Colapsar">☰</button>
+    <div class="sb-logo">mis <span>prioridades</span></div>
   </div>
+
+  <div class="nav-section" id="ns-joint">
+    <div class="nav-section-header" data-ns="joint">
+      <span class="nav-section-label">El Joint</span>
+      <span class="nav-chevron">▾</span>
+    </div>
+    <div class="nav-items">
+      <button class="nav-item active" data-tab="tasks">
+        <span class="nav-icon">📋</span><span class="nav-label">prioridades</span>
+      </button>
+      <button class="nav-item" data-tab="refs">
+        <span class="nav-icon">🔖</span><span class="nav-label">referencias</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-section" id="ns-personal">
+    <div class="nav-section-header" data-ns="personal">
+      <span class="nav-section-label">Personal</span>
+      <span class="nav-chevron">▾</span>
+    </div>
+    <div class="nav-items">
+      <button class="nav-item" data-tab="notas">
+        <span class="nav-icon">📝</span><span class="nav-label">notas</span>
+      </button>
+      <button class="nav-item" data-tab="compras">
+        <span class="nav-icon">🛒</span><span class="nav-label">compras</span>
+      </button>
+      <button class="nav-item" data-tab="recetas">
+        <span class="nav-icon">🍳</span><span class="nav-label">recetas</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div id="app-main">
+<div id="sb-overlay"></div>
+
+<header>
+  <button id="hamburger">☰</button>
   <input class="search-box tasks-only" id="search" type="text" placeholder="buscar...">
   <select class="brand-sel tasks-only" id="brand-filter">
     <option value="">todas las marcas</option>
@@ -1934,6 +2168,44 @@ body.public-client .rc-msg-actions { display: none !important; }
     <div class="cards" id="notas-archived"></div>
   </div>
 </div>
+
+<!-- Compras board -->
+<div id="board-compras">
+  <div class="compras-header">🛒 lista de compras</div>
+  <div class="compras-add">
+    <input class="compras-input" id="compras-input" type="text" placeholder="agregar item...">
+    <button class="compras-btn-add" id="compras-add-btn">+</button>
+  </div>
+  <div class="compras-list" id="compras-list"></div>
+  <button class="compras-clear-btn" id="compras-clear-btn">limpiar tachados</button>
+</div>
+
+<!-- Recetas board: recetario + esta semana -->
+<div id="board-recetas">
+  <div class="col" style="min-width:200px;max-width:280px">
+    <div class="col-head">
+      <div class="col-dot" style="background:#E8A530"></div>
+      <div class="col-name">recetario</div>
+      <div class="col-actions-row">
+        <div class="col-count" id="recetario-count">0</div>
+      </div>
+    </div>
+    <div class="cards" id="recetario-list"></div>
+  </div>
+  <div class="col" style="min-width:200px;max-width:280px">
+    <div class="col-head">
+      <div class="col-dot" style="background:#9b8fff"></div>
+      <div class="col-name">esta semana</div>
+      <div class="col-actions-row">
+        <div class="recetas-semana" id="recetas-semana"></div>
+      </div>
+    </div>
+    <div class="cards" id="menu-list"></div>
+  </div>
+</div>
+
+</div><!-- /app-main -->
+</div><!-- /layout -->
 
 <script>
 // ── Auth & public mode ─────────────────────────────────────────
@@ -3599,6 +3871,9 @@ TASKS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
 const REFS_DOC     = db.collection('kanban').doc('refs');
 const NOTAS_DOC    = db.collection('kanban').doc('notas');
 const SEMILLAS_DOC = db.collection('kanban').doc('semillas');
+const COMPRAS_DOC    = db.collection('kanban').doc('compras');
+const MENU_DOC       = db.collection('kanban').doc('menu');
+const RECETARIO_DOC  = db.collection('kanban').doc('recetario');
 const REF_COLS = ['inspiracion','inbox','ideas','para-producir','finalizadas'];
 const REF_COL_LABELS = { inspiracion:'inspiración', inbox:'inbox', ideas:'análisis de equipo', 'para-producir':'para producir', finalizadas:'finalizadas' };
 const REF_BRAND_CLASS = { byd:'byd', bmw:'bmw', mini:'mini', motorrad:'motorrad', personal:'personal' };
@@ -5012,15 +5287,10 @@ document.addEventListener('touchend', e => {
   refTouchDragEl = null; refDragId = null; refDragOverCardId = null; refDragOverPos = null;
 });
 
-// ── Tabs ───────────────────────────────────────────────────────
-
+// ── Tabs — initial stub (overridden below) ─────────────────────
 function switchTab(tab) {
   document.body.classList.toggle('showing-refs', tab === 'refs');
-  document.getElementById('tab-tasks').classList.toggle('on', tab === 'tasks');
-  document.getElementById('tab-refs').classList.toggle('on', tab === 'refs');
 }
-document.getElementById('tab-tasks').addEventListener('click', () => switchTab('tasks'));
-document.getElementById('tab-refs').addEventListener('click', () => switchTab('refs'));
 
 // ── Recuperar backup local si la página se refrescó a mitad de un guardado ──
 (function() {
@@ -5306,16 +5576,19 @@ document.getElementById('notam-archive').addEventListener('click', () => {
   renderNotas();
 });
 
-// switchTab update
-const _origSwitchTab = switchTab;
+// switchTab — sidebar version
 function switchTab(tab) {
-  document.body.classList.toggle('showing-refs',   tab === 'refs');
-  document.body.classList.toggle('showing-notas',  tab === 'notas');
-  document.getElementById('tab-tasks').classList.toggle('on', tab === 'tasks');
-  document.getElementById('tab-refs').classList.toggle('on',  tab === 'refs');
-  document.getElementById('tab-notas').classList.toggle('on', tab === 'notas');
-  document.getElementById('refs-toolbar').style.display  = tab === 'refs'  ? 'flex' : 'none';
-  document.getElementById('notas-toolbar').style.display = tab === 'notas' ? 'flex' : 'none';
+  const tabs = ['tasks', 'refs', 'notas', 'compras', 'recetas'];
+  tabs.forEach(t => document.body.classList.toggle('showing-' + t, t === tab));
+  // active nav item
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  document.getElementById('refs-toolbar').style.display   = tab === 'refs'   ? 'flex' : 'none';
+  document.getElementById('notas-toolbar').style.display  = tab === 'notas'  ? 'flex' : 'none';
+  // close mobile sidebar
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sb-overlay').classList.remove('on');
 }
 
 document.querySelectorAll('.ref-filter-btn').forEach(btn => {
@@ -5348,7 +5621,7 @@ document.querySelectorAll('[data-nota-brand]').forEach(btn => {
     renderNotas();
   });
 });
-document.getElementById('tab-notas').addEventListener('click', () => switchTab('notas'));
+// notas tab listener moved to sidebar
 
 document.querySelectorAll('[data-toggle-col]').forEach(head => {
   head.addEventListener('click', e => {
@@ -5579,6 +5852,188 @@ SEMILLAS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
 });
 
 renderSemillas();
+
+// ── Sidebar ────────────────────────────────────────────────────
+
+// Nav items → switchTab
+document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// Collapse/expand sidebar (desktop)
+const sidebar = document.getElementById('sidebar');
+document.getElementById('sb-toggle').addEventListener('click', () => {
+  sidebar.classList.toggle('sb-collapsed');
+  localStorage.setItem('sb_collapsed', sidebar.classList.contains('sb-collapsed') ? '1' : '0');
+});
+if (localStorage.getItem('sb_collapsed') === '1') sidebar.classList.add('sb-collapsed');
+
+// Section submenus
+document.querySelectorAll('.nav-section-header').forEach(hdr => {
+  hdr.addEventListener('click', () => {
+    const section = hdr.closest('.nav-section');
+    if (section) section.classList.toggle('ns-closed');
+  });
+});
+
+// Mobile hamburger
+const sbOverlay = document.getElementById('sb-overlay');
+document.getElementById('hamburger').addEventListener('click', () => {
+  sidebar.classList.toggle('mobile-open');
+  sbOverlay.classList.toggle('on');
+});
+sbOverlay.addEventListener('click', () => {
+  sidebar.classList.remove('mobile-open');
+  sbOverlay.classList.remove('on');
+});
+
+// Init to tasks tab
+switchTab('tasks');
+
+// ── Compras ────────────────────────────────────────────────────
+
+let compras = [];
+let comprasPendingWrite = false;
+
+function uid7() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function renderCompras() {
+  const list = document.getElementById('compras-list');
+  if (!compras.length) { list.innerHTML = '<div style="font-size:11px;color:#333331;padding:8px 10px">vacío</div>'; return; }
+  list.innerHTML = compras.map(c => `
+    <div class="compra-item${c.done ? ' done' : ''}" data-compra-id="${c.id}">
+      <div class="compra-check">${c.done ? '✓' : ''}</div>
+      <div class="compra-text">${esc(c.text)}</div>
+      <button class="compra-del" data-compra-del="${c.id}">×</button>
+    </div>`).join('');
+}
+
+function saveCompras() {
+  comprasPendingWrite = true;
+  COMPRAS_DOC.set({ items: compras }).finally(() => { comprasPendingWrite = false; });
+}
+
+function addCompraItem(text) {
+  if (!text.trim()) return;
+  compras.push({ id: uid7(), text: text.trim(), done: false, createdAt: new Date().toISOString() });
+  saveCompras(); renderCompras();
+}
+
+document.getElementById('compras-add-btn').addEventListener('click', () => {
+  const inp = document.getElementById('compras-input');
+  addCompraItem(inp.value); inp.value = '';
+});
+document.getElementById('compras-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { document.getElementById('compras-add-btn').click(); }
+});
+document.getElementById('compras-list').addEventListener('click', e => {
+  const item = e.target.closest('[data-compra-id]');
+  const del  = e.target.closest('[data-compra-del]');
+  if (del) {
+    compras = compras.filter(c => c.id !== del.dataset.compraDel);
+    saveCompras(); renderCompras(); return;
+  }
+  if (item) {
+    const c = compras.find(x => x.id === item.dataset.compraId);
+    if (c) { c.done = !c.done; saveCompras(); renderCompras(); }
+  }
+});
+document.getElementById('compras-clear-btn').addEventListener('click', () => {
+  compras = compras.filter(c => !c.done);
+  saveCompras(); renderCompras();
+});
+
+COMPRAS_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
+  if (snap.metadata.hasPendingWrites || comprasPendingWrite) return;
+  compras = snap.data()?.items || [];
+  renderCompras();
+});
+
+// ── Recetas / Menú ─────────────────────────────────────────────
+
+// ── Recetario ──────────────────────────────────────────────────
+let recetario = [];
+let recetarioPending = false;
+
+function renderRecetario() {
+  const list = document.getElementById('recetario-list');
+  const count = document.getElementById('recetario-count');
+  count.textContent = recetario.length;
+  list.innerHTML = recetario.map(r => `
+    <div class="receta-card" data-rec-id="${r.id}">
+      <span class="receta-nombre">${esc(r.nombre)}</span>
+      <button class="receta-add-btn" data-rec-add="${r.id}" title="agregar a esta semana">→</button>
+    </div>`).join('') || '<div class="recetas-empty">vacío</div>';
+}
+
+function saveRecetario() {
+  recetarioPending = true;
+  RECETARIO_DOC.set({ recetas: recetario }).finally(() => { recetarioPending = false; });
+}
+
+RECETARIO_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
+  if (snap.metadata.hasPendingWrites || recetarioPending) return;
+  recetario = snap.data()?.recetas || [];
+  renderRecetario();
+});
+
+// ── Menú semanal ───────────────────────────────────────────────
+let menuData = null;
+let menuPendingWrite = false;
+
+function renderMenu() {
+  const list = document.getElementById('menu-list');
+  const semanaEl = document.getElementById('recetas-semana');
+  const comidas = menuData?.comidas || [];
+  semanaEl.textContent = menuData?.semana || '';
+  list.innerHTML = comidas.length
+    ? comidas.map((c, i) => `
+        <div class="receta-card${c.listo ? ' hecha' : ''}" data-menu-idx="${i}">
+          <div class="receta-check" data-menu-check="${i}">${c.listo ? '✓' : ''}</div>
+          <span class="receta-nombre">${esc(c.receta)}</span>
+          <button class="receta-del" data-menu-del="${i}">×</button>
+        </div>`).join('')
+    : '<div class="recetas-empty">agregá recetas<br>desde el recetario →</div>';
+}
+
+function saveMenu() {
+  menuPendingWrite = true;
+  MENU_DOC.set(menuData).finally(() => { menuPendingWrite = false; });
+}
+
+document.getElementById('menu-list').addEventListener('click', e => {
+  if (!menuData) return;
+  const chk = e.target.closest('[data-menu-check]');
+  const del = e.target.closest('[data-menu-del]');
+  if (chk) {
+    const idx = parseInt(chk.dataset.menuCheck);
+    menuData.comidas[idx].listo = !menuData.comidas[idx].listo;
+    saveMenu(); renderMenu();
+  } else if (del) {
+    const idx = parseInt(del.dataset.menuDel);
+    menuData.comidas.splice(idx, 1);
+    saveMenu(); renderMenu();
+  }
+});
+
+document.getElementById('recetario-list').addEventListener('click', e => {
+  const btn = e.target.closest('[data-rec-add]');
+  if (!btn) return;
+  const r = recetario.find(x => x.id === btn.dataset.recAdd);
+  if (!r) return;
+  if (!menuData) menuData = { semana: '', comidas: [] };
+  if (!menuData.comidas) menuData.comidas = [];
+  if (menuData.comidas.some(c => c.receta === r.nombre)) return;
+  menuData.comidas.push({ receta: r.nombre, listo: false });
+  saveMenu(); renderMenu();
+});
+
+MENU_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
+  if (snap.metadata.hasPendingWrites || menuPendingWrite) return;
+  menuData = snap.data() || { semana: '', comidas: [] };
+  renderMenu();
+});
+
 </script>
 </body>
 </html>
