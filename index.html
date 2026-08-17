@@ -626,8 +626,9 @@ body.showing-refs .refs-only { display: inline-flex !important; }
   display: flex; align-items: center; gap: 8px;
   padding: 6px 8px; border-radius: 6px;
   background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  font-size: 11px; color: #aaa8a0;
+  font-size: 11px; color: #aaa8a0; text-decoration: none; cursor: pointer;
 }
+.ref-link-chip:hover { border-color: rgba(255,255,255,0.18); color: #e8e6dc; }
 .ref-link-chip img.ref-link-thumb { width: 32px; height: 32px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 .ref-link-chip .ref-link-platform { flex-shrink: 0; font-size: 13px; }
 .ref-link-chip .ref-link-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -4257,14 +4258,18 @@ function renderRefmLinks() {
   // el fallback sin estilo (fondo blanco fijo del propio HTML de
   // Instagram), fuera de lugar en un modal oscuro. El chip de abajo ya
   // muestra el link con ícono/miniatura, así que era redundante además de feo.
+  // El chip en sí es el <a> clickeable ahora (antes el único link real
+  // era el de adentro del blockquote que se sacó).
   box.innerHTML = links.map((l, idx) => `
-      <div class="ref-link-chip">
+      <a class="ref-link-chip" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
         ${l.thumb ? `<img class="ref-link-thumb" src="${esc(l.thumb)}" alt="">` : `<span class="ref-link-platform">${PLATFORM_ICON[l.platform] || '🔗'}</span>`}
         <span class="ref-link-text">${esc(l.title || l.url)}</span>
         <button class="em-gallery-del" data-del-link="${idx}">×</button>
-      </div>`).join('');
+      </a>`).join('');
   box.querySelectorAll('[data-del-link]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
       const item = refs.find(r => r.id === refEditingId);
       if (!item) return;
       const idx = parseInt(btn.dataset.delLink);
