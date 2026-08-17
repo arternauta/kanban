@@ -589,12 +589,15 @@ body.showing-refs .refs-only { display: inline-flex !important; }
 /* Shotlist (storyboard + texto por toma) */
 .sb-shotlist { display: flex; flex-direction: column; gap: 6px; }
 .sb-shot-row { display: flex; align-items: center; gap: 8px; }
+.sb-shot-check { flex-shrink: 0; cursor: pointer; accent-color: #3B6D11; }
+.sb-shot-row.sb-shot-done .sb-shot-text { text-decoration: line-through; opacity: 0.5; }
+.sb-shot-row.sb-shot-done .sb-shot-thumb { opacity: 0.5; }
 .sb-shot-num {
   flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
   background: rgba(255,255,255,0.06); color: #888780; font-size: 10px;
   display: flex; align-items: center; justify-content: center;
 }
-.sb-shot-thumb { flex-shrink: 0; width: 48px; height: 48px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+.sb-shot-thumb { flex-shrink: 0; width: 48px; height: 48px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); cursor: zoom-in; }
 .sb-shot-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .sb-shot-thumb-empty {
   display: flex; align-items: center; justify-content: center; cursor: pointer;
@@ -951,6 +954,8 @@ body.showing-refs .refs-only { display: inline-flex !important; }
   align-items: center; justify-content: center;
 }
 .modal-overlay.open { display: flex; }
+.img-lightbox-inner { position: relative; max-width: 90vw; max-height: 90vh; }
+.img-lightbox-inner img { display: block; max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
 .modal {
   background: #161614; border: 0.5px solid #2c2c2a;
   border-radius: 6px; padding: 20px; width: 340px;
@@ -1827,6 +1832,14 @@ body.public-client .rc-msg-actions { display: none !important; }
   <button class="rp-nav-btn rp-nav-prev" id="rp-prev" title="anterior">‹</button>
   <button class="rp-nav-btn rp-nav-next" id="rp-next" title="siguiente">›</button>
   <div class="rp-body" id="rp-body"></div>
+</div>
+
+<!-- Visor de imagen (doble click en una toma del shotlist) -->
+<div class="modal-overlay" id="img-lightbox">
+  <div class="img-lightbox-inner">
+    <img id="img-lightbox-img" src="" alt="">
+    <button class="rp-back" id="img-lightbox-close" style="position:absolute;top:-40px;right:0">cerrar ×</button>
+  </div>
 </div>
 
 <!-- Trash modal -->
@@ -4326,10 +4339,11 @@ function renderRefmStoryboard() {
   const frames = item.storyboard || [];
   const box = document.getElementById('refm-storyboard');
   box.innerHTML = frames.map((f, idx) => `
-    <div class="sb-shot-row">
+    <div class="sb-shot-row${f.done ? ' sb-shot-done' : ''}">
+      <input type="checkbox" class="sb-shot-check" data-sb-done="${idx}" ${f.done ? 'checked' : ''} title="¿ya grabada?">
       <div class="sb-shot-num">${idx + 1}</div>
       ${f.url
-        ? `<div class="sb-shot-thumb"><img src="${esc(f.url)}" alt=""></div>`
+        ? `<div class="sb-shot-thumb" data-sb-view="${idx}" title="doble click para ver grande"><img src="${esc(f.url)}" alt=""></div>`
         : `<label class="sb-shot-thumb sb-shot-thumb-empty" title="agregar imagen">+
              <input type="file" accept="image/*" data-add-sb-img="${idx}" style="display:none">
            </label>`}
@@ -4337,6 +4351,25 @@ function renderRefmStoryboard() {
       <button class="em-gallery-del" data-del-sb="${idx}">×</button>
     </div>`
   ).join('');
+  box.querySelectorAll('[data-sb-view]').forEach(el => {
+    el.addEventListener('dblclick', () => {
+      const idx = parseInt(el.dataset.sbView);
+      const item = refs.find(r => r.id === refEditingId);
+      const f = item?.storyboard?.[idx];
+      if (!f?.url) return;
+      document.getElementById('img-lightbox-img').src = f.url;
+      document.getElementById('img-lightbox').classList.add('open');
+    });
+  });
+  box.querySelectorAll('[data-sb-done]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const item = refs.find(r => r.id === refEditingId);
+      if (!item) return;
+      const idx = parseInt(cb.dataset.sbDone);
+      if (item.storyboard[idx]) item.storyboard[idx].done = cb.checked;
+      saveRefs(); renderRefmStoryboard(); renderRefs();
+    });
+  });
   // Cada handler vuelve a buscar el item en `refs` al momento del evento,
   // en vez de reusar el `item` cerrado arriba: si un guardado en segundo
   // plano ya reemplazó `refs` por una copia nueva (refs = merged) mientras
@@ -4660,6 +4693,7 @@ document.addEventListener('click', e => {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
+    if (document.getElementById('img-lightbox').classList.contains('open')) { document.getElementById('img-lightbox').classList.remove('open'); return; }
     if (document.getElementById('ref-preview').classList.contains('open')) { closeRefPreview(); return; }
     if (document.getElementById('ref-modal').classList.contains('open')) cancelRefModal();
     return;
@@ -4668,6 +4702,13 @@ document.addEventListener('keydown', e => {
   if (document.activeElement?.closest('textarea, input')) return; // no interferir al escribir
   if (e.key === 'ArrowLeft')  document.getElementById('rp-prev').click();
   if (e.key === 'ArrowRight') document.getElementById('rp-next').click();
+});
+
+document.getElementById('img-lightbox-close').addEventListener('click', () => {
+  document.getElementById('img-lightbox').classList.remove('open');
+});
+document.getElementById('img-lightbox').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('img-lightbox').classList.remove('open');
 });
 
 // ── Ref Preview Panel ────────────────────────────────────────────
