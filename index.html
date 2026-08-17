@@ -4252,20 +4252,17 @@ function renderRefmLinks() {
   if (!item) return;
   const links = (item.media || []).filter(m => m.type === 'link');
   const box = document.getElementById('refm-links');
-  box.innerHTML = links.map((l, idx) => {
-    const igPreview = l.platform === 'instagram' && !l.thumb ? `
-      <blockquote class="instagram-media" data-instgrm-permalink="${esc(l.url)}" data-instgrm-version="14"
-        style="background:#fff;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,.5),0 1px 10px 0 rgba(0,0,0,.15);margin:4px 0 8px;max-width:100%;min-width:326px;padding:0;width:calc(100% - 2px);">
-        <a href="${esc(l.url)}" target="_blank" rel="noopener">Ver en Instagram</a>
-      </blockquote>` : '';
-    const chip = `
+  // El embed oficial de Instagram (blockquote instagram-media) se sacó de
+  // acá: cuando su script no cargaba/procesaba a tiempo quedaba mostrando
+  // el fallback sin estilo (fondo blanco fijo del propio HTML de
+  // Instagram), fuera de lugar en un modal oscuro. El chip de abajo ya
+  // muestra el link con ícono/miniatura, así que era redundante además de feo.
+  box.innerHTML = links.map((l, idx) => `
       <div class="ref-link-chip">
         ${l.thumb ? `<img class="ref-link-thumb" src="${esc(l.thumb)}" alt="">` : `<span class="ref-link-platform">${PLATFORM_ICON[l.platform] || '🔗'}</span>`}
         <span class="ref-link-text">${esc(l.title || l.url)}</span>
         <button class="em-gallery-del" data-del-link="${idx}">×</button>
-      </div>`;
-    return chip + igPreview;
-  }).join('');
+      </div>`).join('');
   box.querySelectorAll('[data-del-link]').forEach(btn => {
     btn.addEventListener('click', () => {
       const item = refs.find(r => r.id === refEditingId);
@@ -4276,7 +4273,6 @@ function renderRefmLinks() {
       saveRefs(); renderRefmLinks(); renderRefs();
     });
   });
-  if (links.some(l => l.platform === 'instagram')) loadInstagramEmbed();
 }
 
 async function addRefLink() {
