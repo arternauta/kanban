@@ -5228,8 +5228,8 @@ function exportRefBrief(id) {
 // imágenes de moodboard, ítems de checklist) para que ninguno quede
 // cortado a la mitad entre dos páginas.
 function exportBrandBrief(brand) {
-  const items = refs.filter(r => r.brand === brand && ['para-producir', 'finalizadas'].includes(r.col));
-  if (!items.length) { alert('No hay referencias aprobadas para esta marca todavía.'); return; }
+  const items = refs.filter(r => r.brand === brand && r.col === 'para-producir');
+  if (!items.length) { alert('No hay referencias para producir de esta marca todavía.'); return; }
 
   const pagesHTML = items.map((item, i) => `
     <div class="ref-page${i === 0 ? ' ref-page-first' : ''}">
