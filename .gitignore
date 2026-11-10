@@ -2,8 +2,6 @@ node_modules/
 .firebase/
 .DS_Store
 presentacion-publica/public/
-# Tipografía con licencia de la marca: no va en un repositorio público (copiar a mano a fonts/)
-fonts/BMWMotorrad*
 # Datos personales
 scripts/notas-pending.json
 scripts/ideas.json
