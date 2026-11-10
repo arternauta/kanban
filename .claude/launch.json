@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "kanban",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["/Users/arterland/Documents/01-PROYECTOS/kanban/server.cjs"],
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3000", "--bind", "127.0.0.1", "--directory", "/Users/arternauta/projects/kanban"],
       "port": 3000
     }
   ]

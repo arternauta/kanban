@@ -4,8 +4,8 @@
   "description": "Kanban personal de tareas",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0e0e0d",
-  "theme_color": "#111110",
+  "background_color": "#101836",
+  "theme_color": "#141d40",
   "orientation": "landscape",
   "icons": [
     {

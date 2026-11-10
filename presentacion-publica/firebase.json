@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "eljoint-referencias",
+    "public": "public",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [{ "source": "/", "destination": "/presentacion.html" }],
+    "headers": [
+      { "source": "**", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }
+    ]
+  }
+}

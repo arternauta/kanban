@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0a0b">
+<meta name="robots" content="noindex, nofollow">
+<title>Referencias · El Joint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<style>
+@font-face { font-family: 'Freudian'; src: url('fonts/FreudianOne.woff') format('woff'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Freudian'; src: url('fonts/FreudianTwo.woff') format('woff'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'BMW Motorrad'; src: url('fonts/BMWMotorrad-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'BMW Motorrad'; src: url('fonts/BMWMotorrad-Heavy.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'BMW Motorrad Outline'; src: url('fonts/BMWMotorradOutline-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+
+:root {
+  /* El Joint: lima sobre negro, sea cual sea la marca */
+  --bg: #0a0a0b;
+  --bg-deep: #000000;
+  --card: #141416;
+  --card-2: #1f1f23;
+  --ink: #f2f1ed;
+  --muted: #9a9a9f;
+  --dim: #6f6f75;
+  --line: rgb(242 241 237 / 0.14);
+  --coral: #ff6b5b;
+  --lilac: #f2f1ed;
+  --ok: #e1fb52;
+  --warn: #f5c542;
+  --accent: #e1fb52;
+  --navy-ink: #0a0a0b;
+  --star: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Freudian', 'Montserrat', sans-serif;
+  --font-hero: 'Freudian', 'Montserrat', sans-serif;
+  --type: #ffffff; /* la tipografía de marca va siempre en blanco; el lima queda para botones, fichas y detalles */
+}
+/* Motorrad usa su propia tipografía: Heavy para los títulos y Outline para el nombre grande */
+body[data-brand="motorrad"] { --font-display: 'BMW Motorrad', 'Freudian', 'Montserrat', sans-serif; --font-hero: 'BMW Motorrad Outline', 'BMW Motorrad', 'Montserrat', sans-serif; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-weight: 400; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--accent); color: var(--navy-ink); }
+a { color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+.star { display: inline-block; width: 12px; height: 12px; background: var(--accent); clip-path: var(--star); }
+
+/* ── Barra superior ── */
+.top {
+  position: sticky; top: 0; z-index: 20; background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 0 clamp(16px, 4vw, 40px); height: 58px;
+}
+.wordmark { font-family: var(--font-body); font-weight: 700; font-size: 17px; letter-spacing: 0.14em; display: flex; align-items: center; gap: 9px; color: var(--type); }
+.team-tag { font-family: var(--font-body); font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: var(--lilac); color: var(--navy-ink); margin-left: 6px; }
+.progress { display: flex; align-items: center; gap: 12px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.progress-bar { width: clamp(70px, 14vw, 150px); height: 4px; border-radius: 4px; background: rgb(242 241 237 / 0.14); overflow: hidden; }
+.progress-bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.4s ease; }
+
+/* ── Portada ── */
+.hero {
+  min-height: calc(100vh - 58px); display: flex; flex-direction: column; justify-content: center;
+  padding: clamp(40px, 8vw, 90px) clamp(16px, 4vw, 40px); max-width: 1240px; margin: 0 auto;
+}
+.kicker { font-size: 12px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 12px; }
+.hero h1 {
+  font-family: var(--font-hero); font-weight: 700; color: var(--type);
+  font-size: clamp(76px, 19vw, 230px); line-height: 0.9; letter-spacing: 0.01em; margin: 0 0 28px; overflow-wrap: anywhere;
+}
+body[data-brand="motorrad"] .hero h1 { font-weight: 400; font-size: clamp(56px, 14.5vw, 190px); letter-spacing: 0; }
+.hero-sub { max-width: 30ch; font-size: clamp(20px, 3vw, 32px); font-weight: 500; line-height: 1.25; color: var(--type); }
+.hero-meta { margin-top: 38px; display: flex; flex-wrap: wrap; gap: 10px; }
+.pill {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 7px 14px; border-radius: 999px; background: rgb(242 241 237 / 0.1); color: var(--ink);
+}
+.start {
+  margin-top: 46px; align-self: flex-start; border: none; border-radius: 999px; background: var(--accent); color: var(--navy-ink);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 15px 28px; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.start:hover { background: var(--lilac); }
+
+/* ── Cada referencia ── */
+.refs { max-width: 1240px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
+.ref {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px);
+  padding: clamp(36px, 6vw, 72px) 0; border-top: 1px solid var(--line); scroll-margin-top: 58px;
+  opacity: 0; transform: translateY(18px); transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.ref.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .ref { opacity: 1; transform: none; transition: none; } html { scroll-behavior: auto; } }
+
+.media { align-self: start; position: sticky; top: 82px; }
+.media-frame { position: relative; border-radius: 18px; overflow: hidden; background: var(--card); aspect-ratio: 4 / 5; max-height: calc(100vh - 110px); width: 100%; }
+.media-link { display: block; cursor: pointer; text-decoration: none; }
+.media-link .play { pointer-events: none; }
+.media-link:hover .play { background: var(--accent); }
+.media-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.media-frame iframe { width: 100%; height: 100%; border: none; background: var(--bg-deep); }
+.media-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--dim); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
+.play {
+  position: absolute; left: 16px; bottom: 16px; display: inline-flex; align-items: center; gap: 10px;
+  border: none; border-radius: 999px; background: var(--ink); color: var(--navy-ink);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 12px 20px;
+}
+.play:hover { background: var(--accent); }
+.play i { width: 0; height: 0; border-left: 9px solid currentColor; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+
+.info { min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+.info-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.num { font-family: var(--font-display); font-weight: 400; font-size: 18px; letter-spacing: 0.1em; color: var(--type); margin-right: 4px; }
+.chip { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; background: rgb(242 241 237 / 0.1); color: var(--muted); }
+.chip.state-aprobada  { background: var(--ok);   color: var(--navy-ink); }
+.chip.state-cambios   { background: var(--warn); color: var(--navy-ink); }
+.chip.state-rechazada { background: var(--coral); color: var(--navy-ink); }
+.chip.state-comentada { background: rgb(225 251 82 / 0.14); color: var(--accent); }
+.title { font-family: var(--font-display); font-weight: 700; font-size: clamp(34px, 5vw, 60px); line-height: 1.02; letter-spacing: 0.01em; overflow-wrap: anywhere; color: var(--type); }
+.desc { font-size: 16px; color: var(--muted); white-space: pre-wrap; max-width: 56ch; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; }
+.orig { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); }
+.orig:hover { background: var(--lilac); color: var(--navy-ink); border-color: var(--lilac); }
+
+/* Todo lo que se llena en la edición de la tarjeta */
+.block { border-top: 1px solid var(--line); padding-top: 16px; }
+.block h4 { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+.script { white-space: pre-wrap; font-size: 15px; color: var(--muted); }
+.shots { padding-left: 22px; display: flex; flex-direction: column; gap: 12px; font-size: 14px; color: var(--muted); }
+.shots li.done > span { text-decoration: line-through; opacity: 0.6; }
+.shots img { display: block; margin-top: 8px; max-width: 240px; width: 100%; border-radius: 10px; }
+.mood { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mood a, .mood video { display: block; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--card); width: 100%; object-fit: cover; }
+.mood img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.checks { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--muted); }
+.checks li { display: flex; align-items: flex-start; gap: 10px; }
+.checks i { flex: none; width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--dim); display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 12px; color: var(--navy-ink); margin-top: 2px; }
+.checks li.done i { background: var(--accent); border-color: var(--accent); }
+.checks li.done { opacity: 0.7; }
+
+/* ── Acciones: aprobar la referencia o dejar un comentario ── */
+.actions { display: grid; grid-template-columns: 1.15fr 1fr; gap: 8px; }
+.act {
+  min-height: 56px; border-radius: 14px; padding: 12px 16px; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center; gap: 10px; line-height: 1.2;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.act.approve { border: 1px solid var(--accent); background: var(--accent); color: var(--navy-ink); }
+.act.approve:hover { background: var(--ink); border-color: var(--ink); }
+.act.approve.on { background: transparent; color: var(--accent); }
+.act.approve.on:hover { background: rgb(225 251 82 / 0.12); }
+.act.comment { border: 1px solid var(--line); background: transparent; color: var(--ink); }
+.act.comment:hover { background: rgb(242 241 237 / 0.1); }
+
+/* ── Comentarios: escribir, resolver y (solo el equipo) ocultar ── */
+.thread { display: flex; flex-direction: column; gap: 8px; }
+.msg { max-width: 92%; padding: 10px 14px; border-radius: 14px; font-size: 14px; overflow-wrap: anywhere; }
+.msg-text { white-space: pre-wrap; }
+.msg-meta { margin-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 14px; font-size: 10px; letter-spacing: 0.08em; color: var(--dim); text-transform: uppercase; }
+.msg-actions { display: inline-flex; gap: 12px; flex: none; }
+.msg-actions button { background: none; border: none; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 0; }
+.msg-actions button:hover { color: var(--accent); }
+.msg.cliente { align-self: flex-end; background: var(--card-2); border-bottom-right-radius: 4px; }
+.msg.equipo  { align-self: flex-start; background: rgb(225 251 82 / 0.12); border-bottom-left-radius: 4px; }
+.msg.resolved { opacity: 0.55; }
+.msg.resolved .msg-text { text-decoration: line-through; }
+.msg.hidden-c { border: 1px dashed var(--dim); opacity: 0.7; }
+.resolved-box > summary { cursor: pointer; list-style: none; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); padding: 6px 2px; }
+.resolved-box > summary::-webkit-details-marker { display: none; }
+.resolved-box > summary::before { content: '+ '; color: var(--accent); }
+.resolved-box[open] > summary::before { content: '– '; }
+.resolved-box[open] { display: flex; flex-direction: column; gap: 8px; }
+.compose { display: flex; gap: 8px; align-items: flex-end; }
+.compose textarea {
+  flex: 1; resize: none; min-height: 48px; max-height: 160px; background: var(--card); color: var(--ink);
+  border: 1px solid transparent; border-radius: 14px; padding: 13px 16px; font: inherit; font-size: 14px; outline: none;
+}
+.compose textarea:focus { border-color: var(--accent); }
+.compose textarea::placeholder { color: var(--dim); }
+.send { border: none; border-radius: 14px; background: var(--accent); color: var(--navy-ink); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 20px; min-height: 48px; }
+.send:hover { background: var(--lilac); }
+.send:disabled { opacity: 0.4; cursor: default; }
+
+/* ── Cierre ── */
+.end { max-width: 1240px; margin: 0 auto; padding: clamp(48px, 8vw, 100px) clamp(16px, 4vw, 40px) 120px; border-top: 1px solid var(--line); }
+.end h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(44px, 9vw, 110px); line-height: 0.95; color: var(--type); }
+.end p { margin-top: 16px; max-width: 50ch; color: var(--muted); }
+.end .tally { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px; }
+.foot { text-align: center; padding: 28px 16px 40px; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); }
+
+.state { min-height: calc(100vh - 58px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 24px; color: var(--muted); }
+.state h2 { font-family: 'Freudian', 'Montserrat', sans-serif; font-weight: 700; font-size: clamp(34px, 6vw, 56px); color: var(--type); }
+.toast {
+  position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  background: var(--ink); color: var(--navy-ink); font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+  padding: 11px 20px; border-radius: 999px; transition: opacity 0.25s, transform 0.25s; z-index: 50;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 860px) {
+  .actions { grid-template-columns: 1fr; }
+  .ref { grid-template-columns: 1fr; }
+  .media { position: static; }
+  .media-frame { aspect-ratio: 4 / 5; max-height: 70vh; }
+  .msg { max-width: 96%; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wordmark"><span class="star"></span>EL JOINT<span class="team-tag" id="team-tag" hidden title="Así ve el cliente su página. Tú además ves los comentarios ocultos y puedes ocultar los que no deban llegarle.">Modo equipo</span></div>
+  <div class="progress" id="progress" hidden>
+    <span id="progress-text"></span>
+    <span class="progress-bar"><i id="progress-fill"></i></span>
+  </div>
+</header>
+
+<main id="app">
+  <div class="state"><span class="star"></span><p>Cargando referencias…</p></div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// Web de presentación: muestra, por marca, las referencias que están en «Para producir»
+// con todo lo que se llena en la edición de la tarjeta, y deja decidir y comentar.
+// Entra con un enlace secreto por marca (?k=...), guardado en kanban/settings → client_keys.
+// Si quien abre ya inició sesión en el Kanban en este navegador, entra en «modo equipo»:
+// ve también los comentarios ocultos y puede ocultarlos al cliente.
+// ═══════════════════════════════════════════════════════════════
+firebase.initializeApp({
+  apiKey: "AIzaSyA5wvhWZyiVcPyf4jLrpRxITTTEv-m2XXM",
+  authDomain: "kanbarter-a2951.firebaseapp.com",
+  projectId: "kanbarter-a2951",
+  storageBucket: "kanbarter-a2951.firebasestorage.app",
+  messagingSenderId: "86086247553",
+  appId: "1:86086247553:web:adc809d28c032497d89980"
+});
+const db = firebase.firestore();
+const REFS_DOC = db.collection('kanban').doc('refs');
+const SETTINGS_DOC = db.collection('kanban').doc('settings');
+
+const KEY = new URLSearchParams(location.search).get('k') || '';
+const SHOW_COL = 'para-producir';
+const BRAND_NAME = { byd: 'BYD', bmw: 'BMW', mini: 'MINI', motorrad: 'MOTORRAD' };
+const FORMAT_NAME = { reel: 'Reel', story: 'Story', tiktok: 'TikTok', post: 'Post', carrusel: 'Carrusel' };
+const PLATFORM_NAME = { instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube' };
+const POS = { top: 'top', center: 'center', bottom: 'bottom' };
+const STATE_LABEL = { aprobada: 'Aprobada', cambios: 'Cambios pedidos', rechazada: 'Rechazada', comentada: 'Con comentarios' };
+
+let BRAND = null;
+let TEAM = false;
+let refs = [];
+const app = document.getElementById('app');
+const live = new Set(); // referencias con el reproductor abierto
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const safeUrl = u => (typeof u === 'string' && /^https?:\/\//i.test(u)) ? u : '';
+const pad = n => String(n).padStart(2, '0');
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('es', { day: 'numeric', month: 'short' }) + ' · ' + d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+}
+
+// Los comentarios viejos no tienen id: se calcula uno estable (el mismo que usa el Kanban).
+function commentId(c) {
+  if (c.id) return c.id;
+  let h = 5381;
+  const str = (c.createdAt || '') + '|' + (c.text || '');
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+  return 'c' + (h >>> 0).toString(36);
+}
+const withId = c => c.id ? c : { ...c, id: commentId(c) };
+
+// ── Datos de cada referencia ──
+function visibleRefs() {
+  return refs.filter(r => r.brand === BRAND && r.col === SHOW_COL && !r.archived);
+}
+function coverOf(r) {
+  const links = (r.media || []).filter(m => m.type === 'link');
+  const mb = (r.moodboard || []).find(m => m.type !== 'video');
+  return safeUrl(r.cover || (links.find(l => l.thumb) || {}).thumb || (mb && mb.url) || '');
+}
+function linksOf(r) {
+  return (r.media || []).filter(m => m.type === 'link').map(l => ({ url: safeUrl(l.url), platform: l.platform })).filter(l => l.url);
+}
+function embedOf(url) {
+  const m = url && url.match(/instagram\.com\/(reel|p)\/([A-Za-z0-9_-]+)/);
+  return m ? `https://www.instagram.com/${m[1]}/${m[2]}/embed/` : '';
+}
+
+// ── Escrituras: siempre sobre lo más reciente del servidor ──
+async function mutate(id, fn) {
+  await db.runTransaction(async tx => {
+    const snap = await tx.get(REFS_DOC);
+    const arr = snap.exists ? (snap.data().data || []) : [];
+    const i = arr.findIndex(r => r.id === id);
+    if (i === -1 || arr[i].brand !== BRAND || arr[i].col !== SHOW_COL) return;
+    arr[i] = fn({ ...arr[i] });
+    tx.set(REFS_DOC, { data: arr });
+  });
+}
+
+async function recover() { // si una escritura falla, vuelve a lo que dice el servidor
+  try { const s = await REFS_DOC.get(); refs = (s.data() || {}).data || []; sync(); } catch (e) {}
+}
+
+async function decide(id, decision) {
+  if (TEAM) return; // la decisión es del cliente
+  const r = refs.find(x => x.id === id);
+  if (!r) return;
+  const same = r.clientStatus === decision;
+  const status = same ? null : decision;
+  const at = same ? null : new Date().toISOString();
+  r.clientStatus = status; r.clientDecidedAt = at; // se ve al instante
+  sync();
+  try {
+    await mutate(id, x => { x.clientStatus = status; x.clientDecidedAt = at; return x; });
+    toast(same ? 'Aprobación retirada' : 'Referencia aprobada, gracias');
+  } catch (e) { toast('No se pudo guardar. Inténtalo otra vez.'); recover(); }
+}
+
+// Cambia la lista de comentarios: primero en pantalla, luego sobre lo fresco del servidor.
+async function changeComments(id, fn, okMsg) {
+  const r = refs.find(x => x.id === id);
+  if (!r) return false;
+  r.comments = fn((r.comments || []).map(withId));
+  sync();
+  try {
+    await mutate(id, x => { x.comments = fn((x.comments || []).map(withId)); return x; });
+    if (okMsg) toast(okMsg);
+    return true;
+  } catch (e) { toast('No se pudo guardar. Inténtalo otra vez.'); recover(); return false; }
+}
+
+function comment(id, text) {
+  text = text.trim();
+  if (!text) return false;
+  const c = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), text, author: TEAM ? 'equipo' : 'cliente', createdAt: new Date().toISOString() };
+  return changeComments(id, arr => [...arr, c], 'Comentario enviado');
+}
+const resolveComment = (id, cid) => changeComments(id, arr => arr.map(c => c.id === cid ? { ...c, resolved: !c.resolved } : c));
+const hideComment = (id, cid) => TEAM && changeComments(id, arr => arr.map(c => c.id === cid ? { ...c, hidden: !c.hidden } : c));
+
+// ── Dibujo ──
+function mediaHTML(r) {
+  const cover = coverOf(r), first = linksOf(r)[0], embed = first ? embedOf(first.url) : '';
+  // TikTok: la foto es un enlace directo al video (su miniatura trae un play dibujado, no debe parecer un reproductor)
+  if (first && first.platform === 'tiktok') return `<a class="media-frame media-link" href="${esc(first.url)}" target="_blank" rel="noopener noreferrer" title="Abrir en TikTok">
+      ${cover ? `<img src="${esc(cover)}" alt="" loading="lazy" style="object-position:${POS[r.coverPosition] || 'center'}">` : '<div class="media-empty">sin imagen</div>'}
+      <span class="play"><i></i>Ver en TikTok ↗</span>
+    </a>`;
+  // El video se ve directo, sin botón. "lazy": cada reproductor carga cuando la propuesta se acerca a la pantalla.
+  if (embed) return `<div class="media-frame"><iframe src="${esc(embed)}" allowfullscreen scrolling="no" loading="lazy" title="Vista previa"></iframe></div>`;
+  return `<div class="media-frame">
+      ${cover ? `<img src="${esc(cover)}" alt="" loading="lazy" style="object-position:${POS[r.coverPosition] || 'center'}">` : '<div class="media-empty">sin imagen</div>'}
+    </div>`;
+}
+
+function blocksHTML(r) {
+  const out = [];
+  if (r.script) out.push(`<div class="block"><h4>Guion</h4><div class="script">${esc(r.script)}</div></div>`);
+  const sb = (r.storyboard || []).filter(f => f.text || safeUrl(f.url));
+  if (sb.length) out.push(`<div class="block"><h4>Plan de tomas</h4><ol class="shots">${sb.map(f =>
+    `<li class="${f.done ? 'done' : ''}">${f.text ? `<span>${esc(f.text)}</span>` : ''}${safeUrl(f.url) ? `<img src="${esc(f.url)}" alt="" loading="lazy">` : ''}</li>`).join('')}</ol></div>`);
+  const mb = (r.moodboard || []).filter(m => safeUrl(m.url));
+  if (mb.length) out.push(`<div class="block"><h4>Moodboard</h4><div class="mood">${mb.map(m => m.type === 'video'
+    ? `<video src="${esc(m.url)}" controls preload="none" playsinline></video>`
+    : `<a href="${esc(m.url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(m.url)}" alt="" loading="lazy"></a>`).join('')}</div></div>`);
+  const cl = r.refChecklist || [];
+  if (cl.length) out.push(`<div class="block"><h4>Pendientes</h4><ul class="checks">${cl.map(c =>
+    `<li class="${c.done ? 'done' : ''}"><i>${c.done ? '✓' : ''}</i><span>${esc(c.text)}</span></li>`).join('')}</ul></div>`);
+  return out.join('');
+}
+
+function authorLabel(c) {
+  if (TEAM) return c.author === 'cliente' ? 'Cliente' : 'Equipo';
+  return c.author === 'cliente' ? 'Cliente' : 'El Joint';
+}
+
+function threadHTML(r) {
+  const list = (r.comments || []).map(withId).filter(c => TEAM || !c.hidden);
+  const one = c => `
+    <div class="msg ${c.author === 'cliente' ? 'cliente' : 'equipo'}${c.resolved ? ' resolved' : ''}${c.hidden ? ' hidden-c' : ''}">
+      <div class="msg-text">${esc(c.text)}</div>
+      <div class="msg-meta">
+        <span>${esc(authorLabel(c))} · ${esc(fmtDate(c.createdAt))}${c.hidden ? ' · oculto al cliente' : ''}</span>
+        <span class="msg-actions">
+          <button type="button" data-resolve="${esc(c.id)}">${c.resolved ? 'Reabrir' : 'Resolver'}</button>
+          ${TEAM ? `<button type="button" data-hide="${esc(c.id)}">${c.hidden ? 'Mostrar' : 'Ocultar'}</button>` : ''}
+        </span>
+      </div>
+    </div>`;
+  const pending = list.filter(c => !c.resolved), resolved = list.filter(c => c.resolved);
+  return pending.map(one).join('')
+    + (resolved.length ? `<details class="resolved-box"><summary>${resolved.length} ${resolved.length === 1 ? 'resuelto' : 'resueltos'}</summary>${resolved.map(one).join('')}</details>` : '');
+}
+
+const clientCommented = r => (r.comments || []).some(c => c.author === 'cliente');
+const isReviewed = r => !!r.clientStatus || clientCommented(r);
+function stateChip(r) {
+  const st = r.clientStatus || (clientCommented(r) ? 'comentada' : '');
+  return st ? `<span class="chip state-${esc(st)}">${esc(STATE_LABEL[st] || '')}</span>` : '';
+}
+
+function buildRef(r, i, n) {
+  const sec = document.createElement('section');
+  sec.className = 'ref'; sec.dataset.ref = r.id;
+  const links = linksOf(r);
+  sec.innerHTML = `
+    <div class="media" data-media data-live="${live.has(r.id)}">${mediaHTML(r)}</div>
+    <div class="info">
+      <div class="info-top"><span class="num">${pad(i + 1)} / ${pad(n)}</span>${r.format && FORMAT_NAME[r.format] ? `<span class="chip">${esc(FORMAT_NAME[r.format])}</span>` : ''}<span data-state>${stateChip(r)}</span></div>
+      <h2 class="title">${esc(r.title || r.text || 'Propuesta')}</h2>
+      ${r.title && r.text ? `<p class="desc">${esc(r.text)}</p>` : ''}
+      ${links.length && !embedOf(links[0].url) && links[0].platform !== 'tiktok' ? `<div class="links">${links.map((l, k) => `<a class="orig" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">Ver ${links.length > 1 ? esc(PLATFORM_NAME[l.platform] || 'enlace') + ' ' + (k + 1) : 'la referencia original'} ↗</a>`).join('')}</div>` : ''}
+      ${blocksHTML(r)}
+      ${TEAM ? '' : `<div class="actions" data-decide>
+        <button class="act approve" data-dec="aprobada" type="button">✓ Aprobar referencia</button>
+        <button class="act comment" data-open-comment type="button">💬 Dejar comentario</button>
+      </div>`}
+      <div class="thread" data-thread></div>
+      <form class="compose" data-compose${TEAM ? '' : ' hidden'}>
+        <textarea rows="1" placeholder="Escribe un comentario…" maxlength="1500"></textarea>
+        <button class="send" type="submit" disabled>Enviar</button>
+      </form>
+    </div>`;
+  return sec;
+}
+
+function updateRef(sec, r, i, n) {
+  sec.querySelector('.num').textContent = `${pad(i + 1)} / ${pad(n)}`;
+  sec.querySelector('[data-state]').innerHTML = stateChip(r);
+  const ap = sec.querySelector('[data-dec]');
+  if (ap) { const on = r.clientStatus === 'aprobada'; ap.classList.toggle('on', on); ap.textContent = on ? '✓ Aprobada' : '✓ Aprobar referencia'; }
+  const th = sec.querySelector('[data-thread]');
+  const html = threadHTML(r);
+  if (th.dataset.h !== html) {
+    const wasOpen = !!(th.querySelector('details') && th.querySelector('details').open);
+    th.innerHTML = html; th.dataset.h = html;
+    const d = th.querySelector('details'); if (d && wasOpen) d.open = true;
+  }
+  const media = sec.querySelector('[data-media]');
+  const wantLive = live.has(r.id);
+  if (media.dataset.live !== String(wantLive)) { media.innerHTML = mediaHTML(r); media.dataset.live = String(wantLive); }
+}
+
+function sync() {
+  const list = visibleRefs();
+  const n = list.length;
+  const host = document.getElementById('refs');
+  if (!host) return;
+  const have = new Map([...host.children].map(el => [el.dataset.ref, el]));
+  list.forEach((r, i) => {
+    let el = have.get(r.id);
+    if (!el) { el = buildRef(r, i, n); observe(el); }
+    updateRef(el, r, i, n);
+    if (host.children[i] !== el) host.insertBefore(el, host.children[i] || null); // orden del equipo, sin mover lo que ya está bien colocado (mover un iframe lo recarga)
+    have.delete(r.id);
+  });
+  have.forEach(el => el.remove());
+
+  const done = list.filter(r => r.clientStatus === 'aprobada').length; // la barra cuenta aprobadas
+  const reviewed = list.filter(isReviewed).length; // el cierre final espera a que todas tengan decisión o comentario
+  document.getElementById('progress').hidden = !n;
+  document.getElementById('progress-text').textContent = `${done} de ${n} aprobadas`;
+  document.getElementById('progress-fill').style.width = n ? (done / n * 100) + '%' : '0';
+  const counts = { aprobadas: list.filter(r => r.clientStatus === 'aprobada').length, comentadas: list.filter(r => r.clientStatus !== 'aprobada' && clientCommented(r)).length };
+  const end = document.getElementById('end');
+  end.hidden = !(n && reviewed === n);
+  document.getElementById('tally').innerHTML =
+    `<span class="pill">${counts.aprobadas} aprobadas</span><span class="pill">${counts.comentadas} con comentarios</span>`;
+  const empty = document.getElementById('empty');
+  if (empty) empty.hidden = n > 0;
+}
+
+let io = null;
+function observe(el) {
+  if (!('IntersectionObserver' in window)) { el.classList.add('in'); return; }
+  if (!io) io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+  io.observe(el);
+}
+
+// Mes de la portada: el que indique kanban/settings → client_meta.<marca>.mes; si no hay, el mes actual.
+let CLIENT_META = {};
+function monthName() {
+  const custom = ((CLIENT_META[BRAND] || {}).mes || '').trim();
+  const m = custom || new Date().toLocaleDateString('es', { month: 'long' });
+  return m.charAt(0).toUpperCase() + m.slice(1);
+}
+
+function showInvalid() {
+  app.innerHTML = `<div class="state"><span class="star"></span><h2>Este enlace no funciona</h2><p>Puede que haya cambiado. Pídele a tu contacto en El Joint uno nuevo.</p></div>`;
+}
+
+function showPresentation() {
+  document.body.dataset.brand = BRAND;
+  document.title = `Referencias ${BRAND_NAME[BRAND]} · El Joint`;
+  document.getElementById('team-tag').hidden = !TEAM;
+  app.innerHTML = `
+    <section class="hero">
+      <h1>${esc(BRAND_NAME[BRAND])}</h1>
+      <p class="hero-sub">Ideas para contenido orgánico de ${esc(monthName())}</p>
+      <div class="hero-meta" id="hero-meta"></div>
+      <a class="start" href="#refs">Empezar <span>↓</span></a>
+    </section>
+    <div class="refs" id="refs"></div>
+    <p class="state" id="empty" hidden style="min-height:40vh">Por ahora no hay propuestas para revisar. Te avisamos cuando haya.</p>
+    <section class="end" id="end" hidden>
+      <h2>Todo revisado</h2>
+      <p>Gracias por tomarte el tiempo. Vamos a leer lo que nos dejaste y te respondemos aquí mismo.</p>
+      <div class="tally" id="tally"></div>
+    </section>
+    <div class="foot">El Joint</div>`;
+
+  // Delegación: decidir, reproducir, resolver / ocultar y comentar
+  app.addEventListener('click', e => {
+    const sec = e.target.closest('[data-ref]');
+    const dec = e.target.closest('[data-dec]');
+    if (dec && sec) { decide(sec.dataset.ref, dec.dataset.dec); return; }
+    const openC = e.target.closest('[data-open-comment]');
+    if (openC && sec) {
+      const form = sec.querySelector('[data-compose]');
+      form.hidden = false;
+      const ta = form.querySelector('textarea');
+      ta.focus({ preventScroll: false });
+      return;
+    }
+    const play = e.target.closest('[data-play]');
+    if (play) { live.add(play.dataset.play); sync(); return; }
+    const res = e.target.closest('[data-resolve]');
+    if (res && sec) { resolveComment(sec.dataset.ref, res.dataset.resolve); return; }
+    const hid = e.target.closest('[data-hide]');
+    if (hid && sec) { hideComment(sec.dataset.ref, hid.dataset.hide); }
+  });
+  app.addEventListener('input', e => {
+    const ta = e.target.closest('textarea');
+    if (!ta) return;
+    ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+    ta.closest('form').querySelector('.send').disabled = !ta.value.trim();
+  });
+  app.addEventListener('keydown', e => {
+    const ta = e.target.closest('textarea');
+    if (ta && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ta.closest('form').requestSubmit(); }
+  });
+  app.addEventListener('submit', async e => {
+    const form = e.target.closest('[data-compose]');
+    if (!form) return;
+    e.preventDefault();
+    const ta = form.querySelector('textarea');
+    const btn = form.querySelector('.send');
+    const text = ta.value;
+    if (!text.trim()) return;
+    btn.disabled = true;
+    const ok = await comment(form.closest('[data-ref]').dataset.ref, text);
+    if (ok) { ta.value = ''; ta.style.height = 'auto'; } else { btn.disabled = false; }
+  });
+
+  REFS_DOC.onSnapshot(snap => {
+    refs = (snap.data() || {}).data || [];
+    sync();
+    const n = visibleRefs().length;
+    const meta = document.getElementById('hero-meta');
+    if (meta) meta.innerHTML = n ? `<span class="pill">${n} ${n === 1 ? 'propuesta' : 'propuestas'}</span>` : '';
+  }, () => { app.innerHTML = '<div class="state"><span class="star"></span><h2>No pudimos cargar</h2><p>Revisa tu conexión e inténtalo de nuevo.</p></div>'; });
+}
+
+(async function init() {
+  if (!KEY) { showInvalid(); return; }
+  try {
+    const snap = await SETTINGS_DOC.get();
+    const data = snap.exists ? snap.data() : {};
+    const keys = data.client_keys || {};
+    CLIENT_META = data.client_meta || {};
+    BRAND = Object.keys(keys).find(b => BRAND_NAME[b] && keys[b] && keys[b] === KEY) || null;
+    // Modo equipo: quien ya inició sesión en el Kanban desde este navegador (mismo token que usa el Kanban)
+    try { TEAM = !!data.pass_hash && localStorage.getItem('kb_auth') === data.pass_hash; } catch (e) { TEAM = false; }
+  } catch (e) { BRAND = null; }
+  if (!BRAND) { showInvalid(); return; }
+  showPresentation();
+})();
+</script>
+</body>
+</html>
