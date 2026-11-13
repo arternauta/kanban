@@ -1817,6 +1817,10 @@ body.public-client .rc-msg-actions { display: none !important; }
         <button type="button" class="refm-brand-btn refm-archive-btn" data-refm-archive="1" title="archivar (6)"><kbd>6</kbd><span>ARCHIVAR</span></button>
       </div>
       <span class="refm-client-decision" id="refm-client-decision"></span>
+      <div class="refm-stages" id="refm-stages">
+        <button type="button" class="refm-stage-btn" data-refm-stage="grabado" title="marcar como grabado">🎬 Grabado</button>
+        <button type="button" class="refm-stage-btn" data-refm-stage="editado" title="marcar como editado">✂ Editado</button>
+      </div>
     </div>
     <div class="refm-peek" id="refm-peek"></div>
     <div style="font-size:11px;color:#5f5e5a;letter-spacing:0.08em;text-transform:uppercase" id="refm-title">nueva referencia</div>
@@ -3061,11 +3065,17 @@ function patchTaskFields(id, fields, gen) {
   return db.runTransaction(async tx => {
     const snap = await tx.get(TASKS_DOC);
     const serverTasks = snap.exists ? (snap.data().data || []) : [];
+    const serverIds = new Set(serverTasks.map(t => t.id));
     const idx = serverTasks.findIndex(t => t.id === id);
-    if (idx === -1) return serverTasks;
-    serverTasks[idx] = { ...serverTasks[idx], ...fields };
-    tx.set(TASKS_DOC, { data: serverTasks });
-    return serverTasks;
+    if (idx !== -1) serverTasks[idx] = { ...serverTasks[idx], ...fields };
+    // Tareas que acá existen y el servidor todavía no tiene (creadas o movidas hace un instante, con su
+    // guardado completo aún en camino): se suben en vez de descartarlas. Sin esto, `tasks = merged` de
+    // abajo las borraba de pantalla y de la memoria, y ya nada las volvía a guardar.
+    const localOnly = tasks.filter(t => !serverIds.has(t.id));
+    if (idx === -1 && !localOnly.some(t => t.id === id)) return serverTasks;
+    const out = localOnly.length ? [...serverTasks, ...localOnly] : serverTasks;
+    tx.set(TASKS_DOC, { data: out });
+    return out;
   })
     .then(merged => {
       if (gen === writeGen) {
@@ -3407,6 +3417,7 @@ function onDragStart(e) {
   e.dataTransfer.setData('text/plain', dragId);
 }
 function onDragEnd() {
+  dragId = null; // si quedaba puesto, la pestaña dejaba de recibir cambios del servidor para siempre
   this.classList.remove('dragging');
   document.querySelectorAll('.col').forEach(c => c.classList.remove('drag-over'));
   clearInsertIndicators();
@@ -4294,6 +4305,8 @@ function refCard(item) {
         ${formatLabel ? `<div class="card-ref-status">${formatLabel}</div>` : ''}
         ${item.comments && item.comments.length ? `<div class="card-ref-status" title="${item.comments.length} comentario(s)">💬 ${item.comments.length}</div>` : ''}
         ${item.clientStatus ? `<div class="card-ref-status client-${item.clientStatus}">cliente ${CLIENT_DECISION_LABEL[item.clientStatus] || ''}</div>` : ''}
+        ${item.grabado ? `<div class="card-ref-status stage">🎬 grabado</div>` : ''}
+        ${item.editado ? `<div class="card-ref-status stage">✂ editado</div>` : ''}
       </div>`;
   const linkBtn = firstLink
     ? `<a class="card-ref-link" href="${esc(firstLink.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🔗 ver ref</a>`
@@ -4592,7 +4605,22 @@ function renderRefmDecision() {
   const el = document.getElementById('refm-client-decision');
   el.textContent = item && item.clientStatus ? 'cliente ' + (CLIENT_DECISION_LABEL[item.clientStatus] || '') : '';
   el.className = 'refm-client-decision' + (item && item.clientStatus ? ' ' + item.clientStatus : '');
+  document.querySelectorAll('#refm-stages [data-refm-stage]').forEach(b => b.classList.toggle('on', !!(item && item[b.dataset.refmStage])));
 }
+
+// Seguimiento de producción: «grabado» y «editado» se marcan al instante, sin esperar a «guardar»
+document.getElementById('refm-stages').addEventListener('click', e => {
+  const b = e.target.closest('[data-refm-stage]');
+  const item = b && refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  const k = b.dataset.refmStage;
+  const on = !item[k];
+  const fields = { [k]: on, [k + 'At']: on ? new Date().toISOString() : null };
+  Object.assign(item, fields); // optimista
+  renderRefmDecision();
+  renderRefs();
+  patchRefFields(item.id, fields);
+});
 
 const PRESENTACION_PUBLICA = 'https://eljoint-referencias.web.app'; // sitio aparte, sin acceso al Kanban
 
@@ -4620,7 +4648,7 @@ document.getElementById('client-link-btn').addEventListener('click', async e => 
     }
     // Probando en local se abre la página local; copiar (Alt) o abrir desde el Kanban publicado usa siempre el sitio público.
     const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
-    const url = `${(isLocal && !copyOnly) ? location.origin : PRESENTACION_PUBLICA}/presentacion.html?k=${key}`;
+    const url = (isLocal && !copyOnly) ? `${location.origin}/presentacion.html?k=${key}` : `${PRESENTACION_PUBLICA}/${brand}.html?k=${key}`; // el público usa una página por marca (vista previa de WhatsApp con su nombre)
     if (win) { win.location.href = url; return; }
     let copied = false;
     try { await navigator.clipboard.writeText(url); copied = true; } catch (err) {}

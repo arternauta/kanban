@@ -442,6 +442,11 @@ body.showing-refs header, body.showing-notas header { border-bottom: none; paddi
 .card-ref-status.client-aprobada  { background: var(--green-400); color: var(--navy-900); }
 .card-ref-status.client-cambios   { background: var(--amber-500); color: var(--navy-900); }
 .card-ref-status.client-rechazada { background: var(--coral);     color: var(--navy-900); }
+.refm-stages { display: flex; gap: 6px; margin-left: auto; }
+.refm-stage-btn { background: transparent; border: 1px solid rgb(var(--ov) / 0.2); color: var(--n-400); border-radius: 999px; padding: 4px 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.refm-stage-btn:hover { color: var(--n-100, #fff); border-color: rgb(var(--ov) / 0.4); }
+.refm-stage-btn.on { background: var(--green-400); border-color: var(--green-400); color: var(--navy-900); }
+.card-ref-status.stage { background: rgb(var(--ov) / 0.14); color: var(--n-200, #ddd); }
 .rc-msg-hide { background: none; border: none; color: var(--n-600); cursor: pointer; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
 .rc-msg-hide:hover { color: var(--coral-ink); }
 .rc-msg.rc-hidden { opacity: 0.55; border-style: dashed; }

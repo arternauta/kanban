@@ -16,6 +16,9 @@
 @font-face { font-family: 'Freudian'; src: url('fonts/FreudianTwo.woff') format('woff'); font-weight: 700; font-display: swap; }
 @font-face { font-family: 'BMW Motorrad'; src: url('fonts/BMWMotorrad-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'BMW Motorrad'; src: url('fonts/BMWMotorrad-Heavy.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'BMW Type Next'; src: url('fonts/BMWTypeNext-Light.otf') format('opentype'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'BMW Type Next'; src: url('fonts/BMWTypeNext-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'BMW Type Next'; src: url('fonts/BMWTypeNext-Bold.otf') format('opentype'); font-weight: 700; font-display: swap; }
 @font-face { font-family: 'BMW Motorrad Outline'; src: url('fonts/BMWMotorradOutline-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 
 :root {
@@ -41,6 +44,8 @@
   --type: #ffffff; /* la tipografía de marca va siempre en blanco; el lima queda para botones, fichas y detalles */
 }
 /* Motorrad usa su propia tipografía: Heavy para los títulos y Outline para el nombre grande */
+/* BMW usa BMW Type Next en toda la página */
+body[data-brand="bmw"] { --font-body: 'BMW Type Next', 'Montserrat', sans-serif; --font-display: 'BMW Type Next', 'Montserrat', sans-serif; --font-hero: 'BMW Type Next', 'Montserrat', sans-serif; }
 body[data-brand="motorrad"] { --font-display: 'BMW Motorrad', 'Freudian', 'Montserrat', sans-serif; --font-hero: 'BMW Motorrad Outline', 'BMW Motorrad', 'Montserrat', sans-serif; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -127,6 +132,12 @@ body[data-brand="motorrad"] .hero h1 { font-weight: 400; font-size: clamp(56px, 
 .chip.state-cambios   { background: var(--warn); color: var(--navy-ink); }
 .chip.state-rechazada { background: var(--coral); color: var(--navy-ink); }
 .chip.state-comentada { background: rgb(225 251 82 / 0.14); color: var(--accent); }
+.chip.stage { background: rgb(242 241 237 / 0.1); color: var(--ink); }
+.chip.stage::before { content: '● '; color: var(--accent); }
+.stages { display: flex; flex-wrap: wrap; gap: 8px; }
+.stage-btn { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: 10px 18px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.stage-btn:hover { background: rgb(242 241 237 / 0.1); }
+.stage-btn.on { background: var(--accent); border-color: var(--accent); color: var(--navy-ink); }
 .title { font-family: var(--font-display); font-weight: 700; font-size: clamp(34px, 5vw, 60px); line-height: 1.02; letter-spacing: 0.01em; overflow-wrap: anywhere; color: var(--type); }
 .desc { font-size: 16px; color: var(--muted); white-space: pre-wrap; max-width: 56ch; }
 .links { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -192,6 +203,23 @@ body[data-brand="motorrad"] .hero h1 { font-weight: 400; font-size: clamp(56px, 
 .send:hover { background: var(--lilac); }
 .send:disabled { opacity: 0.4; cursor: default; }
 
+/* ── Sugerencias del cliente ── */
+.suggest { max-width: 1240px; margin: 0 auto; padding: clamp(40px, 6vw, 72px) clamp(16px, 4vw, 40px); border-top: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); }
+.suggest h3 { font-family: var(--font-display); font-weight: 700; font-size: clamp(30px, 4.4vw, 52px); line-height: 1.04; color: var(--type); }
+.suggest .lead { margin-top: 14px; max-width: 44ch; color: var(--muted); font-size: 16px; }
+.suggest-form { display: flex; flex-direction: column; gap: 10px; }
+.suggest-form textarea { width: 100%; background: var(--card); color: var(--ink); border: 1px solid transparent; border-radius: 14px; padding: 14px 16px; font: inherit; font-size: 14px; outline: none; resize: none; }
+.suggest-form textarea:focus { border-color: var(--accent); }
+.suggest-form ::placeholder { color: var(--dim); }
+.suggest-form .send { min-height: 52px; align-self: flex-start; padding: 0 26px; }
+.sent { margin-top: 6px; display: flex; flex-direction: column; gap: 8px; }
+.sent h4 { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); }
+.sent-item { background: var(--card); border-radius: 14px; padding: 12px 16px; font-size: 14px; overflow-wrap: anywhere; }
+.sent-item a { color: var(--accent); text-decoration: none; }
+.sent-item a:hover { text-decoration: underline; }
+.sent-item p { margin-top: 4px; color: var(--muted); white-space: pre-wrap; }
+.sent-item small { display: block; margin-top: 6px; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+
 /* ── Cierre ── */
 .end { max-width: 1240px; margin: 0 auto; padding: clamp(48px, 8vw, 100px) clamp(16px, 4vw, 40px) 120px; border-top: 1px solid var(--line); }
 .end h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(44px, 9vw, 110px); line-height: 0.95; color: var(--type); }
@@ -210,6 +238,7 @@ body[data-brand="motorrad"] .hero h1 { font-weight: 400; font-size: clamp(56px, 
 
 @media (max-width: 860px) {
   .actions { grid-template-columns: 1fr; }
+  .suggest { grid-template-columns: 1fr; }
   .ref { grid-template-columns: 1fr; }
   .media { position: static; }
   .media-frame { aspect-ratio: 4 / 5; max-height: 70vh; }
@@ -257,6 +286,7 @@ const BRAND_NAME = { byd: 'BYD', bmw: 'BMW', mini: 'MINI', motorrad: 'MOTORRAD' 
 const FORMAT_NAME = { reel: 'Reel', story: 'Story', tiktok: 'TikTok', post: 'Post', carrusel: 'Carrusel' };
 const PLATFORM_NAME = { instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube' };
 const POS = { top: 'top', center: 'center', bottom: 'bottom' };
+const STAGES = { grabado: 'Grabado', editado: 'Editado' }; // seguimiento de producción: lo marca el equipo, el cliente solo lo ve
 const STATE_LABEL = { aprobada: 'Aprobada', cambios: 'Cambios pedidos', rechazada: 'Rechazada', comentada: 'Con comentarios' };
 
 let BRAND = null;
@@ -337,6 +367,50 @@ async function decide(id, decision) {
     await mutate(id, x => { x.clientStatus = status; x.clientDecidedAt = at; return x; });
     toast(same ? 'Aprobación retirada' : 'Referencia aprobada, gracias');
   } catch (e) { toast('No se pudo guardar. Inténtalo otra vez.'); recover(); }
+}
+
+// Seguimiento: el equipo marca o desmarca «grabado» / «editado»
+async function toggleStage(id, stage) {
+  if (!TEAM || !STAGES[stage]) return;
+  const r = refs.find(x => x.id === id);
+  if (!r) return;
+  const on = !r[stage];
+  const at = on ? new Date().toISOString() : null;
+  r[stage] = on; r[stage + 'At'] = at; // se ve al instante
+  sync();
+  try {
+    await mutate(id, x => { x[stage] = on; x[stage + 'At'] = at; return x; });
+  } catch (e) { toast('No se pudo guardar. Inténtalo otra vez.'); recover(); }
+}
+
+// ── Mensajes generales del cliente: van aparte, no son referencias ──
+const NOTES_DOC = db.collection('kanban').doc('client_notes');
+let notes = [];
+const notesOfBrand = () => notes.filter(n => n.brand === BRAND).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+async function sendNote(text) {
+  text = text.trim();
+  if (!text) return false;
+  const n = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), brand: BRAND, text, author: 'cliente', createdAt: new Date().toISOString(), resolved: false };
+  try {
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(NOTES_DOC);
+      const arr = snap.exists ? (snap.data().data || []) : [];
+      tx.set(NOTES_DOC, { data: [...arr, n] });
+    });
+    toast('Gracias, recibimos tu mensaje');
+    return true;
+  } catch (e) { toast('No se pudo enviar. Inténtalo otra vez.'); return false; }
+}
+
+function renderSent() {
+  const box = document.getElementById('sent');
+  if (!box) return;
+  const list = notesOfBrand();
+  box.hidden = !list.length;
+  const html = list.length ? `<h4>Comentarios del cliente</h4>` + list.map(n =>
+    `<div class="sent-item"><p>${esc(n.text)}</p><small>Cliente · ${esc(fmtDate(n.createdAt))}</small></div>`).join('') : '';
+  if (box.dataset.h !== html) { box.innerHTML = html; box.dataset.h = html; }
 }
 
 // Cambia la lista de comentarios: primero en pantalla, luego sobre lo fresco del servidor.
@@ -422,6 +496,8 @@ function stateChip(r) {
   return st ? `<span class="chip state-${esc(st)}">${esc(STATE_LABEL[st] || '')}</span>` : '';
 }
 
+const stageChips = r => Object.keys(STAGES).filter(k => r[k]).map(k => `<span class="chip stage">${STAGES[k]}</span>`).join('');
+
 function buildRef(r, i, n) {
   const sec = document.createElement('section');
   sec.className = 'ref'; sec.dataset.ref = r.id;
@@ -429,11 +505,12 @@ function buildRef(r, i, n) {
   sec.innerHTML = `
     <div class="media" data-media data-live="${live.has(r.id)}">${mediaHTML(r)}</div>
     <div class="info">
-      <div class="info-top"><span class="num">${pad(i + 1)} / ${pad(n)}</span>${r.format && FORMAT_NAME[r.format] ? `<span class="chip">${esc(FORMAT_NAME[r.format])}</span>` : ''}<span data-state>${stateChip(r)}</span></div>
+      <div class="info-top"><span class="num">${pad(i + 1)} / ${pad(n)}</span>${r.format && FORMAT_NAME[r.format] ? `<span class="chip">${esc(FORMAT_NAME[r.format])}</span>` : ''}<span data-state>${stateChip(r)}</span><span class="stage-chips" data-stage-chips>${TEAM ? '' : stageChips(r)}</span></div>
       <h2 class="title">${esc(r.title || r.text || 'Propuesta')}</h2>
       ${r.title && r.text ? `<p class="desc">${esc(r.text)}</p>` : ''}
       ${links.length && !embedOf(links[0].url) && links[0].platform !== 'tiktok' ? `<div class="links">${links.map((l, k) => `<a class="orig" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">Ver ${links.length > 1 ? esc(PLATFORM_NAME[l.platform] || 'enlace') + ' ' + (k + 1) : 'la referencia original'} ↗</a>`).join('')}</div>` : ''}
       ${blocksHTML(r)}
+      ${TEAM ? `<div class="stages" data-stages>${Object.keys(STAGES).map(k => `<button class="stage-btn" type="button" data-stage="${k}">${STAGES[k]}</button>`).join('')}</div>` : ''}
       ${TEAM ? '' : `<div class="actions" data-decide>
         <button class="act approve" data-dec="aprobada" type="button">✓ Aprobar referencia</button>
         <button class="act comment" data-open-comment type="button">💬 Dejar comentario</button>
@@ -452,6 +529,9 @@ function updateRef(sec, r, i, n) {
   sec.querySelector('[data-state]').innerHTML = stateChip(r);
   const ap = sec.querySelector('[data-dec]');
   if (ap) { const on = r.clientStatus === 'aprobada'; ap.classList.toggle('on', on); ap.textContent = on ? '✓ Aprobada' : '✓ Aprobar referencia'; }
+  sec.querySelectorAll('[data-stage]').forEach(b => b.classList.toggle('on', !!r[b.dataset.stage]));
+  const sc = sec.querySelector('[data-stage-chips]');
+  if (sc) sc.innerHTML = TEAM ? '' : stageChips(r);
   const th = sec.querySelector('[data-thread]');
   const html = threadHTML(r);
   if (th.dataset.h !== html) {
@@ -525,6 +605,19 @@ function showPresentation() {
     </section>
     <div class="refs" id="refs"></div>
     <p class="state" id="empty" hidden style="min-height:40vh">Por ahora no hay propuestas para revisar. Te avisamos cuando haya.</p>
+    <section class="suggest" id="suggest">
+      <div>
+        <h3>¿Algo más que quieras decirnos?</h3>
+        <p class="lead">Este espacio es para cualquier comentario general. Lo leemos igual que el resto.</p>
+      </div>
+      <div>
+        ${TEAM ? '' : `<form class="suggest-form" id="suggest-form">
+          <textarea id="suggest-note" rows="4" placeholder="Escribe aquí tu mensaje" maxlength="1500"></textarea>
+          <button class="send" type="submit" id="suggest-send" disabled>Enviar mensaje</button>
+        </form>`}
+        <div class="sent" id="sent" hidden></div>
+      </div>
+    </section>
     <section class="end" id="end" hidden>
       <h2>Todo revisado</h2>
       <p>Gracias por tomarte el tiempo. Vamos a leer lo que nos dejaste y te respondemos aquí mismo.</p>
@@ -537,6 +630,8 @@ function showPresentation() {
     const sec = e.target.closest('[data-ref]');
     const dec = e.target.closest('[data-dec]');
     if (dec && sec) { decide(sec.dataset.ref, dec.dataset.dec); return; }
+    const stg = e.target.closest('[data-stage]');
+    if (stg && sec) { toggleStage(sec.dataset.ref, stg.dataset.stage); return; }
     const openC = e.target.closest('[data-open-comment]');
     if (openC && sec) {
       const form = sec.querySelector('[data-compose]');
@@ -553,13 +648,26 @@ function showPresentation() {
     if (hid && sec) { hideComment(sec.dataset.ref, hid.dataset.hide); }
   });
   app.addEventListener('input', e => {
-    const ta = e.target.closest('textarea');
+    const ta = e.target.closest('[data-compose] textarea');
     if (!ta) return;
     ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
     ta.closest('form').querySelector('.send').disabled = !ta.value.trim();
   });
+  const sf = document.getElementById('suggest-form');
+  if (sf) {
+    const note = document.getElementById('suggest-note'), btn = document.getElementById('suggest-send');
+    note.addEventListener('input', () => { btn.disabled = !note.value.trim(); });
+    sf.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (btn.disabled) return;
+      btn.disabled = true;
+      const ok = await sendNote(note.value);
+      if (ok) note.value = '';
+      btn.disabled = !note.value.trim();
+    });
+  }
   app.addEventListener('keydown', e => {
-    const ta = e.target.closest('textarea');
+    const ta = e.target.closest('[data-compose] textarea');
     if (ta && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ta.closest('form').requestSubmit(); }
   });
   app.addEventListener('submit', async e => {
@@ -575,6 +683,7 @@ function showPresentation() {
     if (ok) { ta.value = ''; ta.style.height = 'auto'; } else { btn.disabled = false; }
   });
 
+  NOTES_DOC.onSnapshot(snap => { notes = snap.exists ? (snap.data().data || []) : []; renderSent(); }, () => {});
   REFS_DOC.onSnapshot(snap => {
     refs = (snap.data() || {}).data || [];
     sync();
