@@ -21,7 +21,15 @@
       ".firebase/**",
       "functions/**",
       "uploads/**",
-      ".DS_Store"
+      ".DS_Store",
+      "scripts/**",
+      "tema/**",
+      "presentacion-publica/**",
+      "server.cjs",
+      "firestore.rules",
+      "fonts/BMW*",
+      "**/.*",
+      "fonts/MINI*"
     ]
   }
 }

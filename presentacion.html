@@ -19,6 +19,11 @@
 @font-face { font-family: 'BMW Type Next'; src: url('fonts/BMWTypeNext-Light.otf') format('opentype'); font-weight: 300; font-display: swap; }
 @font-face { font-family: 'BMW Type Next'; src: url('fonts/BMWTypeNext-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'BMW Type Next'; src: url('fonts/BMWTypeNext-Bold.otf') format('opentype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'MINI Serif'; src: url('fonts/MINISerif-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'MINI Serif'; src: url('fonts/MINISerif-Medium.otf') format('opentype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'MINI Serif'; src: url('fonts/MINISerif-Bold.otf') format('opentype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'MINI Serif Headline'; src: url('fonts/MINISerif-Headline.otf') format('opentype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'MINI Serif Headline'; src: url('fonts/MINISerif-Headline.otf') format('opentype'); font-weight: 700; font-display: swap; }
 @font-face { font-family: 'BMW Motorrad Outline'; src: url('fonts/BMWMotorradOutline-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 
 :root {
@@ -46,6 +51,8 @@
 /* Motorrad usa su propia tipografía: Heavy para los títulos y Outline para el nombre grande */
 /* BMW usa BMW Type Next en toda la página */
 body[data-brand="bmw"] { --font-body: 'BMW Type Next', 'Montserrat', sans-serif; --font-display: 'BMW Type Next', 'Montserrat', sans-serif; --font-hero: 'BMW Type Next', 'Montserrat', sans-serif; }
+/* MINI usa MINI Serif: Headline para los títulos y el nombre grande, el resto en su familia de texto */
+body[data-brand="mini"] { --font-body: 'MINI Serif', 'Montserrat', sans-serif; --font-display: 'MINI Serif Headline', 'MINI Serif', 'Montserrat', sans-serif; --font-hero: 'MINI Serif Headline', 'MINI Serif', 'Montserrat', sans-serif; }
 body[data-brand="motorrad"] { --font-display: 'BMW Motorrad', 'Freudian', 'Montserrat', sans-serif; --font-hero: 'BMW Motorrad Outline', 'BMW Motorrad', 'Montserrat', sans-serif; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

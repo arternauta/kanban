@@ -2013,7 +2013,26 @@ body.showing-refs header, body.showing-notas header { border-bottom: none; paddi
 .refm-stage-btn { background: transparent; border: 1px solid rgb(var(--ov) / 0.2); color: var(--n-400); border-radius: 999px; padding: 4px 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
 .refm-stage-btn:hover { color: var(--n-100, #fff); border-color: rgb(var(--ov) / 0.4); }
 .refm-stage-btn.on { background: var(--green-400); border-color: var(--green-400); color: var(--navy-900); }
+.refm-stage-btn.on[data-refm-status="rechazada"] { background: var(--coral); border-color: var(--coral); color: var(--navy-900); }
 .card-ref-status.stage { background: rgb(var(--ov) / 0.14); color: var(--n-200, #ddd); }
+.cat-box { max-width: 680px; width: 94vw; max-height: 82vh; overflow: auto; }
+.cat-new { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.cat-new select, .cat-new input { background: rgb(var(--ov) / 0.06); border: 1px solid rgb(var(--ov) / 0.14); color: inherit; border-radius: 6px; padding: 6px 10px; font: inherit; font-size: 12px; }
+.cat-new input { flex: 1; min-width: 120px; }
+.cat-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.cat-entry { background: rgb(var(--ov) / 0.05); border-radius: 10px; overflow: hidden; }
+.cat-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 14px; cursor: pointer; font-size: 13px; }
+.cat-head small { opacity: 0.6; }
+.cat-stats { flex-basis: 100%; font-size: 11px; opacity: 0.75; }
+.cat-arrow { margin-left: auto; opacity: 0.6; }
+.cat-body { border-top: 1px solid rgb(var(--ov) / 0.1); padding: 8px 14px 12px; display: flex; flex-direction: column; gap: 6px; }
+.cat-ref { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 12px; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.cat-ref:hover { background: rgb(var(--ov) / 0.08); }
+.cat-ref.gone { opacity: 0.5; cursor: default; }
+.cat-ref > span:first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.cat-chip { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: rgb(var(--ov) / 0.12); }
+.cat-chip.ok { background: var(--green-400); color: var(--navy-900); }
+.cat-actions { display: flex; gap: 14px; margin-top: 6px; }
 .rc-msg-hide { background: none; border: none; color: var(--n-600); cursor: pointer; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
 .rc-msg-hide:hover { color: var(--coral-ink); }
 .rc-msg.rc-hidden { opacity: 0.55; border-style: dashed; }
@@ -2199,6 +2218,20 @@ body.showing-refs header, body.showing-notas header { border-bottom: none; paddi
   </div>
 </div>
 
+<!-- Catálogo de presentaciones para clientes -->
+<div class="modal-overlay" id="catalog-modal">
+  <div class="pause-modal-box cat-box">
+    <div class="pause-modal-title">catálogo de presentaciones</div>
+    <div class="cat-new">
+      <select id="cat-brand"><option value="bmw">BMW</option><option value="motorrad">MOTORRAD</option><option value="mini">MINI</option><option value="byd">BYD</option></select>
+      <input type="text" id="cat-mes" placeholder="mes (ej. Diciembre)" maxlength="30">
+      <button class="edit-modal-save" id="cat-save" title="guarda las referencias que hoy están en «para producir» de esa marca">guardar presentación</button>
+    </div>
+    <div id="cat-list" class="cat-list"></div>
+    <div class="pause-modal-btns" style="margin-top:12px;"><button class="edit-modal-cancel" id="cat-close">cerrar</button></div>
+  </div>
+</div>
+
 <!-- Add modal -->
 <div class="modal-overlay" id="add-modal">
   <div class="edit-modal">
@@ -2307,6 +2340,10 @@ body.showing-refs header, body.showing-notas header { border-bottom: none; paddi
       <div class="refm-stages" id="refm-stages">
         <button type="button" class="refm-stage-btn" data-refm-stage="grabado" title="marcar como grabado">🎬 Grabado</button>
         <button type="button" class="refm-stage-btn" data-refm-stage="editado" title="marcar como editado">✂ Editado</button>
+        <button type="button" class="refm-stage-btn" data-refm-status="rechazada" title="rechazar (va a Inspiración)">✕ Rechazar</button>
+        <button type="button" class="refm-stage-btn" data-refm-status="aprobada" title="enviar a producción">→ Producción</button>
+        <button type="button" class="refm-stage-btn" data-refm-finish="1" title="finalizar">✓ Finalizar</button>
+        <button type="button" class="refm-stage-btn" data-refm-export="1" title="exportar el brief">↓ Exportar</button>
       </div>
     </div>
     <div class="refm-peek" id="refm-peek"></div>
@@ -2564,6 +2601,7 @@ body.showing-refs header, body.showing-notas header { border-bottom: none; paddi
   <button class="hbtn" id="client-link-btn" title="abre la web del cliente de la marca elegida (Alt: copia el enlace público · Shift: genera uno nuevo)">web cliente</button>
   <button class="hbtn" id="export-brand-btn" style="display:none;margin-left:10px">↓ exportar marca</button>
   <button class="hbtn" id="production-toggle-btn" style="margin-left:10px">🎬 producción</button>
+  <button class="hbtn" id="catalog-btn" style="margin-left:10px" title="presentaciones que ya hicimos para clientes">📚 catálogo</button>
 </div>
 
 <div class="production-grid-view" id="production-grid-view" style="display:none">
@@ -4980,7 +5018,7 @@ function commitRefEdits(onlyIfChanged = false, extra = null) {
     script:       document.getElementById('refm-script').value.trim(),
   };
   if (fields.status === 'rechazada') fields.col = 'inspiracion';
-  if (fields.status === 'aprobada')  fields.col = 'para-producir';
+  if (fields.status === 'aprobada' && item.col !== 'finalizadas') fields.col = 'para-producir';
   // Asignar marca saca la referencia de inspiración/inbox y la manda a análisis de equipo
   if (fields.status !== 'rechazada' && fields.status !== 'aprobada' && fields.brand
       && (item.col === 'inspiracion' || item.col === 'inbox')) fields.col = 'ideas';
@@ -5093,9 +5131,42 @@ function renderRefmDecision() {
   el.textContent = item && item.clientStatus ? 'cliente ' + (CLIENT_DECISION_LABEL[item.clientStatus] || '') : '';
   el.className = 'refm-client-decision' + (item && item.clientStatus ? ' ' + item.clientStatus : '');
   document.querySelectorAll('#refm-stages [data-refm-stage]').forEach(b => b.classList.toggle('on', !!(item && item[b.dataset.refmStage])));
+  const isNew = !(item && refEditSiblings.includes(item.id));
+  document.querySelectorAll('#refm-stages [data-refm-status]').forEach(b => {
+    const on = !!(item && item.status === b.dataset.refmStatus);
+    b.classList.toggle('on', on);
+    if (b.dataset.refmStatus === 'rechazada') b.textContent = on ? '↺ Quitar rechazo' : '✕ Rechazar';
+    else b.textContent = on ? '↺ Volver a análisis' : '→ Producción';
+  });
+  const fin = document.querySelector('#refm-stages [data-refm-finish]');
+  const canFinish = item && (item.col === 'para-producir' || item.col === 'finalizadas');
+  fin.style.display = canFinish ? '' : 'none';
+  fin.classList.toggle('on', !!(item && item.col === 'finalizadas'));
+  fin.textContent = item && item.col === 'finalizadas' ? '↺ Reabrir' : '✓ Finalizar';
+  document.querySelector('#refm-stages [data-refm-export]').style.display = isNew ? 'none' : '';
 }
 
 // Seguimiento de producción: «grabado» y «editado» se marcan al instante, sin esperar a «guardar»
+// Estado (rechazar / producción) y finalizar también se aplican al instante; tocar de nuevo el mismo lo deshace.
+const REFM_STATUS_COL = { aprobada: 'para-producir', rechazada: 'inspiracion', pendiente: 'ideas' };
+document.getElementById('refm-stages').addEventListener('click', e => {
+  const item = refs.find(r => r.id === refEditingId);
+  if (!item) return;
+  if (e.target.closest('[data-refm-export]')) { commitRefEdits(true); exportRefBrief(item.id); return; }
+  const sb = e.target.closest('[data-refm-status]');
+  const fb = e.target.closest('[data-refm-finish]');
+  if (sb || fb) {
+    const fields = sb
+      ? (s => ({ status: s, col: REFM_STATUS_COL[s] }))(item.status === sb.dataset.refmStatus ? 'pendiente' : sb.dataset.refmStatus)
+      : { col: item.col === 'finalizadas' ? 'para-producir' : 'finalizadas' };
+    if (fields.status) document.getElementById('refm-status').value = fields.status; // que «guardar» no lo pise
+    Object.assign(item, fields); // optimista
+    renderRefmDecision();
+    renderRefs();
+    patchRefFields(item.id, fields);
+    return;
+  }
+});
 document.getElementById('refm-stages').addEventListener('click', e => {
   const b = e.target.closest('[data-refm-stage]');
   const item = b && refs.find(r => r.id === refEditingId);
@@ -5107,6 +5178,133 @@ document.getElementById('refm-stages').addEventListener('click', e => {
   renderRefmDecision();
   renderRefs();
   patchRefFields(item.id, fields);
+});
+
+// ── Catálogo: las presentaciones que ya hicimos para clientes (una por marca y mes) → kanban/catalogo.
+// Cada entrada guarda qué referencias iban; el estado (aprobada, grabada, editada) se lee en vivo de las referencias.
+const CATALOG_DOC = db.collection('kanban').doc('catalogo');
+let catalog = [];
+let catalogKeys = {}, catalogMeta = {};
+const catalogOpen = new Set();
+const monthNow = () => { const m = new Date().toLocaleDateString('es', { month: 'long' }); return m.charAt(0).toUpperCase() + m.slice(1); };
+
+function catalogStats(entry) {
+  const live = entry.refs.map(r => refs.find(x => x.id === r.id)).filter(Boolean);
+  const n = fn => live.filter(fn).length;
+  return {
+    total: entry.refs.length,
+    aprobadas: n(x => x.clientStatus === 'aprobada'),
+    comentadas: n(x => x.clientStatus !== 'aprobada' && (x.comments || []).some(c => c.author === 'cliente')),
+    grabadas: n(x => x.grabado),
+    editadas: n(x => x.editado)
+  };
+}
+
+function renderCatalog() {
+  const modal = document.getElementById('catalog-modal');
+  if (!modal.classList.contains('open')) return;
+  const list = [...catalog].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  document.getElementById('cat-list').innerHTML = list.length ? list.map(e => {
+    const s = catalogStats(e), open = catalogOpen.has(e.id);
+    const rows = open ? e.refs.map(r => {
+      const x = refs.find(y => y.id === r.id);
+      if (!x) return `<div class="cat-ref gone"><span>${esc(r.title || 'sin título')}</span><span class="cat-chip">ya no existe</span></div>`;
+      return `<div class="cat-ref" data-cat-ref="${esc(x.id)}"><span>${esc(x.title || x.text || 'sin título')}</span>
+        ${x.clientStatus ? `<span class="cat-chip ok">cliente ${esc(CLIENT_DECISION_LABEL[x.clientStatus] || '')}</span>` : ''}
+        ${x.grabado ? '<span class="cat-chip">🎬 grabada</span>' : ''}${x.editado ? '<span class="cat-chip">✂ editada</span>' : ''}</div>`;
+    }).join('') : '';
+    return `<div class="cat-entry">
+      <div class="cat-head" data-cat-toggle="${esc(e.id)}">
+        <span class="card-ref-status ${esc(e.brand)}">${esc(REF_BRAND_LABEL[e.brand] || e.brand)}</span>
+        <b>${esc(e.mes)}</b>
+        <small>${esc(new Date(e.createdAt).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' }))}</small>
+        <span class="cat-stats">${s.total} propuestas · ${s.aprobadas} aprobadas · ${s.comentadas} con comentarios · ${s.grabadas} grabadas · ${s.editadas} editadas</span>
+        <span class="cat-arrow">${open ? '–' : '+'}</span>
+      </div>
+      ${open ? `<div class="cat-body">${rows}
+        <div class="cat-actions">
+          <button type="button" class="rc-msg-hide" data-cat-open="${esc(e.brand)}">abrir web del cliente</button>
+          <button type="button" class="rc-msg-hide" data-cat-copy="${esc(e.brand)}">copiar enlace</button>
+          <button type="button" class="rc-msg-hide" data-cat-del="${esc(e.id)}" style="color:#c95c5c">quitar del catálogo</button>
+        </div></div>` : ''}
+    </div>`;
+  }).join('') : '<div style="opacity:0.6;font-size:12px;padding:8px 0">Todavía no hay presentaciones guardadas. Elige la marca y el mes y guarda la primera.</div>';
+}
+
+function catalogDefaultMes() {
+  const b = document.getElementById('cat-brand').value;
+  document.getElementById('cat-mes').value = ((catalogMeta[b] || {}).mes || '').trim() || monthNow();
+}
+
+async function catalogUrl(brand) {
+  const snap = await db.collection('kanban').doc('settings').get();
+  const d = snap.exists ? snap.data() : {};
+  catalogKeys = d.client_keys || {}; catalogMeta = d.client_meta || {};
+  const key = catalogKeys[brand];
+  if (!key) { alert('Esa marca todavía no tiene enlace. Elige la marca en el filtro y usa «web cliente».'); return null; }
+  return `${PRESENTACION_PUBLICA}/${brand}.html?k=${key}`;
+}
+
+CATALOG_DOC.onSnapshot(snap => { catalog = snap.exists ? (snap.data().data || []) : []; renderCatalog(); }, () => {});
+
+document.getElementById('catalog-btn').addEventListener('click', async () => {
+  document.getElementById('catalog-modal').classList.add('open');
+  const f = ['bmw','motorrad','mini','byd'].includes(refBrandFilter) ? refBrandFilter : null;
+  if (f) document.getElementById('cat-brand').value = f;
+  catalogDefaultMes();
+  renderCatalog();
+  try { const d = (await db.collection('kanban').doc('settings').get()).data() || {}; catalogMeta = d.client_meta || {}; catalogDefaultMes(); } catch (e) {}
+});
+document.getElementById('cat-brand').addEventListener('change', catalogDefaultMes);
+document.getElementById('cat-close').addEventListener('click', () => document.getElementById('catalog-modal').classList.remove('open'));
+
+document.getElementById('cat-save').addEventListener('click', async () => {
+  const brand = document.getElementById('cat-brand').value;
+  const mes = document.getElementById('cat-mes').value.trim();
+  if (!mes) { alert('Escribe el mes de la presentación.'); return; }
+  const list = refs.filter(r => r.brand === brand && r.col === 'para-producir' && !r.archived);
+  if (!list.length) { alert(`${REF_BRAND_LABEL[brand]} no tiene referencias en «para producir» ahora mismo.`); return; }
+  if (catalog.some(e => e.brand === brand && e.mes.toLowerCase() === mes.toLowerCase())
+      && !confirm(`Ya hay una presentación de ${REF_BRAND_LABEL[brand]} de ${mes}. ¿Guardar otra?`)) return;
+  const entry = { id: uid(), brand, mes, createdAt: new Date().toISOString(), refs: list.map(r => ({ id: r.id, title: r.title || r.text || '' })) };
+  catalogOpen.add(entry.id); // la entrada nueva aparece desplegada
+  try {
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(CATALOG_DOC);
+      const arr = snap.exists ? (snap.data().data || []) : [];
+      tx.set(CATALOG_DOC, { data: [...arr, entry] });
+    });
+  } catch (e) { catalogOpen.delete(entry.id); alert('No se pudo guardar. Revisa la conexión.'); }
+});
+
+document.getElementById('catalog-modal').addEventListener('click', async e => {
+  if (e.target.id === 'catalog-modal') { e.target.classList.remove('open'); return; }
+  const del = e.target.closest('[data-cat-del]');
+  if (del) {
+    if (!confirm('¿Quitar esta presentación del catálogo? Las referencias no se borran.')) return;
+    const id = del.dataset.catDel;
+    db.runTransaction(async tx => {
+      const snap = await tx.get(CATALOG_DOC);
+      tx.set(CATALOG_DOC, { data: (snap.exists ? (snap.data().data || []) : []).filter(x => x.id !== id) });
+    }).catch(() => alert('No se pudo quitar. Revisa la conexión.'));
+    return;
+  }
+  const open = e.target.closest('[data-cat-open]'), copy = e.target.closest('[data-cat-copy]');
+  if (open || copy) {
+    const win = open ? window.open('about:blank', '_blank') : null;
+    try {
+      const url = await catalogUrl((open || copy).dataset.catOpen || (open || copy).dataset.catCopy);
+      if (!url) { if (win) win.close(); return; }
+      if (win) { win.location.href = url; return; }
+      try { await navigator.clipboard.writeText(url); copy.textContent = '✓ copiado'; setTimeout(() => { copy.textContent = 'copiar enlace'; }, 1500); }
+      catch (err) { prompt('Copia el enlace:', url); }
+    } catch (err) { if (win) win.close(); alert('No se pudo leer el enlace. Revisa la conexión.'); }
+    return;
+  }
+  const r = e.target.closest('[data-cat-ref]');
+  if (r) { openRef(r.dataset.catRef, null); return; }
+  const t = e.target.closest('[data-cat-toggle]');
+  if (t) { const id = t.dataset.catToggle; catalogOpen.has(id) ? catalogOpen.delete(id) : catalogOpen.add(id); renderCatalog(); }
 });
 
 const PRESENTACION_PUBLICA = 'https://eljoint-referencias.web.app'; // sitio aparte, sin acceso al Kanban
@@ -5135,7 +5333,7 @@ document.getElementById('client-link-btn').addEventListener('click', async e => 
     }
     // Probando en local se abre la página local; copiar (Alt) o abrir desde el Kanban publicado usa siempre el sitio público.
     const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
-    const url = (isLocal && !copyOnly) ? `${location.origin}/presentacion.html?k=${key}` : `${PRESENTACION_PUBLICA}/${brand}.html?k=${key}`; // el público usa una página por marca (vista previa de WhatsApp con su nombre)
+    const url = (isLocal && !copyOnly) ? new URL(`presentacion.html?k=${key}`, location.href).href : `${PRESENTACION_PUBLICA}/${brand}.html?k=${key}`; // el público usa una página por marca (vista previa de WhatsApp con su nombre)
     if (win) { win.location.href = url; return; }
     let copied = false;
     try { await navigator.clipboard.writeText(url); copied = true; } catch (err) {}
@@ -5678,7 +5876,6 @@ document.getElementById('refm-comment-input').addEventListener('keydown', e => {
 
 // Un clic abre el visor; doble clic abre la edición. El visor espera un instante
 // para saber si viene el segundo clic (en la vista cliente no hay edición, no espera).
-let refClickTimer = null;
 
 document.addEventListener('click', e => {
   const el = e.target;
@@ -5719,21 +5916,11 @@ document.addEventListener('click', e => {
     const cardEl = el.closest('[data-ref-edit]');
     if (cardEl) {
       const rid = cardEl.dataset.refEdit;
-      clearTimeout(refClickTimer);
       if (CLIENT_BRAND) openRefPreview(rid);
-      else refClickTimer = setTimeout(() => openRefPreview(rid), 230);
+      else openRef(rid, null);
       return;
     }
   }
-});
-
-document.addEventListener('dblclick', e => {
-  if (CLIENT_BRAND) return;
-  if (e.target.closest('button, input, textarea, select, a, .card-btns')) return;
-  const cardEl = e.target.closest('.ref-card[data-ref-edit]');
-  if (!cardEl) return;
-  clearTimeout(refClickTimer);
-  openRef(cardEl.dataset.refEdit, null);
 });
 
 document.addEventListener('keydown', e => {
@@ -5794,7 +5981,10 @@ function openRefPreview(id, keepSiblings) {
   finishBtn.style.display = (item.col === 'para-producir' || item.col === 'finalizadas') ? 'inline-flex' : 'none';
   finishBtn.textContent = item.col === 'finalizadas' ? '↺ reabrir' : '✓ finalizar';
   finishBtn.classList.toggle('rp-status-on', item.col === 'finalizadas');
-  document.getElementById('rp-reject').style.display = item.status === 'rechazada' ? 'none' : 'inline-flex';
+  const rejectBtn = document.getElementById('rp-reject');
+  const isRejected = item.status === 'rechazada';
+  rejectBtn.classList.toggle('rp-status-on', isRejected);
+  rejectBtn.textContent = isRejected ? '↺ quitar rechazo' : '✕ rechazar';
   renderRpComments(item);
 
   const body = document.getElementById('rp-body');
@@ -5898,7 +6088,7 @@ document.getElementById('rp-export').addEventListener('click', () => {
   const id = document.getElementById('ref-preview').dataset.refId;
   if (id) exportRefBrief(id);
 });
-// Aprobar/rechazar son toggles: tocar de nuevo el mismo vuelve a "pendiente".
+// Aprobar/rechazar son toggles: tocar de nuevo el mismo vuelve a "pendiente" (y a Análisis de equipo).
 // Rechazar NO borra nada — solo cambia el status y mueve la card a Inspiración.
 const REF_STATUS_COL = { aprobada: 'para-producir', rechazada: 'inspiracion', pendiente: 'ideas' };
 function toggleRefStatus(btn) {

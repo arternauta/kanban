@@ -446,7 +446,26 @@ body.showing-refs header, body.showing-notas header { border-bottom: none; paddi
 .refm-stage-btn { background: transparent; border: 1px solid rgb(var(--ov) / 0.2); color: var(--n-400); border-radius: 999px; padding: 4px 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
 .refm-stage-btn:hover { color: var(--n-100, #fff); border-color: rgb(var(--ov) / 0.4); }
 .refm-stage-btn.on { background: var(--green-400); border-color: var(--green-400); color: var(--navy-900); }
+.refm-stage-btn.on[data-refm-status="rechazada"] { background: var(--coral); border-color: var(--coral); color: var(--navy-900); }
 .card-ref-status.stage { background: rgb(var(--ov) / 0.14); color: var(--n-200, #ddd); }
+.cat-box { max-width: 680px; width: 94vw; max-height: 82vh; overflow: auto; }
+.cat-new { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.cat-new select, .cat-new input { background: rgb(var(--ov) / 0.06); border: 1px solid rgb(var(--ov) / 0.14); color: inherit; border-radius: 6px; padding: 6px 10px; font: inherit; font-size: 12px; }
+.cat-new input { flex: 1; min-width: 120px; }
+.cat-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.cat-entry { background: rgb(var(--ov) / 0.05); border-radius: 10px; overflow: hidden; }
+.cat-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 14px; cursor: pointer; font-size: 13px; }
+.cat-head small { opacity: 0.6; }
+.cat-stats { flex-basis: 100%; font-size: 11px; opacity: 0.75; }
+.cat-arrow { margin-left: auto; opacity: 0.6; }
+.cat-body { border-top: 1px solid rgb(var(--ov) / 0.1); padding: 8px 14px 12px; display: flex; flex-direction: column; gap: 6px; }
+.cat-ref { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 12px; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.cat-ref:hover { background: rgb(var(--ov) / 0.08); }
+.cat-ref.gone { opacity: 0.5; cursor: default; }
+.cat-ref > span:first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.cat-chip { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: rgb(var(--ov) / 0.12); }
+.cat-chip.ok { background: var(--green-400); color: var(--navy-900); }
+.cat-actions { display: flex; gap: 14px; margin-top: 6px; }
 .rc-msg-hide { background: none; border: none; color: var(--n-600); cursor: pointer; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
 .rc-msg-hide:hover { color: var(--coral-ink); }
 .rc-msg.rc-hidden { opacity: 0.55; border-style: dashed; }

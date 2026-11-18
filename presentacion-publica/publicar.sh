@@ -7,6 +7,7 @@ rm -rf public && mkdir -p public/fonts
 cp ../presentacion.html public/presentacion.html
 cp ../fonts/FreudianOne.woff ../fonts/FreudianTwo.woff \
    ../fonts/BMWMotorrad-Regular.ttf ../fonts/BMWMotorrad-Heavy.ttf ../fonts/BMWMotorradOutline-Regular.ttf \
-   ../fonts/BMWTypeNext-Light.otf ../fonts/BMWTypeNext-Regular.otf ../fonts/BMWTypeNext-Bold.otf public/fonts/
+   ../fonts/BMWTypeNext-Light.otf ../fonts/BMWTypeNext-Regular.otf ../fonts/BMWTypeNext-Bold.otf \
+   ../fonts/MINISerif-Regular.otf ../fonts/MINISerif-Medium.otf ../fonts/MINISerif-Bold.otf ../fonts/MINISerif-Headline.otf public/fonts/
 python3 generar.py public # una página por marca, con su vista previa para WhatsApp
 firebase deploy --only hosting --project kanbarter-a2951

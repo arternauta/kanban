@@ -11,7 +11,7 @@ SITIO = 'https://eljoint-referencias.web.app'
 MARCAS = {  # archivo: (nombre, tipografía de la imagen)
     'bmw':      ('BMW',      'BMWTypeNext-Bold.otf'),
     'motorrad': ('MOTORRAD', 'BMWMotorrad-Heavy.ttf'),
-    'mini':     ('MINI',     'FreudianTwo.woff'),
+    'mini':     ('MINI',     'MINISerif-Headline.otf'),
     'byd':      ('BYD',      'FreudianTwo.woff'),
 }
 
