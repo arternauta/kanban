@@ -91,6 +91,7 @@ button { font-family: inherit; cursor: pointer; }
   font-family: var(--font-hero); font-weight: 700; color: var(--type);
   font-size: clamp(76px, 19vw, 230px); line-height: 0.9; letter-spacing: 0.01em; margin: 0 0 28px; overflow-wrap: anywhere;
 }
+.hero-logo { display: block; width: clamp(240px, 62vw, 760px); height: auto; }
 body[data-brand="motorrad"] .hero h1 { font-weight: 400; font-size: clamp(56px, 14.5vw, 190px); letter-spacing: 0; }
 .hero-sub { max-width: 30ch; font-size: clamp(20px, 3vw, 32px); font-weight: 500; line-height: 1.25; color: var(--type); }
 .hero-meta { margin-top: 38px; display: flex; flex-wrap: wrap; gap: 10px; }
@@ -290,6 +291,7 @@ const SETTINGS_DOC = db.collection('kanban').doc('settings');
 const KEY = new URLSearchParams(location.search).get('k') || '';
 const SHOW_COL = 'para-producir';
 const BRAND_NAME = { byd: 'BYD', bmw: 'BMW', mini: 'MINI', motorrad: 'MOTORRAD' };
+const BRAND_LOGO = { byd: 'logos/byd.png' }; // marcas con logo (blanco, fondo transparente) en vez del nombre escrito
 const FORMAT_NAME = { reel: 'Reel', story: 'Story', tiktok: 'TikTok', post: 'Post', carrusel: 'Carrusel' };
 const PLATFORM_NAME = { instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube' };
 const POS = { top: 'top', center: 'center', bottom: 'bottom' };
@@ -605,7 +607,7 @@ function showPresentation() {
   document.getElementById('team-tag').hidden = !TEAM;
   app.innerHTML = `
     <section class="hero">
-      <h1>${esc(BRAND_NAME[BRAND])}</h1>
+      <h1>${BRAND_LOGO[BRAND] ? `<img class="hero-logo" src="${BRAND_LOGO[BRAND]}" alt="${esc(BRAND_NAME[BRAND])}">` : esc(BRAND_NAME[BRAND])}</h1>
       <p class="hero-sub">Ideas para contenido orgánico de ${esc(monthName())}</p>
       <div class="hero-meta" id="hero-meta"></div>
       <a class="start" href="#refs">Empezar <span>↓</span></a>

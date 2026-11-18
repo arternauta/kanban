@@ -3,7 +3,8 @@
 # No toca el Kanban publicado. Copia la página y las fuentes al directorio público y despliega.
 set -e
 cd "$(dirname "$0")"
-rm -rf public && mkdir -p public/fonts
+rm -rf public && mkdir -p public/fonts public/logos
+cp ../logos/*.png public/logos/
 cp ../presentacion.html public/presentacion.html
 cp ../fonts/FreudianOne.woff ../fonts/FreudianTwo.woff \
    ../fonts/BMWMotorrad-Regular.ttf ../fonts/BMWMotorrad-Heavy.ttf ../fonts/BMWMotorradOutline-Regular.ttf \
